@@ -40,8 +40,8 @@ public class LessMainApp extends Application {
 	}
 	
 	/**
-	 * 在退出前关掉所有子进程。由于python console会有一些进程无法自动关闭
-	 * 所以听过这个方式可以关掉
+	 * python console
+	 * 
 	 */
 	 @Override
     public void stop() throws Exception {

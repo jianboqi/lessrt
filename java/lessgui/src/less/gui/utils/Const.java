@@ -1,5 +1,7 @@
 package less.gui.utils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javafx.scene.paint.Color;
@@ -13,7 +15,7 @@ public class Const {
 	public static String LESS_TITLE = "LESS-";
 	public static String LESS_LAUNCH_SCRIPT= "less.py";
 	public static String LESS_LAUNCH_SCRIPT_PYC= "less.pyc";
-	public static String LESS_LAUNCH_PATH = "E:\\Coding\\LessProject\\python\\lesspy\\";
+	//public static String LESS_LAUNCH_PATH = "";
 	public static String LESS_CONST_JSON_NAME="const.conf";
 	public static String LESS_BATCH_JSON_NAME="batch.conf";
 	public static String LESS_DOT_LESS_FILE = ".less";
@@ -52,7 +54,7 @@ public class Const {
 	
 	
 	// LESS Mode
-	public static String LESS_MODE= "development11";
+	public static String LESS_MODE= "development";
 	public static String LESS_VERSION = "V1.6";
 	
 	public static boolean LESS_OUT_ALL = false;

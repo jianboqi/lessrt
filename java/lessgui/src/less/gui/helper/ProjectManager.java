@@ -703,6 +703,10 @@ public class ProjectManager {
 	public void save_hidden_object_list(){
 		String param_path = this.mwController.projManager.getParameterDirPath();
 		String hidden_file = Paths.get(param_path, Const.LESS_HIDE_OBJECT_FILE_NAME).toString();
+		
+		if(!new File(hidden_file).getParentFile().exists())
+			return;
+		
 		BufferedWriter writer = null;
 		try {
 			writer = new BufferedWriter( new FileWriter(hidden_file));
