@@ -8,8 +8,10 @@ import java.nio.file.Paths;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import less.gui.helper.PyLauncher;
+
 /**
- * ´ÓjsonÅäÖÃÎÄ¼þÖÐ¶ÁÈ¡ËùÓÐµÄ³£Á¿
+ * ï¿½ï¿½jsonï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ð¶ï¿½È¡ï¿½ï¿½ï¿½ÐµÄ³ï¿½ï¿½ï¿½
  * @author Jim
  *
  */
@@ -19,7 +21,7 @@ public class ConstConfig {
 	public ConstConfig(){
 		String jsonPath;
 		if(Const.LESS_MODE.equals("development")){
-			jsonPath= Const.LESS_LAUNCH_PATH + Const.LESS_CONST_JSON_NAME;
+			jsonPath= Paths.get(PyLauncher.getLessPyFolderPath(), Const.LESS_CONST_JSON_NAME).toString();
 		}else{
 			jsonPath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_CONST_JSON_NAME).toString();
 		}	

@@ -1068,7 +1068,7 @@ public class LessMainWindowController {
 	}
 	
 	/**
-	 * 锟斤拷about锟斤拷锟斤拷
+	 * open about dialog
 	 */
 	@FXML
 	private void OpenAboutDialog(){
@@ -1399,6 +1399,11 @@ public class LessMainWindowController {
 	public void save_tree_pos_xy(){
 		String param_path = this.projManager.getParameterDirPath();
 		String instancefilePath = Paths.get(param_path, Const.LESS_INSTANCE_FILE_NAME).toString();
+		
+		File parent = new File(instancefilePath);
+		if(!parent.getParentFile().exists()){
+			return;
+		}
 		
 		BufferedWriter writer = null;
 		try {

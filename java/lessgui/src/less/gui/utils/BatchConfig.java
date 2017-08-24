@@ -11,6 +11,7 @@ import org.json.JSONTokener;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import less.gui.helper.PyLauncher;
 import less.gui.model.FacetOptical;
 import less.gui.model.TreeViewNode;
 
@@ -20,7 +21,7 @@ public JSONObject data;
 	public BatchConfig(){
 		String jsonPath;
 		if(Const.LESS_MODE.equals("development")){
-			jsonPath= Const.LESS_LAUNCH_PATH + Const.LESS_BATCH_JSON_NAME;
+			jsonPath= Paths.get(PyLauncher.getLessPyFolderPath(),Const.LESS_BATCH_JSON_NAME).toString();
 		}else{
 			jsonPath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_BATCH_JSON_NAME).toString();
 		}	

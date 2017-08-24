@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class PyLauncher extends Thread{
 	public String getLessRTexe(){
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath= Paths.get(Const.LESS_LAUNCH_PATH,"bin","rt",
+			pypath= Paths.get(PyLauncher.getLessPyFolderPath(),"bin","rt",
 					this.mwController.constConfig.data.getString("current_rt_program"),"lessrt").toString();
 		}else{
 			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",
@@ -71,12 +72,15 @@ public class PyLauncher extends Thread{
 		return pypath;
 	}
 	
+	public static String getLessPyFolderPath(){
+		return Paths.get(Paths.get(System.getProperty("user.dir")).getParent().getParent().toString(),"python","lesspy").toString();
+	}
 	
 	
 	public static String getScriptsPath(String scriptsName){
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath= Const.LESS_LAUNCH_PATH + scriptsName+".py";
+			pypath= Paths.get(PyLauncher.getLessPyFolderPath(), scriptsName+".py").toString();
 		}else{
 			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",scriptsName+".pyc").toString();
 		}
@@ -86,7 +90,7 @@ public class PyLauncher extends Thread{
 	public static String getUtilityScriptsPath(String scriptsName){
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath = Paths.get(Const.LESS_LAUNCH_PATH, "Utility", scriptsName+".py").toString();
+			pypath = Paths.get(PyLauncher.getLessPyFolderPath(), "Utility", scriptsName+".py").toString();
 		}else{
 			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy","Utility",scriptsName+".py").toString();
 		}
@@ -96,7 +100,7 @@ public class PyLauncher extends Thread{
 	public static String getDefaultConf(){
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath= Const.LESS_LAUNCH_PATH + Const.LESS_DEFAULT_INPUT_FILE;
+			pypath= Paths.get(PyLauncher.getLessPyFolderPath(), Const.LESS_DEFAULT_INPUT_FILE).toString();
 		}else{
 			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_DEFAULT_INPUT_FILE).toString();
 		}
@@ -107,7 +111,7 @@ public class PyLauncher extends Thread{
 		
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath= Const.LESS_LAUNCH_PATH + Const.LESS_LAUNCH_SCRIPT;
+			pypath= Paths.get(PyLauncher.getLessPyFolderPath(), Const.LESS_LAUNCH_SCRIPT).toString();
 		}else{
 			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_LAUNCH_SCRIPT_PYC).toString();
 		}

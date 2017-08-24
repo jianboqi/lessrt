@@ -22,6 +22,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import less.gui.helper.Filehelper;
+import less.gui.helper.PyLauncher;
 import less.gui.utils.Const;
 
 public class RunningOnClusterController {
@@ -88,12 +89,12 @@ public class RunningOnClusterController {
 	            }
 	        });
 		
-		//³õÊ¼»¯°´Å¥×´Ì¬£¬·ÅÖÃ¹Ø±Õ´°¿ÚÔÙ´ò¿ª£¬×´Ì¬¸Ä±ä
+		//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Å¥×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ã¹Ø±Õ´ï¿½ï¿½ï¿½ï¿½Ù´ò¿ª£ï¿½×´Ì¬ï¿½Ä±ï¿½
 		changeStartServerBtn();
 	}
 	
 	/**
-	 * ¸Ä±äbuttonµÄ×´Ì¬
+	 * ï¿½Ä±ï¿½buttonï¿½ï¿½×´Ì¬
 	 */
 	private void changeStartServerBtn(){
 		if(this.mwController.projManager.isServerStarted){
@@ -121,7 +122,7 @@ public class RunningOnClusterController {
 
 		    t.start();
 		}
-		else{//ÒÑ¾­Æô¶¯£¬Ôò¹Ø±Õ
+		else{//ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½
 			this.mwController.projManager.isServerStarted = false;
 			changeStartServerBtn();
 			this.mwController.projManager.p.destroy();
@@ -137,7 +138,7 @@ public class RunningOnClusterController {
 		this.mwController.outputConsole.appendText("INFO: Starting server "+host +":"+port+"\n");
 		if(host.equals("") || port.equals(""))
 			return;
-		//Í¨¹ýpythonÆô¶¯mtssrv¿ÉÒÔÔËÐÐ
+		//Í¨ï¿½ï¿½pythonï¿½ï¿½ï¿½ï¿½mtssrvï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		ProcessBuilder pd=new ProcessBuilder(this.getSrvexe(),"-i", host, "-l", port);
 		pd.directory(new File(this.getSrvDir()));
 		try {
@@ -150,7 +151,7 @@ public class RunningOnClusterController {
 				if(line.contains("Enter mtssrv -h")){
 					
 				}else if (line.contains("Send Ctrl-C to stop")){
-					changeStartServerBtn();//Æô¶¯ºó¸Ä±ä°´Å¥×´Ì¬
+					changeStartServerBtn();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ä°´Å¥×´Ì¬
 					this.mwController.outputConsole.appendText("INFO: Server started, listening on "+host +":"+port+"\n");
 				}else{
 					String [] arr = line.split("]");
@@ -173,7 +174,7 @@ public class RunningOnClusterController {
 	
 	
 	/**
-	 * Ìí¼Óserver
+	 * ï¿½ï¿½ï¿½server
 	 */
 	@FXML
 	private void onAdd(){
@@ -251,13 +252,13 @@ public class RunningOnClusterController {
 	}
 	
 	/**
-	 * »òÕß mtssrvµÄÂ·¾¶
+	 * ï¿½ï¿½ï¿½ï¿½ mtssrvï¿½ï¿½Â·ï¿½ï¿½
 	 * @return
 	 */
 	public String getSrvexe(){
 		String srvPath;
 		if(Const.LESS_MODE.equals("development")){
-			srvPath= Paths.get(Const.LESS_LAUNCH_PATH,"bin","rt",
+			srvPath= Paths.get(PyLauncher.getLessPyFolderPath(),"bin","rt",
 					this.mwController.constConfig.data.getString("current_rt_program"),Const.LESS_SERVER_EXE).toString();
 		}else{
 			srvPath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",
@@ -269,7 +270,7 @@ public class RunningOnClusterController {
 	public String getSrvDir(){
 		String srvPath;
 		if(Const.LESS_MODE.equals("development")){
-			srvPath= Paths.get(Const.LESS_LAUNCH_PATH,"bin","rt",
+			srvPath= Paths.get(PyLauncher.getLessPyFolderPath(),"bin","rt",
 					this.mwController.constConfig.data.getString("current_rt_program")).toString();
 		}else{
 			srvPath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",

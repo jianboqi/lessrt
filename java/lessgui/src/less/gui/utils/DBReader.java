@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
+import less.gui.helper.PyLauncher;
 import less.gui.model.FacetOptical;
 
 public class DBReader {
@@ -21,7 +22,7 @@ public class DBReader {
 	public String getLambertDBPath(){
 		String dbpath;
 		if(Const.LESS_MODE.equals("development")){
-			dbpath= Paths.get(Const.LESS_LAUNCH_PATH,"SpectralDB",Const.LESS_DBNAME_LambertianDB).toString();
+			dbpath= Paths.get(PyLauncher.getLessPyFolderPath(),"SpectralDB",Const.LESS_DBNAME_LambertianDB).toString();
 		}else{
 			dbpath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",
 					"SpectralDB",Const.LESS_DBNAME_LambertianDB).toString();
@@ -57,8 +58,8 @@ public class DBReader {
 	}
 	
 	/**
-	 * ¸ù¾Ý¹âÆ×Ãû×Ö£¬Ñ¡Ôñ²¨¶ÎµÄ·´ÉäÂÊ»òÕßÍ¸¹ýÂÊ
-	 * @param opticalName ¹âÆ×Ãû×Ö
+	 * ï¿½ï¿½ï¿½Ý¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½Ñ¡ï¿½ñ²¨¶ÎµÄ·ï¿½ï¿½ï¿½ï¿½Ê»ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½
+	 * @param opticalName ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @return
 	 */
 	public ArrayList<String> getOpticalByName(String opticalName, String wavelength_and_bandwidth){
@@ -92,7 +93,7 @@ public class DBReader {
 					br /= num;
 					trans /= num;
 				}else{
-					//µ±Ã»ÓÐÕÒµ½ºÏÊÊµÄ²¨¶ÎÊÇ£¬Ôò½øÐÐ²åÖµ.
+					//ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½ÊµÄ²ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½Öµ.
 					sql = "SELECT wavelength, front_ref,back_ref,transmittance FROM "+opticalName+" order by abs(wavelength-"+center_w
 							+ ") LIMIT 2";
 					rs = stmt.executeQuery(sql);
@@ -104,7 +105,7 @@ public class DBReader {
 					double front_ref2 = rs.getDouble("front_ref");
 					double back_ref2 = rs.getDouble("back_ref");
 					double transmittance2 = rs.getDouble("transmittance");
-					fr = 0.5*(front_ref1+front_ref2); //Ó¦¸ÃÓÃÏßÐÔ²åÖµ£¬²»¹ýÏÖÔÚ¾Í¼òµ¥Æ½¾ù°É
+					fr = 0.5*(front_ref1+front_ref2); //Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¾Í¼ï¿½Æ½ï¿½ï¿½ï¿½ï¿½
 					br = 0.5*(back_ref1+back_ref2);
 					trans = 0.5 * (transmittance1+transmittance2);
 				}
@@ -130,7 +131,7 @@ public class DBReader {
 	}
 	
 	/**
-	 * ¸ù¾Ý¹âÆ×¿âÖÐµÄ¶¨ÒåµÄ½øÐÐ¸üÐÂ£¬Èç¹û¸Ä±ä²¨¶ÎµÄÇé¿öÏÂ
+	 * ï¿½ï¿½ï¿½Ý¹ï¿½ï¿½×¿ï¿½ï¿½ÐµÄ¶ï¿½ï¿½ï¿½Ä½ï¿½ï¿½Ð¸ï¿½ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ä²¨ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @param opticalData
 	 */
 	public void refreshOpticalDB(ObservableList<FacetOptical> opticalData,String waveLength_and_bandwidth){
