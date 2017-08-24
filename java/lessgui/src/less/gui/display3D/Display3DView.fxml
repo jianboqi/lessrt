@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.display3D.Display3DController">
+   <center>
+      <SplitPane dividerPositions="0.5635451505016722" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+          <AnchorPane fx:id="subscenePane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+          <AnchorPane fx:id="configAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="300.0">
+               <children>
+                  <CheckBox fx:id="AxisCheck" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" onAction="#onShowAxes" selected="true" text="Show Axes" />
+                  <CheckBox fx:id="GridCheck" layoutX="14.0" layoutY="65.0" mnemonicParsing="false" onAction="#onShowGrid" selected="true" text="Show Grids" />
+                  <CheckBox fx:id="SunRayCheck" layoutX="14.0" layoutY="102.0" mnemonicParsing="false" onAction="#onShowSunRay" selected="true" text="Show Sun Ray" />
+                  <CheckBox fx:id="CameraVolCheck" layoutX="14.0" layoutY="141.0" mnemonicParsing="false" onAction="#onShowCameraVolume" text="Show Camera Volume" />
+                  <ColorPicker fx:id="backgroundColorPicker" layoutX="14.0" layoutY="220.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
+                  <Label layoutX="12.0" layoutY="191.0" text="Background Color:" />
+                  <ColorPicker fx:id="cameraVolColorPicker" layoutX="15.0" layoutY="298.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
+                  <Label layoutX="13.0" layoutY="269.0" text="Camera Volume Color:" />
+               </children></AnchorPane>
+        </items>
+      </SplitPane>
+   </center>
+</BorderPane>

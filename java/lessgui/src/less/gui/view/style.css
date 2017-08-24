@@ -1,0 +1,23 @@
+#positionTable .table-column {
+  -fx-alignment: CENTER;
+}
+
+BorderPane{
+	-fx-font-size:13px;
+}
+
+#canvasScrollPane:focused {
+    -fx-background-insets: 0;
+}
+
+/*
+    The tab bar
+*/
+
+.tab-header-background {
+    -fx-background-color: #eee;
+}
+
+.scroll-pane {
+    -fx-background-color:transparent;
+}

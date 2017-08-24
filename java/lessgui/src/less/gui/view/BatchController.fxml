@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="928.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.BatchController">
+   <center>
+      <SplitPane dividerPositions="0.30952380952380953" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+          <AnchorPane fx:id="treeviewAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="626.0" prefWidth="610.0">
+               <children>
+                  <Button fx:id="paramterAddBtn" disable="true" layoutX="14.0" layoutY="321.0" mnemonicParsing="false" text="&gt;&gt;" />
+                  <Button fx:id="paramterDelBtn" disable="true" layoutX="14.0" layoutY="363.0" mnemonicParsing="false" text="&lt;&lt;" />
+                  <TextField fx:id="groupTextField" layoutX="134.0" layoutY="26.0" prefHeight="35.0" prefWidth="102.0" />
+                  <Label layoutX="72.0" layoutY="32.0" text="Group" />
+                  <Button fx:id="groupAddBtn" layoutX="259.0" layoutY="26.0" mnemonicParsing="false" text="Add" />
+                  <Button fx:id="groupDelBtn" disable="true" layoutX="335.0" layoutY="26.0" mnemonicParsing="false" text="Del" />
+                  <ListView fx:id="groupListView" layoutX="73.0" layoutY="71.0" prefHeight="150.0" prefWidth="468.0" AnchorPane.leftAnchor="73.0" AnchorPane.rightAnchor="5.0" />
+                  <Label layoutX="72.0" layoutY="244.0" text="Parameters:" />
+                  <ListView fx:id="parameterListView" layoutX="72.0" layoutY="267.0" prefHeight="226.0" prefWidth="184.0" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="72.0" AnchorPane.topAnchor="267.0" />
+                  <TextField fx:id="valueTextField" disable="true" layoutX="266.0" layoutY="267.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="5.0" />
+                  <Button layoutX="288.0" layoutY="438.0" mnemonicParsing="false" onAction="#runBatch" prefHeight="55.0" prefWidth="80.0" text="Run" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="288.0" />
+                  <Label layoutX="266.0" layoutY="310.0" text="Example: " textFill="#656363" AnchorPane.topAnchor="310.0">
+                     <font>
+                        <Font name="Arial Italic" size="17.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="345.0" layoutY="310.0" text="LIST:10,20,30,40" textFill="#656363" AnchorPane.topAnchor="310.0" />
+                  <Label layoutX="270.0" layoutY="339.0" text="Group1:" textFill="#656363">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font></Label>
+                  <Label layoutX="270.0" layoutY="362.0" text="Param1: val1, val2,...,valn" textFill="#656363" />
+                  <Label layoutX="270.0" layoutY="398.0" text="Param2: val1, val2,...,valn" textFill="#656363" />
+                  <Label layoutX="270.0" layoutY="443.0" text="Group2:" textFill="#656363">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font></Label>
+                  <Label layoutX="270.0" layoutY="466.0" text="Param1: val1, val2,...,valn" textFill="#656363" />
+                  <Line endX="10.0" endY="25.0" layoutX="345.0" layoutY="375.0" startX="10.0" startY="10.0" />
+                  <Line endX="10.0" endY="25.0" layoutX="388.0" layoutY="374.0" startX="10.0" startY="10.0" />
+                  <Line endX="10.0" endY="25.0" layoutX="442.0" layoutY="374.0" startX="10.0" startY="10.0" />
+                  <Line endX="10.0" endY="54.0" layoutX="347.0" layoutY="410.0" startX="10.0" startY="10.0" />
+                  <Line endX="39.0" endY="47.0" layoutX="353.0" layoutY="420.0" startX="5.0" startY="1.0" />
+                  <Line endX="86.0" endY="47.0" layoutX="358.0" layoutY="420.0" startX="1.0" startY="1.0" />
+                  <Line endX="10.0" endY="54.0" layoutX="393.0" layoutY="411.0" startX="10.0" startY="10.0" />
+                  <Line endX="55.0" endY="54.0" layoutX="393.0" layoutY="412.0" startX="10.0" startY="10.0" />
+                  <Line endX="-26.0" endY="54.0" layoutX="393.0" layoutY="412.0" startX="10.0" startY="10.0" />
+                  <Label layoutX="263.0" layoutY="493.0" text="(Parameter combinations)" textFill="#656363" />
+                  <Label layoutX="468.0" layoutY="311.0" text="Don't forget 'LIST'!!" textFill="RED">
+                     <font>
+                        <Font name="Arial Bold Italic" size="17.0" />
+                     </font>
+                  </Label>
+               </children></AnchorPane>
+        </items>
+      </SplitPane>
+   </center>
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#load" text="Load" />
+                  <MenuItem mnemonicParsing="false" onAction="#save" text="Save" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveAs" text="SaveAs" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+</BorderPane>

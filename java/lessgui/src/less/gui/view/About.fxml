@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <AnchorPane maxHeight="424.0" maxWidth="562.0" prefHeight="424.0" prefWidth="562.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="80.0" fitWidth="120.0" layoutX="14.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../LESS128_128.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="112.0" layoutY="14.0" prefHeight="41.0" prefWidth="74.0" text="LESS">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <Label layoutX="112.0" layoutY="55.0" text="Large-scale Emulation System for forest Simulation" />
+            <Label layoutX="112.0" layoutY="85.0" text="Version: Release 1.6" />
+            <Label layoutX="308.0" layoutY="85.0" text="Date: 2017/08/07" />
+            <TextArea editable="false" layoutX="27.0" layoutY="145.0" prefHeight="184.0" prefWidth="508.0" text="LESS is a ray-tracing based radiative transfer simulation &#10;model, which is mainly designed for radiometric &#10;simulation of forest canopies, but also can simulate &#10;other kinds of scenes (such as cities etc.). A possible &#10;advantage of LESS is that it can simulate relatively large &#10;areas with millions of single trees, thus we named it &#10;as Large-scale Emulation System for forest Simulation (LESS). " />
+            <Hyperlink layoutX="172.0" layoutY="112.0" text="http://ramm.bnu.edu.cn/projects/less/" />
+            <Label layoutX="29.0" layoutY="116.0" text="Documentation:" />
+            <Label layoutX="27.0" layoutY="338.0" text="Designed by Jianbo Qi        Email: jianboqi@gmail.com" />
+            <Label layoutX="18.0" layoutY="369.0" text="Beijing Normal University, Université Toulouse III - Paul Sabatier" />
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

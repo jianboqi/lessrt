@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LAICalculatorController">
+   <center>
+      <AnchorPane prefHeight="450.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <CheckBox fx:id="selectAllChecbox" layoutX="22.0" layoutY="39.0" mnemonicParsing="false" onAction="#selectAll" selected="true" text="Select All" />
+            <ScrollPane layoutX="126.0" layoutY="167.0" prefHeight="364.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="86.0">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="577.0" style="-fx-background-color: #fff;">
+                     <children>
+                        <VBox fx:id="componentVBox" layoutX="119.0" layoutY="37.0" prefWidth="100.0" style="-fx-background-color: #fff;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+            <Button layoutX="439.0" layoutY="34.0" mnemonicParsing="false" onAction="#run_lai" text="Run" />
+            <Label layoutX="193.0" layoutY="40.0" text="Resolution [m]:" />
+            <TextField fx:id="LAITextField" layoutX="325.0" layoutY="34.0" prefHeight="35.0" prefWidth="103.0" text="25" />
+         </children></AnchorPane>
+   </center>
+</BorderPane>
