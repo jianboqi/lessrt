@@ -529,7 +529,6 @@
                                              <children>
                                                 <Button fx:id="importObjectsBtn" layoutX="443.0" layoutY="50.0" mnemonicParsing="false" text="Import..." AnchorPane.leftAnchor="443.0" AnchorPane.topAnchor="50.0" />
                                                 <Button fx:id="importInstancesBtn" layoutX="443.0" layoutY="87.0" mnemonicParsing="false" text="Import..." AnchorPane.leftAnchor="443.0" AnchorPane.topAnchor="87.0" />
-                                                <Button layoutX="14.0" layoutY="120.0" mnemonicParsing="false" text="Advanced Tools..." AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" />
                                                 <Button fx:id="ClearSelectionBtn" layoutX="5.0" layoutY="5.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="131.0" text="Clear Selection" AnchorPane.leftAnchor="0.0">
                                                    <padding>
                                                       <Insets left="1.0" right="1.0" top="-1.0" />
