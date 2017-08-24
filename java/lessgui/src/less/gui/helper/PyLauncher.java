@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import org.apache.commons.lang3.SystemUtils;
 
 import javafx.application.Platform;
 import less.gui.utils.Const;
@@ -53,7 +50,12 @@ public class PyLauncher extends Thread{
 	public static String getPyexe(){
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			pypath= Paths.get("C:\\Python27","python").toString();
+			if(SystemUtils.IS_OS_LINUX){
+				pypath= Paths.get("/home/jimb/miniconda2/bin/","python").toString();
+			}else{
+				pypath= Paths.get("c:\\python27","python").toString();
+			}
+			
 		}else{
 		    pypath = Paths.get(System.getProperty("user.dir"), "bin/python/","python").toString();
 		}
