@@ -21,14 +21,14 @@
 		<mkdir dir="externalLibs" />
 	
 		<copy todir="externalLibs">
-			<fileset dir="E:\Coding\Repos\JavaWorkspace\LessGUI\libs">
+			<fileset dir="E:\Coding\LessProject\java\lessgui\libs">
 				<filename name="**/*"/>
 			</fileset>
 		</copy>
 	
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="E:\Coding\Repos\JavaWorkspace\LessGUI">
+			<fileset dir="E:\Coding\LessProject\java\lessgui">
 				<include name="src/**" />
 			</fileset>
 		</copy>
@@ -98,7 +98,7 @@
 		<mkdir dir="dist/bin/scripts" />
 		<mkdir dir="dist/bin/scripts/Lesspy" />
 		<copy todir="dist/bin/scripts/Lesspy" >
-		    <fileset dir="E:\Coding\Mitsuba\LessPyc" />
+		    <fileset dir="E:\Coding\LessProject\build\LessPyc" />
 		</copy>
 		
 	
