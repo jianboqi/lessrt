@@ -47,7 +47,6 @@ public class SunPostionCalculatorController {
 	public void initView(){
 		if(this.mwController.projManager.sunpos != null){
 			SunPos sunPos = this.mwController.projManager.sunpos;
-			//≥ı ºªØ÷µ
 			this.yearTextField.setText(sunPos.year+"");
 			this.monthTextField.setText(sunPos.month+"");
 			this.dayTextField.setText(sunPos.day+"");

@@ -67,7 +67,7 @@ public class DrawToolBarHelper {
 	public Canvas polygonLayer = null;
 	public Canvas pointLayer = null;
 	public Canvas backgroundLayer = null;
-	private int addedPointNum = 0; //×Ü¹²Í¨¹ýµã¹¤¾ßÌí¼ÓÁË¶àÉÙ¸öµã£¬ÓÃÓÚÓÒ¼ü»ØÍËÉ¾³ý
+	private int addedPointNum = 0; // How many points have been added.
 	private double zoomVal = 0.2; //zoomIn: 1.2 zoomOut 0.8
 	private File backgroundImgFile = null;
 	private double fisrt_x = 0;
@@ -150,7 +150,7 @@ public class DrawToolBarHelper {
 	
 	
 	/**
-	 * ¸ù¾Ý´´½¨µÄpolygon×ø±ê½øÐÐ»æÖÆ
+	 * ï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½ï¿½ï¿½polygonï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½
 	 */
 	public void reDrawPolygon(){
 		if(polygonLayer != null && xs.size()>0 && mwConstroller.DrawPolygonCheckbox.isSelected()){
@@ -173,7 +173,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * »æÖÆ±³¾°²ã
+	 * ï¿½ï¿½ï¿½Æ±ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void DrawBackground(){
 		if(backgroundLayer != null && backgroundImgFile != null){
@@ -184,7 +184,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * Çå¿Õ±³¾°²ã
+	 * ï¿½ï¿½Õ±ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	private void clearBackgroundImg(){
 		if(this.backgroundLayer != null){
@@ -222,7 +222,7 @@ public class DrawToolBarHelper {
 		    			 fisrt_x = x;
 		    			 first_y = y;
 	    			 }
-	    			 //»æÖÆÍêÖ®ºóÐèÒª½«toolbarÖÁÓÚ¶¥²ã£¬·ÀÖ¹µ±canvas·¶Î§³¬¹ýtoolbarÊ±£¬toolbar±»¸²¸Ç
+	    			 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½toolbarï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ã£¬ï¿½ï¿½Ö¹ï¿½ï¿½canvasï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½toolbarÊ±ï¿½ï¿½toolbarï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	    			 mwConstroller.DrawToolBar.toFront();
 	    			 //mwConstroller.canvasScrollPane.toFront();
 			    }
@@ -310,7 +310,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ´ò¿ªÈýÎ¬ÊÓÍ¼´°¿Ú
+	 * ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void open3dViewer(Boolean isSimplified){
 				
@@ -339,7 +339,7 @@ public class DrawToolBarHelper {
 	
 	
 	/**
-	 * ³õÊ¼»¯º¯Êý
+	 * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void initDrawToolBar(){
 		//scroll bar
@@ -561,9 +561,9 @@ public class DrawToolBarHelper {
 				return;
 			}
 			
-			//Ö»Éú³ÉÄÇÐ©±»Ñ¡ÖÐµÄ
+			//Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½Ñ¡ï¿½Ðµï¿½
 			ObservableList<String> selectedObjs = this.mwConstroller.objectLV.getSelectionModel().getSelectedItems();
-			if(selectedObjs.size() == 0){//µ±Ö»Ñ¡Ôñ²¿·ÖÊ±£¬ÔòÖ»¶Ô²¿·Ö½øÐÐÉú³É
+			if(selectedObjs.size() == 0){//ï¿½ï¿½Ö»Ñ¡ï¿½ñ²¿·ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ö»ï¿½Ô²ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				System.out.println("Please choose at least one object to populate.");
 				return;
 			}
@@ -605,7 +605,7 @@ public class DrawToolBarHelper {
 						
 		});
 		
-		//½«Ñ¡ÖÐµÄobjectÓ¦ÓÃµ½ÒÑÓÐµÄµãÖ®ÉÏ
+		//ï¿½ï¿½Ñ¡ï¿½Ðµï¿½objectÓ¦ï¿½Ãµï¿½ï¿½ï¿½ï¿½ÐµÄµï¿½Ö®ï¿½ï¿½
 		mwConstroller.ApplyTreeSpeciesBtn.setOnAction((event) -> {
 			if(xs.size()== 0){
 				mwConstroller.outputConsole.log("Please draw a polygon.\n");
@@ -615,9 +615,9 @@ public class DrawToolBarHelper {
 				mwConstroller.outputConsole.log("No simulation.\n");
 				return;
 			}
-			//Ö»Éú³ÉÄÇÐ©±»Ñ¡ÖÐµÄ
+			//Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½Ñ¡ï¿½Ðµï¿½
 			ObservableList<String> selectedObjs = this.mwConstroller.objectLV.getSelectionModel().getSelectedItems();
-			if(selectedObjs.size() == 0){//µ±Ö»Ñ¡Ôñ²¿·ÖÊ±£¬ÔòÖ»¶Ô²¿·Ö½øÐÐÉú³É
+			if(selectedObjs.size() == 0){//ï¿½ï¿½Ö»Ñ¡ï¿½ñ²¿·ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ö»ï¿½Ô²ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				System.out.println("Please choose at least one object to populate.");
 				return;
 			}
@@ -687,7 +687,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * Ñ¡ÔñÒ»¸ömaskÎÄ¼þ
+	 * Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½maskï¿½Ä¼ï¿½
 	 */
 	public void chooseMaskImg(){
 		if(this.mwConstroller.simulation_path == null){
@@ -706,7 +706,7 @@ public class DrawToolBarHelper {
         File file = fileChooser.showOpenDialog(this.mwConstroller.mainApp.getPrimaryStage());
         if(file !=null)
         {
-        	//µ÷ÓÃpythonÇ°£¬ÏÈ±£´æinstancesÎÄ¼þ
+        	//ï¿½ï¿½ï¿½ï¿½pythonÇ°ï¿½ï¿½ï¿½È±ï¿½ï¿½ï¿½instancesï¿½Ä¼ï¿½
         	this.mwConstroller.save_tree_pos_xy();
         	//using python gdal to read and write 
         	String pyExe = PyLauncher.getPyexe();
@@ -744,7 +744,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * Ñ¡ÔñÒ»¸ö±³¾°ÎÄ¼þ
+	 * Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 	 */
 	public void chooseBackgroundImg(){
 		if(this.mwConstroller.simulation_path == null){
@@ -771,7 +771,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ¶ÁÈ¡polygon
+	 * ï¿½ï¿½È¡polygon
 	 */
 	public void onLoadPolygon(){
 		if(!mwConstroller.DrawPolygonCheckbox.isSelected()){
@@ -812,7 +812,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ±£´æpolygon
+	 * ï¿½ï¿½ï¿½ï¿½polygon
 	 */
 	public void onSavePolygon(){
 		

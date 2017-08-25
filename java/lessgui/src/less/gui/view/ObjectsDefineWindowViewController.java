@@ -91,11 +91,6 @@ public class ObjectsDefineWindowViewController {
 	public double fy = 1.0;
 	public double fz = 1.0;
 	
-	//private ObservableList<String> objectsList;
-	
-	//private Map<String, ObservableList<String> > objectsAndCompomentsMap;
-	//private Map<String, String> opticalcomponentMap; //每个object每个compoment的光学属性。object_component作为键.
-	//private ObservableList<String> FacetOpticalData; //跟定义地形的保持一直
 	
 	public void setMainWindowController(LessMainWindowController mwController){
 		this.mwController = mwController;
@@ -487,7 +482,7 @@ public class ObjectsDefineWindowViewController {
 	
 	
 	/**
-	 * 该方法目前已经不再使用，全部转为读取每个obj的group importFromObjGroups
+	 * 锟矫凤拷锟斤拷目前锟窖撅拷锟斤拷锟斤拷使锟矫ｏ拷全锟斤拷转为锟斤拷取每锟斤拷obj锟斤拷group importFromObjGroups
 	 */
 	@FXML
 	private void importObjs(){
@@ -561,7 +556,7 @@ public class ObjectsDefineWindowViewController {
 	}
 	
 	/**
-	 * 导入OBJ文件，并读取里边每一个group
+	 * 锟斤拷锟斤拷OBJ锟侥硷拷锟斤拷锟斤拷锟斤拷取锟斤拷锟矫恳伙拷锟絞roup
 	 */
 	@FXML
 	public void importFromObjGroups(){
@@ -576,10 +571,10 @@ public class ObjectsDefineWindowViewController {
 	        if(file !=null)
 	        {
 	        	this.mwController.setLastOpenedPath(Const.LAST_OPNED_CHOOSE_OBJ,file.getParent().toString());
-	        	//显示变换窗口
+	        	// show scale window
 	        	showScaleDialog();
 	        	
-	        	//读取文件
+	        	//read file
 	        	ObjModelImporter objImporter = new ObjModelImporter();
 	    		try {
 	    		    objImporter.read(file.toString());            

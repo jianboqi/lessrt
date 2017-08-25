@@ -6,14 +6,14 @@ public class PositionXY {
 	
 	private SimpleStringProperty pos_x;
 	private SimpleStringProperty pos_y;
-	private SimpleStringProperty pos_z;//额外添加的功能; 最开始只有xy，object的位置由DEM决定，现在可以再DEM位置基础上再额外加一个高度
+	private SimpleStringProperty pos_z;// the z position of object
 	
-	private SimpleStringProperty extra_props; //额外增加字段，保存所有额外的信息
+	private SimpleStringProperty extra_props; //extra field, current, it contains rotation
 	
 	public PositionXY(String x, String y){
 		this.pos_x = new SimpleStringProperty(x);
 		this.pos_y = new SimpleStringProperty(y);
-		this.pos_z = new SimpleStringProperty("0");//默认为0
+		this.pos_z = new SimpleStringProperty("0");// rotation
 		this.extra_props = new SimpleStringProperty("0 ");// by default, it adds a rotation degree
 	}
 	

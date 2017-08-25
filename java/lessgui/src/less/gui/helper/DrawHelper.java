@@ -63,7 +63,7 @@ public class DrawHelper {
 		DrawingUtils.drawArrow(gc, x, y, x+0.5*(width*0.5-x), y+0.5*(height*0.5-y));
 		gc.setLineWidth(1);
 		
-		//只有平行投影下才绘制观测方向
+		//只 only show observation direction in the mode of orthergraphic
 		if(this.mwController.comboBoxSensorType.getSelectionModel().getSelectedItem().equals(Const.LESS_SENSOR_TYPE_ORTH)){
 			if(this.mwController.obsAzimuthField.getText().equals(""))
 				return;
@@ -100,7 +100,7 @@ public class DrawHelper {
 				this.mwController.canvas.setHeight(max_canvas_length);
 				this.mwController.drawtoolBarHelper.resizeAllLayers(max_canvas_length*w/h, max_canvas_length);
 			}
-			//当在polygon模式时，如果改变canvas大小，polygon和背景跟着变。
+			//polygon changes with canvas
 			this.mwController.drawtoolBarHelper.reDrawPolygon();
 			this.mwController.drawtoolBarHelper.DrawBackground();
 			this.drawBasicGrids();
@@ -111,7 +111,7 @@ public class DrawHelper {
 		drawOrthgraphicCameraAndSensor();
 		
 		//redraw 3D view
-		//如果3D视图存在，则重绘
+		//
 		if(this.mwController.drawtoolBarHelper.display3dController != null){
 			this.mwController.drawtoolBarHelper.display3dController.drawLightRay();
 			this.mwController.drawtoolBarHelper.display3dController.drawCamerafrustum();
@@ -125,12 +125,11 @@ public class DrawHelper {
 	
 	public void drawTreePosition(){
 		
-		//根据选择，如果不现实，则不绘制
 		if(!this.mwController.displayPosOn2DCheck.isSelected()){
 			return;
 		}
 		
-		//隐藏选中得objects
+		//hide selected objects
 		ObservableList<String> tobeHide = null;
 		if(this.mwController.HideSelectedCheck.isSelected()){
 			tobeHide = this.mwController.objectLV.getSelectionModel().getSelectedItems();

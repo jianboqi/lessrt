@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-	<project name="LessGUI" default="do-deploy" basedir="."  xmlns:fx="javafx:com.sun.javafx.tools.ant">
+	<project name="lessgui" default="do-deploy" basedir="."  xmlns:fx="javafx:com.sun.javafx.tools.ant">
 	<target name="init-fx-tasks">
 		<path id="fxant">
 			<filelist>
@@ -20,25 +20,85 @@
 		<mkdir dir="externalLibs" />
 	
 		<copy todir="externalLibs">
-			<fileset dir="../libs">
-				<filename name="**/*"/>
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="sqlite-jdbc-3.16.1.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="SolarPositioning.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="com.fasterxml.jackson.annotations.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="selenium-server-standalone-3.4.0.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="jimObjModelImporterJFX.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="commons-io-2.5.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="json-org.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="jna-platform-4.4.0.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="jna-4.4.0.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="PoissonSampling.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="jackson-core-2.8.7.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="com.fasterxml.jackson.databind.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="TerminalFX.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="externalLibs">
+			<fileset dir="/home/jimb/lessproject/java/lessgui/libs">
+				<filename name="pty4j-0.7.2.jar"/>
 			</fileset>
 		</copy>
 	
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="../../LessGUI">
-				<include name="libs\libpty/**" />
+			<fileset dir="/home/jimb/lessproject/java/lessgui">
+				<include name="libs/libpty/**" />
 			</fileset>
 		</copy>
 		<copy todir="project">
-			<fileset dir="../../LessGUI">
+			<fileset dir="/home/jimb/lessproject/java/lessgui">
 				<include name="src/**" />
-			</fileset>
-		</copy>
-		<copy todir="project">
-			<fileset dir="../../LessGUI">
-				<include name="Doc/**" />
 			</fileset>
 		</copy>
 	
@@ -53,8 +113,8 @@
 		<!-- Copy project-libs references -->
 		<copy todir="build/libs">
 			<fileset dir="externalLibs">
-				<include name="com.fasterxml.jackson.annotations.jar"/>
 				<include name="jna-platform-4.4.0.jar"/>
+				<include name="com.fasterxml.jackson.annotations.jar"/>
 				<include name="jimObjModelImporterJFX.jar"/>
 				<include name="com.fasterxml.jackson.databind.jar"/>
 				<include name="PoissonSampling.jar"/>
@@ -79,17 +139,12 @@
 			</fileset>
 		</copy>
 		<copy todir="build/src">
-			<fileset dir="project/Doc">
-				<include name="**/*"/>
-			</fileset>
-		</copy>
-		<copy todir="build/src">
 			<fileset dir="project/libs/libpty">
 				<include name="**/*"/>
 			</fileset>
 		</copy>
 	
-		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src" destdir="build/classes" encoding="GBK">
+		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src" destdir="build/classes" encoding="UTF-8">
 			<classpath>
 				<fileset dir="build/libs">
 					<include name="*"/>
@@ -100,9 +155,6 @@
 		<!-- Copy over none Java-Files -->
 		<copy todir="build/classes">
 		<fileset dir="project/src">
-			<exclude name="**/*.java"/>
-		</fileset>
-		<fileset dir="project/Doc">
 			<exclude name="**/*.java"/>
 		</fileset>
 		<fileset dir="project/libs/libpty">
@@ -127,7 +179,7 @@
 	
 	
 		<fx:resources id="appRes">
-			<fx:fileset dir="dist" includes="LessGUI.jar"/>
+			<fx:fileset dir="dist" includes="lessgui.jar"/>
 			<fx:fileset dir="dist" includes="libs/*"/>
 		</fx:resources>
 	
@@ -141,7 +193,7 @@
 	
 	
 	
-		<fx:jar destfile="dist/LessGUI.jar">
+		<fx:jar destfile="dist/lessgui.jar">
 			<fx:application refid="fxApplication"/>
 			<fileset dir="build/classes">
 			</fileset>
@@ -150,7 +202,7 @@
 			<manifest>
 				<attribute name="Implementation-Vendor" value="Jianbo Qi"/>
 				<attribute name="Implementation-Title" value="LESS"/>
-				<attribute name="Implementation-Version" value="0.1"/>
+				<attribute name="Implementation-Version" value="1.6"/>
 				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>
@@ -164,11 +216,11 @@
 			includeDT="false"
 			offlineAllowed="true"
 			outdir="${basedir}/deploy"
-			outfile="LessGUI" nativeBundles="deb"
+			outfile="lessgui" nativeBundles="none"
 			updatemode="background" >
 	
 			<fx:platform basedir="${java.home}"/>
-			<fx:info title="LessGUI" vendor="Jianbo Qi"/>
+			<fx:info title="lessgui" vendor="Jianbo Qi"/>
 	
 			<fx:application refId="fxApplication"/>
 			<fx:resources refid="appRes"/>

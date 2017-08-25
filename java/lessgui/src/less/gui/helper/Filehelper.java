@@ -38,7 +38,7 @@ public class Filehelper {
 	
 	
 	/**
-	 * 把triangle mesh保存到obj文件
+	 * save triangle mesh to obj file
 	 * @param filepath
 	 * @param triangleMesh
 	 */
@@ -51,7 +51,7 @@ public class Filehelper {
 			e.printStackTrace();
 		}
 		
-		//顺便返回一个boundingbox [(minx,miny,minz,maxx,maxy,maxz)]
+		//boundingbox [(minx,miny,minz,maxx,maxy,maxz)]
 		LSBoundingbox lsBoundingbox = new LSBoundingbox();
 		 
 		ObservableFloatArray pointarray =  triangleMesh.getPoints();

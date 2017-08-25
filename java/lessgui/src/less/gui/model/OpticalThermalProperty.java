@@ -3,14 +3,14 @@ package less.gui.model;
 import javafx.scene.paint.Color;
 
 /**
- * 保存光谱的温度信息
+ * optical properties
  * @author Jim
  *
  */
 public class OpticalThermalProperty {
 	private String opticalName;
-	private String temperatureName="-"; //temperature有一个默认初始值-, 在非thermalmode情况下。
-	private Color componentColor = Color.DARKGREEN; //记录每个component显示时的颜色。
+	private String temperatureName="-"; //temperature with default value equals to -
+	private Color componentColor = Color.DARKGREEN; // the color of each component.
 	
 
 	public OpticalThermalProperty(String o, String t){

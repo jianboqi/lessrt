@@ -49,7 +49,7 @@ public class ControlJsonWrapper {
 	public String controltoJson(){
 		JSONObject json=new JSONObject();		
 	    JSONObject observation = new JSONObject();
-	    //对不同的相机类型，观测方式不一样.
+	    // Different camera has different view geometry
 	    String sensorType = this.mwcontroller.comboBoxSensorType.getSelectionModel().getSelectedItem();
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH) || sensorType.equals(Const.LESS_SENSOR_TYPE_PT) ){
 	    	observation.put("obs_zenith", Double.parseDouble(this.mwcontroller.obsZenithField.getText().replaceAll(",", "")));
@@ -74,7 +74,7 @@ public class ControlJsonWrapper {
 	    sun.put("sun_azimuth", Double.parseDouble(this.mwcontroller.sunAzimuthField.getText().replaceAll(",", "")));
 	    illumination.put("sun", sun);
 	    JSONObject atmosphere = new JSONObject();
-	    //目前只有一个选择，在界面显示的是SKY_TO_TOTAL, 由于Python中使用SKYL关键词，这里直接写成SKYL
+	    // currently, only one choice
 	    atmosphere.put("ats_type", this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem());
 	    atmosphere.put("percentage", this.mwcontroller.atsPercentageField.getText());
 	    illumination.put("atmosphere", atmosphere);

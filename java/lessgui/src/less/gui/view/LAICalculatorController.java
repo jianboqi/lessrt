@@ -58,7 +58,7 @@ public class LAICalculatorController {
 		componentVBox.setPadding(new Insets(10, 10, 10, 10));
 		componentVBox.setSpacing(10);
 		
-		//±éÀúËùÒÔcomponents
+		//iterate all components
 		for(Map.Entry<String, ObservableList<String>> entry: this.mwController.objectsAndCompomentsMap.entrySet()){
 			ObservableList<String> compList = entry.getValue();
 			if(compList.size()==0){

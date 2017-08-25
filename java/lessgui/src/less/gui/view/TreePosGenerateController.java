@@ -73,9 +73,9 @@ public class TreePosGenerateController {
 				System.out.println("No Objects are defined.");
 				return;
 			}
-			//只生成那些被选中的
+			//只only generate those who have been selected
 			ObservableList<String> selectedObjs = this.mwController.objectLV.getSelectionModel().getSelectedItems();
-			if(selectedObjs.size() == 0){//当只选择部分时，则只对部分进行生成
+			if(selectedObjs.size() == 0){
 				System.out.println("Please choose at least one object to populate.");
 				return;
 			}else{

@@ -464,7 +464,7 @@ public class ProjectManager {
 		}
 	}
 	
-	//�Ƿ񸲸�ȫ������
+	//include whole scene
 	public void handleWholeSceneCheckbox(){
 		if(this.mwController.CoverWholeSceneCheckbox.isSelected()){
 			this.mwController.sensorXExtentField.setDisable(true);
@@ -478,7 +478,7 @@ public class ProjectManager {
 		this.mwController.sensorYExtentField.setText(this.mwController.sceneYSizeField.getText());
 	}
 	
-	//����virtual plane
+	//virtual plane
 	public void handlePlaneCheckbox(){
 		if(this.mwController.virtualPlaneCheckbox.isSelected()){
 			if (virtualPlanePane != null)
@@ -596,7 +596,7 @@ public class ProjectManager {
 	}
 	
 	
-	//�����ȷ���
+	//thermal
 	public void handleThermalRadiationCheckbox(){
 		
 		if(this.mwController.ThermalCheckbox.isSelected()){

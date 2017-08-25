@@ -56,7 +56,7 @@ public class LSBoundingbox {
 	}
 	
 	/**
-	 * 合并两个boundingbox
+	 * merge boundingbox
 	 * @param bound1
 	 * @param bound2
 	 * @return

@@ -10,7 +10,7 @@ public class CommonUitls {
 	}
 	
 	/**
-	 * 判断一个字符串是否含有与branch有关的名字
+	 * Check if a string constains "branch" "trunk"
 	 * @param str
 	 * @return
 	 */

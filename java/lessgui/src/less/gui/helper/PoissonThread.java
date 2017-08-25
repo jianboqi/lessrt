@@ -63,7 +63,6 @@ public class PoissonThread extends Thread{
 	         t.setUncaughtExceptionHandler((thread, throwable) -> {
 	        	 bdConsole.setErrorMode();
 	 			 bdConsole.log(throwable.getMessage());
-	 			//当有错误存在时，继续通知后续进行，讲红色按钮还原。
 	 			synchronized (this) {
 	 				 notify();
 	 			}
@@ -84,7 +83,7 @@ public class PoissonThread extends Thread{
 	}
 	
 	/**
-	 * 泊松分布的产生
+	 * generate poisson
 	 */
 	public void do_sampling(){
 		bdConsole.log("Generating random numbers, Please wait...\n");
@@ -98,7 +97,7 @@ public class PoissonThread extends Thread{
 	}
 	
 	/**
-	 * 在产生完随机数之后，将树的位置加入列表
+	 * after generation of points, add to file
 	 */
 	public void do_post_processing(){
 //		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.mwController.objectAndPositionMap.entrySet()){

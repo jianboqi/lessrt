@@ -73,7 +73,7 @@ public class DrawElement {
 		double z = R*Math.sin(theta)*Math.sin(phi);
 		double y = R*Math.cos(theta);
 		
-		//Ê¹µÃ¼ÆËã¸²¸Ç·¶Î§Ê±ÄÜ¹»µ½´ïµØÃæ
+		//Ê¹ï¿½Ã¼ï¿½ï¿½ã¸²ï¿½Ç·ï¿½Î§Ê±ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		double norm_distance = sub_h*0.5*Math.tan(theta)/R;
 		
 		Box box = DrawElement.drawBox(new Point3D(x, y, z), new Point3D(-x*norm_distance, -y*norm_distance, -z*norm_distance), sub_w, sub_h);
@@ -90,7 +90,7 @@ public class DrawElement {
 	public static Xform drawPerspectiveFrustum(Point3D origin, Point3D target, double fovx, double fovy, PhongMaterial volMtl){		
 		Xform re = new Xform();
 		
-		//ÑÓ³¤target
+		//ï¿½Ó³ï¿½target
 		target = target.add(target.subtract(origin));
 		
 		Point3D yAxis = new Point3D(0, 1, 0);
@@ -208,7 +208,7 @@ public class DrawElement {
 	}
 	
 	/**
-	 * ¶ÁÈ¡Ò»¸öobjÎÄ¼þÖÐµÄËùÓÐMesh£¬±£´æµ½Ò»¸öListÖÐ
+	 * ï¿½ï¿½È¡Ò»ï¿½ï¿½objï¿½Ä¼ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½Meshï¿½ï¿½ï¿½ï¿½ï¿½æµ½Ò»ï¿½ï¿½Listï¿½ï¿½
 	 * @param objPath
 	 * @return
 	 */
@@ -233,7 +233,7 @@ public class DrawElement {
 	}
 	
 	/**
-	 * ´ÓÒ»¸öobjlistÖÐ¶ÁÈ¡Ã¿Ò»¸öobjµÄËùÓÐmesh£¬±£´æµ½Ò»¸öÊý×éÖÐ
+	 * get all the mesh from a list of object
 	 * @param objectsList
 	 * @param parentPath
 	 * @return
@@ -252,7 +252,7 @@ public class DrawElement {
 	}
 	
 	/**
-	 * Ê×ÏÈ½«mesh×ªÎªmeshview£¬È»ºóÔÙºÏ²¢µ½xform
+	 * ï¿½ï¿½ï¿½È½ï¿½mesh×ªÎªmeshviewï¿½ï¿½È»ï¿½ï¿½ï¿½ÙºÏ²ï¿½ï¿½ï¿½xform
 	 * @param meshlist
 	 */
 	public static Xform ConvertMeshList2xform(ArrayList<Mesh> meshlist, ArrayList<Color> compColorList){
@@ -274,7 +274,7 @@ public class DrawElement {
 		return objXform;
 	}
 	/**
-	 * ½«¶à¸öobjÎÄ¼þ¶ÁÈ¡µ½Ò»¸öxformÖÐ£¬ËûÃÇ¶¼±£´æÔÙÄ¿Â¼parentpathÏÂ
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½objï¿½Ä¼ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ò»ï¿½ï¿½xformï¿½Ð£ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Â¼parentpathï¿½ï¿½
 	 * @param objectsList
 	 * @param parentPath
 	 * @return
