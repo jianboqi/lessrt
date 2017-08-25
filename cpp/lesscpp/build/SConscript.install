@@ -46,7 +46,7 @@ for file in os.listdir(env.GetBuildPath('#data/microfacet')):
 if 'linux' in sys.platform:
 	for plugin in plugins:
 		installTargets += env.Install(os.path.join(distDir, 'plugins'), plugin)
-	install(distDir, ['libcore/libmitsuba-core.so', 'libhw/libmitsuba-hw.so',
+	install(distDir, ['libcore/libmitsuba-core.so',
 			'librender/libmitsuba-render.so', 'libbidir/libmitsuba-bidir.so'])
 	for ver in hasPython:
 		installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.so'), 'libpython/mitsuba_python' + ver + '.so')
@@ -71,9 +71,9 @@ if sys.platform == 'win32':
 	sdkLibDir = os.path.join(sdkDir, "lib")
 
 	install(distDir, ['mitsuba/lessrt.exe', 'mitsuba/lesssrv.exe', 'mitsuba/mtsutil.exe'])
-	install(distDir, ['libcore/libmitsuba-core.dll', 'libhw/libmitsuba-hw.dll',
+	install(distDir, ['libcore/libmitsuba-core.dll',
 			'librender/libmitsuba-render.dll', 'libbidir/libmitsuba-bidir.dll'])
-	install(sdkLibDir, ['libcore/mitsuba-core.lib', 'libhw/mitsuba-hw.lib',
+	install(sdkLibDir, ['libcore/mitsuba-core.lib',
 			'librender/mitsuba-render.lib', 'libbidir/mitsuba-bidir.lib'])
 	for entry in os.walk(os.path.join(basePath, "include")):
 		includeDir = entry[0][len(basePath)+1:]
@@ -126,7 +126,7 @@ elif sys.platform == 'darwin':
 	installTargets += env.Install(os.path.join(distDir, 'Contents/Resources'), '#data/darwin/Resources/mitsuba.icns')
 	frameworkDir = os.path.join(distDir, 'Contents/Frameworks')
 
-	install(frameworkDir, ['libcore/libmitsuba-core.dylib', 'libhw/libmitsuba-hw.dylib',
+	install(frameworkDir, ['libcore/libmitsuba-core.dylib',
 		'librender/libmitsuba-render.dylib', 'libbidir/libmitsuba-bidir.dylib'])
 	for ver in hasPython:
 		installTargets += installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.so'), 'libpython/mitsuba_python'+ver+'.dylib')

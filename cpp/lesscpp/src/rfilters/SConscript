@@ -5,6 +5,6 @@ plugins += env.SharedLibrary('box', ['box.cpp'])
 plugins += env.SharedLibrary('lanczos', ['lanczos.cpp'])
 # plugins += env.SharedLibrary('mitchell', ['mitchell.cpp'])
 # plugins += env.SharedLibrary('catmullrom', ['catmullrom.cpp'])
-# plugins += env.SharedLibrary('gaussian', ['gaussian.cpp'])
+plugins += env.SharedLibrary('gaussian', ['gaussian.cpp'])
 
 Export('plugins')

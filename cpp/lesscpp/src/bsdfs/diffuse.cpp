@@ -18,7 +18,7 @@
 
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/texture.h>
-#include <mitsuba/hw/basicshader.h>
+#include <mitsuba/render/basicshader.h>
 #include <mitsuba/core/warp.h>
 
 MTS_NAMESPACE_BEGIN
@@ -178,59 +178,11 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 private:
 	ref<Texture> m_reflectance;
 };
 
-// ================ Hardware shader implementation ================
-
-class SmoothDiffuseShader : public Shader {
-public:
-	SmoothDiffuseShader(Renderer *renderer, const Texture *reflectance)
-		: Shader(renderer, EBSDFShader), m_reflectance(reflectance) {
-		m_reflectanceShader = renderer->registerShaderForResource(m_reflectance.get());
-	}
-
-	bool isComplete() const {
-		return m_reflectanceShader.get() != NULL;
-	}
-
-	void cleanup(Renderer *renderer) {
-		renderer->unregisterShaderForResource(m_reflectance.get());
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		deps.push_back(m_reflectanceShader.get());
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "vec3 " << evalName << "(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    if (cosTheta(wi) < 0.0 || cosTheta(wo) < 0.0)" << endl
-			<< "    	return vec3(0.0);" << endl
-			<< "    return " << depNames[0] << "(uv) * inv_pi * cosTheta(wo);" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_diffuse(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    return " << evalName << "(uv, wi, wo);" << endl
-			<< "}" << endl;
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	ref<const Texture> m_reflectance;
-	ref<Shader> m_reflectanceShader;
-};
-
-Shader *SmoothDiffuse::createShader(Renderer *renderer) const {
-	return new SmoothDiffuseShader(renderer, m_reflectance.get());
-}
-
-MTS_IMPLEMENT_CLASS(SmoothDiffuseShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(SmoothDiffuse, false, BSDF)
 MTS_EXPORT_PLUGIN(SmoothDiffuse, "Smooth diffuse BRDF")
 MTS_NAMESPACE_END

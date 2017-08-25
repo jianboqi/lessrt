@@ -31,7 +31,7 @@ MTS_NAMESPACE_BEGIN
  * point. \ref Texture2D is a specialization to UV-based textures.
  * \ingroup librender
  */
-class MTS_EXPORT_RENDER Texture : public ConfigurableObject, public HWResource {
+class MTS_EXPORT_RENDER Texture : public ConfigurableObject{
 public:
 	/**
 	 * \brief Return the texture value at \c its

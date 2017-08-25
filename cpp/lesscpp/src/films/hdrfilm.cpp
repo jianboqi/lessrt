@@ -22,7 +22,7 @@
 #include <mitsuba/core/statistics.h>
 #include <boost/algorithm/string.hpp>
 #include "banner.h"
-#include "annotations.h"
+//#include "annotations.h"
 
 MTS_NAMESPACE_BEGIN
 
@@ -512,8 +512,8 @@ public:
 		Log(EInfo, "Writing image to \"%s\" ..", filename.string().c_str());
 		ref<FileStream> stream = new FileStream(filename, FileStream::ETruncWrite);
 
-		if (m_pixelFormats.size() == 1)
-			annotate(scene, m_properties, bitmap, renderTime, 1.0f);
+		/*if (m_pixelFormats.size() == 1)
+			annotate(scene, m_properties, bitmap, renderTime, 1.0f);*/
 
 		/* Attach the log file to the image if this is requested */
 		Logger *logger = Thread::getThread()->getLogger();

@@ -18,7 +18,7 @@
 
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/texture.h>
-#include <mitsuba/hw/basicshader.h>
+#include <mitsuba/render/basicshader.h>
 #include <mitsuba/core/warp.h>
 
 MTS_NAMESPACE_BEGIN
@@ -144,59 +144,11 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 private:
 	ref<Texture> m_transmittance;
 };
 
-// ================ Hardware shader implementation ================
-
-class DiffuseTransmitterShader : public Shader {
-public:
-	DiffuseTransmitterShader(Renderer *renderer, const Texture *reflectance)
-		: Shader(renderer, EBSDFShader), m_transmittance(reflectance) {
-		m_transmittanceShader = renderer->registerShaderForResource(m_transmittance.get());
-	}
-
-	bool isComplete() const {
-		return m_transmittanceShader.get() != NULL;
-	}
-
-	void cleanup(Renderer *renderer) {
-		renderer->unregisterShaderForResource(m_transmittance.get());
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		deps.push_back(m_transmittanceShader.get());
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "vec3 " << evalName << "(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    if (cosTheta(wi) * cosTheta(wo) >= 0.0)" << endl
-			<< "    	return vec3(0.0);" << endl
-			<< "    return " << depNames[0] << "(uv) * inv_pi * abs(cosTheta(wo));" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_diffuse(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    return " << evalName << "(uv, wi, wo);" << endl
-			<< "}" << endl;
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	ref<const Texture> m_transmittance;
-	ref<Shader> m_transmittanceShader;
-};
-
-Shader *DiffuseTransmitter::createShader(Renderer *renderer) const {
-	return new DiffuseTransmitterShader(renderer, m_transmittance.get());
-}
-
-MTS_IMPLEMENT_CLASS(DiffuseTransmitterShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(DiffuseTransmitter, false, BSDF)
 MTS_EXPORT_PLUGIN(DiffuseTransmitter, "Diffuse transmitter")
 MTS_NAMESPACE_END

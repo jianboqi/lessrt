@@ -29,7 +29,5 @@ mainEnv.Program('mtsutil', stubs + winstubs + ['mtsutil.cpp'])
 # Build the command-line+GUI interface
 mainEnv.Program('lesssrv',  winstubs + ['mtssrv.cpp'])
 mainEnv.Program('lessrt', winstubs + ['mitsuba.cpp'])
-# mainEnv.Program('less', winstubs + ['less.cpp','LessSim/simjob.cpp','LessSim/directsun.cpp'])
-# mainEnv.Program('mtsless', winstubs + ['mtsless.cpp'])
 
 Return('mainEnv')

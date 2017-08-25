@@ -19,7 +19,6 @@
 #include <mitsuba/render/emitter.h>
 #include <mitsuba/render/shape.h>
 #include <mitsuba/render/medium.h>
-#include <mitsuba/hw/gpuprogram.h>
 #include <mitsuba/core/warp.h>
 
 MTS_NAMESPACE_BEGIN
@@ -221,56 +220,12 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 protected:
 	Spectrum m_radiance, m_power;
 };
 
-// ================ Hardware shader implementation ================
 
-class AreaLightShader : public Shader {
-public:
-	AreaLightShader(Renderer *renderer, const Spectrum &radiance)
-		: Shader(renderer, EEmitterShader), m_radiance(radiance) {
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName,
-			std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_radiance", false));
-	}
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform vec3 " << evalName << "_radiance;" << endl
-			<< endl
-			<< "vec3 " << evalName << "_area(vec2 uv) {" << endl
-			<< "    return " << evalName << "_radiance * pi;" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "    if (cosTheta(wo) < 0.0)" << endl
-			<< "    	return vec3(0.0);" << endl
-			<< "    return vec3(inv_pi);" << endl
-			<< "}" << endl;
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs,
-		int &textureUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_radiance);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	Spectrum m_radiance;
-};
-
-Shader *AreaLight::createShader(Renderer *renderer) const {
-	return new AreaLightShader(renderer, m_radiance);
-}
-
-MTS_IMPLEMENT_CLASS(AreaLightShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(AreaLight, false, Emitter)
 MTS_EXPORT_PLUGIN(AreaLight, "Area light");
 MTS_NAMESPACE_END

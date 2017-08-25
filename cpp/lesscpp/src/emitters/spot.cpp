@@ -226,7 +226,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
 
 	MTS_DECLARE_CLASS()
 private:
@@ -236,91 +235,7 @@ private:
 	Float m_cosBeamWidth, m_cosCutoffAngle, m_invTransitionWidth;
 };
 
-// ================ Hardware shader implementation ================
 
-class SpotEmitterShader : public Shader {
-public:
-	SpotEmitterShader(Renderer *renderer, Transform worldToEmitter,
-		Float invTransitionWidth, Float cutoffAngle, Float cosCutoffAngle,
-		Float cosBeamWidth, Float uvFactor, const Texture *texture)
-		: Shader(renderer, EEmitterShader), m_worldToEmitter(worldToEmitter),
-		  m_invTransitionWidth(invTransitionWidth), m_cutoffAngle(cutoffAngle),
-		  m_cosCutoffAngle(cosCutoffAngle), m_cosBeamWidth(cosBeamWidth),
-		  m_uvFactor(uvFactor), m_texture(texture) {
-		m_textureShader = renderer->registerShaderForResource(m_texture.get());
-	}
-
-	bool isComplete() const {
-		return m_textureShader.get() != NULL;
-	}
-
-	void cleanup(Renderer *renderer) {
-		renderer->unregisterShaderForResource(m_texture.get());
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		deps.push_back(m_textureShader.get());
-	}
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform float " << evalName << "_invTransitionWidth;" << endl
-			<< "uniform float " << evalName << "_cutoffAngle;" << endl
-			<< "uniform float " << evalName << "_cosCutoffAngle;" << endl
-			<< "uniform float " << evalName << "_cosBeamWidth;" << endl
-			<< "uniform float " << evalName << "_uvFactor;" << endl
-			<< "uniform mat4 " << evalName << "_worldToEmitter;" << endl
-			<< "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "    vec3 localDir = (" << evalName << "_worldToEmitter * vec4(wo, 0)).xyz;" << endl
-			<< "    float cosTheta = localDir.z;" << endl
-			<< "    if (cosTheta < " << evalName << "_cosCutoffAngle)" << endl
-			<< "        return vec3(0.0);" << endl
-			<< "    vec2 uv = 0.5 + 0.5 * (localDir.xy / (localDir.z * " << evalName << "_uvFactor));" << endl
-			<< "    vec3 color = " << depNames[0] << "(uv) * inv_fourpi;" << endl
-			<< "    if (cosTheta > " << evalName << "_cosBeamWidth)" << endl
-			<< "        return color;" << endl
-			<< "    return color * ((" << evalName << "_cutoffAngle - acos(cosTheta))" << endl
-			<< "           * " << evalName << "_invTransitionWidth);" << endl
-			<< "}" << endl;
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_worldToEmitter", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_invTransitionWidth", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_cutoffAngle", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_cosCutoffAngle", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_cosBeamWidth", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_uvFactor", false));
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs, int &textureUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_worldToEmitter);
-		program->setParameter(parameterIDs[1], m_invTransitionWidth);
-		program->setParameter(parameterIDs[2], m_cutoffAngle);
-		program->setParameter(parameterIDs[3], m_cosCutoffAngle);
-		program->setParameter(parameterIDs[4], m_cosBeamWidth);
-		program->setParameter(parameterIDs[5], m_uvFactor);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	Transform m_worldToEmitter;
-	Float m_invTransitionWidth;
-	Float m_cutoffAngle, m_cosCutoffAngle;
-	Float m_cosBeamWidth, m_uvFactor;
-	ref<const Texture> m_texture;
-	ref<Shader> m_textureShader;
-};
-
-Shader *SpotEmitter::createShader(Renderer *renderer) const {
-	const Transform &trafo = m_worldTransform->eval(0.0f);
-
-	return new SpotEmitterShader(renderer, trafo.inverse(),
-		m_invTransitionWidth, m_cutoffAngle, m_cosCutoffAngle,
-		m_cosBeamWidth, m_uvFactor, m_texture.get());
-}
-
-MTS_IMPLEMENT_CLASS(SpotEmitterShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(SpotEmitter, false, Emitter)
 MTS_EXPORT_PLUGIN(SpotEmitter, "Spot light");
 MTS_NAMESPACE_END

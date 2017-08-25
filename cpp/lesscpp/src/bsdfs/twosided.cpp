@@ -18,7 +18,7 @@
 
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/texture.h>
-#include <mitsuba/hw/gpuprogram.h>
+#include <mitsuba/render/shape.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -225,79 +225,12 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 protected:
 	ref<BSDF> m_nestedBRDF[2];
 };
 
 
-// ================ Hardware shader implementation ================
-
-class TwoSidedShader : public Shader {
-public:
-	TwoSidedShader(Renderer *renderer,
-			const ref<BSDF> *nestedBRDF) : Shader(renderer, EBSDFShader) {
-		m_nestedBRDF[0] = nestedBRDF[0].get();
-		m_nestedBRDF[1] = nestedBRDF[1].get();
-
-		m_nestedBRDFShader[0] = renderer->registerShaderForResource(m_nestedBRDF[0]);
-		if (m_nestedBRDF[0] != m_nestedBRDF[1])
-			m_nestedBRDFShader[1] = renderer->registerShaderForResource(m_nestedBRDF[1]);
-		else
-			m_nestedBRDFShader[1] = NULL;
-	}
-
-	bool isComplete() const {
-		return m_nestedBRDFShader[0].get() != NULL &&
-		       (m_nestedBRDF[0] == m_nestedBRDF[1] || m_nestedBRDFShader[1].get() != NULL);
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		deps.push_back(m_nestedBRDFShader[0].get());
-		if (m_nestedBRDF[0] != m_nestedBRDF[1])
-			deps.push_back(m_nestedBRDFShader[1].get());
-	}
-
-	void cleanup(Renderer *renderer) {
-		renderer->unregisterShaderForResource(m_nestedBRDF[0]);
-		if (m_nestedBRDF[0] != m_nestedBRDF[1])
-			renderer->unregisterShaderForResource(m_nestedBRDF[1]);
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "vec3 " << evalName << "(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    if (cosTheta(wi) <= 0.0) {" << endl
-			<< "    	wi.z *= -1; wo.z *= -1;" << endl
-			<< "        return " << (depNames.size() == 2 ? depNames[1] : depNames[0]) << "(uv, wi, wo);" << endl
-			<< "    } else {" << endl
-			<< "        return " << depNames[0] << "(uv, wi, wo);" << endl
-			<< "    }" << endl
-			<< "}" << endl
-			<< "vec3 " << evalName << "_diffuse(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    if (cosTheta(wi) <= 0.0) {" << endl
-			<< "    	wi.z *= -1; wo.z *= -1;" << endl
-			<< "        return " << (depNames.size() == 2 ? depNames[1] : depNames[0]) << "_diffuse(uv, wi, wo);" << endl
-			<< "    } else {" << endl
-			<< "        return " << depNames[0] << "_diffuse(uv, wi, wo);" << endl
-			<< "    }" << endl
-			<< "}" << endl;
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	const BSDF *m_nestedBRDF[2];
-	ref<Shader> m_nestedBRDFShader[2];
-};
-
-Shader *TwoSidedBRDF::createShader(Renderer *renderer) const {
-	return new TwoSidedShader(renderer, m_nestedBRDF);
-}
-
-MTS_IMPLEMENT_CLASS(TwoSidedShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(TwoSidedBRDF, false, BSDF)
 MTS_EXPORT_PLUGIN(TwoSidedBRDF, "Two-sided BRDF adapter");
 MTS_NAMESPACE_END

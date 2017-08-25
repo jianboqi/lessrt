@@ -19,7 +19,6 @@
 #include <mitsuba/render/scene.h>
 #include <mitsuba/core/bsphere.h>
 #include <mitsuba/core/plugin.h>
-#include <mitsuba/hw/gpuprogram.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -277,8 +276,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 protected:
 	Spectrum m_radiance, m_power;
@@ -286,48 +283,6 @@ protected:
 	Float m_invSurfaceArea;
 };
 
-// ================ Hardware shader implementation ================
-
-class ConstantBackgroundEmitterShader : public Shader {
-public:
-	ConstantBackgroundEmitterShader(Renderer *renderer, const Spectrum &radiance)
-		: Shader(renderer, EEmitterShader), m_radiance(radiance * M_PI) {
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName,
-			std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_radiance", false));
-	}
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform vec3 " << evalName << "_radiance;" << endl
-			<< endl
-			<< "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "    return vec3(1.0);" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_background(vec3 wo) {" << endl
-			<< "    const float inv_pi = 0.318309886183791;" << endl
-			<< "    return " << evalName << "_radiance * inv_pi;" << endl
-			<< "}" << endl;
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs,
-		int &textureUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_radiance);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	Spectrum m_radiance;
-};
-
-Shader *ConstantBackgroundEmitter::createShader(Renderer *renderer) const {
-	return new ConstantBackgroundEmitterShader(renderer, m_radiance);
-}
-
-MTS_IMPLEMENT_CLASS(ConstantBackgroundEmitterShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(ConstantBackgroundEmitter, false, Emitter)
 MTS_EXPORT_PLUGIN(ConstantBackgroundEmitter, "Constant background emitter");
 MTS_NAMESPACE_END

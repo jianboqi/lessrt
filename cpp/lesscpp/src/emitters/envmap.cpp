@@ -23,8 +23,7 @@
 #include <mitsuba/core/plugin.h>
 #include <mitsuba/core/timer.h>
 #include <mitsuba/render/mipmap.h>
-#include <mitsuba/hw/gpuprogram.h>
-#include <mitsuba/hw/gputexture.h>
+
 
 MTS_NAMESPACE_BEGIN
 
@@ -644,8 +643,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 private:
 	/// Sample from an array using the inversion method
@@ -670,98 +667,6 @@ private:
 	Vector2 m_pixelSize;
 };
 
-// ================ Hardware shader implementation ================
-
-class EnvironmentMapShader : public Shader {
-public:
-	EnvironmentMapShader(Renderer *renderer, const fs::path &filename, ref<Bitmap> bitmap,
-			const Transform &worldToEmitter, Float scale) : Shader(renderer, EEmitterShader) {
-		std::string name = filename.filename().string();
-		if (name.empty())
-			name = "Environment map";
-		m_gpuTexture = renderer->createGPUTexture(name, bitmap);
-		m_gpuTexture->setWrapTypeU(GPUTexture::ERepeat);
-		m_gpuTexture->setWrapTypeV(GPUTexture::EClamp);
-		m_gpuTexture->setMaxAnisotropy(8);
-		m_gpuTexture->initAndRelease();
-		m_worldToEmitter = worldToEmitter;
-		m_scale = scale;
-		m_useCustomTextureFiltering =
-			renderer->getCapabilities()->isSupported(RendererCapabilities::ECustomTextureFiltering);
-	}
-
-	void cleanup(Renderer *renderer) {
-		m_gpuTexture->cleanup();
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_texture", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_worldToEmitter", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_scale", false));
-	}
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-
-		oss << "uniform sampler2D " << evalName << "_texture;" << endl
-			<< "uniform mat4 " << evalName << "_worldToEmitter;" << endl
-			<< "uniform float " << evalName << "_scale;" << endl
-			<< endl
-			<< "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "   return vec3(1.0);" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_background(vec3 v_) {" << endl
-			<< "   const float inv_pi = 0.318309886183791, inv_twopi = 0.159154943091895;" << endl
-			<< "   vec3 v = normalize((" << evalName << "_worldToEmitter * vec4(v_, 0.0)).xyz);" << endl
-			<< "   vec2 coords = vec2(atan(v.x, -v.z) * inv_twopi, acos(v.y) * inv_pi);" << endl;
-
-		if (m_useCustomTextureFiltering) {
-			oss << "   /* Manually compute derivatives to work around discontinuities */" << endl
-				<< "   vec3 dvdx = dFdx(v), dvdy = dFdy(v);" << endl
-				<< "   float t1 = inv_twopi / (v.x*v.x+v.z*v.z)," << endl
-				<< "         t2 = -inv_pi / sqrt(1.0-v.y*v.y);" << endl
-				<< "   vec2 dudx = vec2(t1 * (dvdx.z*v.x - dvdx.x*v.z), t2 * dvdx.y)," << endl
-				<< "        dudy = vec2(t1 * (dvdy.z*v.x - dvdy.x*v.z), t2 * dvdy.y);" << endl
-				<< "   if (abs(v.y) > 0.99) { dudx = dudy = vec2(0.0); /* Don't blur over vertical edges */ }" << endl
-				<< "   return texture2DGrad(" << evalName << "_texture, coords, dudx, dudy).rgb * " << evalName << "_scale;" << endl;
-		} else {
-			oss << "   return texture2D(" << evalName << "_texture, coords).rgb * " << evalName << "_scale;" << endl;
-		}
-
-		oss << "}" << endl;
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs,
-			int &textureUnitOffset) const {
-		m_gpuTexture->bind(textureUnitOffset++);
-		program->setParameter(parameterIDs[0], m_gpuTexture.get());
-		program->setParameter(parameterIDs[1], m_worldToEmitter);
-		program->setParameter(parameterIDs[2], m_scale);
-	}
-
-	void unbind() const {
-		m_gpuTexture->unbind();
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	ref<GPUTexture> m_gpuTexture;
-	bool m_useCustomTextureFiltering;
-	Transform m_worldToEmitter;
-	Float m_scale;
-};
-
-Shader *EnvironmentMap::createShader(Renderer *renderer) const {
-	Transform trafo = m_worldTransform->eval(0).inverse();
-	ref<Bitmap> bitmap = m_mipmap->toBitmap();
-#if SPECTRUM_SAMPLES != 3
-	bitmap = bitmap->convert(Bitmap::ERGB, bitmap->getComponentFormat());
-#endif
-	return new EnvironmentMapShader(renderer, m_filename, bitmap, trafo, m_scale);
-}
-
-MTS_IMPLEMENT_CLASS(EnvironmentMapShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(EnvironmentMap, false, Emitter)
 MTS_EXPORT_PLUGIN(EnvironmentMap, "Environment map");
 MTS_NAMESPACE_END

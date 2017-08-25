@@ -19,7 +19,7 @@
 #include <mitsuba/render/texture.h>
 #include <mitsuba/render/trimesh.h>
 #include <mitsuba/core/properties.h>
-#include <mitsuba/hw/basicshader.h>
+#include <mitsuba/render/basicshader.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -168,8 +168,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 protected:
 	mutable Float m_lineWidth;
@@ -178,43 +176,6 @@ protected:
 	Spectrum m_edgeColor;
 	Spectrum m_interiorColor;
 };
-
-// ================ Hardware shader implementation ================
-
-class WireFrameShader : public Shader {
-public:
-	WireFrameShader(Renderer *renderer, const Spectrum &value)
-		: Shader(renderer, ETextureShader), m_value(value) {
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform vec3 " << evalName << "_value;" << endl
-			<< endl
-			<< "vec3 " << evalName << "(vec2 uv) {" << endl
-			<< "    return " << evalName << "_value;" << endl
-			<< "}" << endl;
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_value", false));
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs, int &textureUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_value);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	Spectrum m_value;
-};
-
-Shader *WireFrame::createShader(Renderer *renderer) const {
-	return new WireFrameShader(renderer, m_interiorColor);
-}
-
-MTS_IMPLEMENT_CLASS(WireFrameShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(WireFrame, false, Texture)
 MTS_EXPORT_PLUGIN(WireFrame, "Wireframe texture");
 MTS_NAMESPACE_END

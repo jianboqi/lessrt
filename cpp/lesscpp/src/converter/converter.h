@@ -49,9 +49,6 @@ public:
 	inline void setFilmType(const std::string &filmType) { m_filmType = filmType; }
 	inline const fs::path &getFilename() const { return m_filename; }
 private:
-	void convertCollada(const fs::path &inputFile, std::ostream &os,
-		const fs::path &textureDirectory,
-		const fs::path &meshesDirectory);
 	void convertOBJ(const fs::path &inputFile, std::ostream &os,
 		const fs::path &textureDirectory,
 		const fs::path &meshesDirectory);

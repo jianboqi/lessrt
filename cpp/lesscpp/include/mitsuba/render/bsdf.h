@@ -212,7 +212,7 @@ public:
  * \ingroup librender
  * \ingroup libpython
  */
-class MTS_EXPORT_RENDER BSDF : public ConfigurableObject, public HWResource {
+class MTS_EXPORT_RENDER BSDF : public ConfigurableObject{
 public:
 	/**
 	 * \brief This list of flags is used to classify the different

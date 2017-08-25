@@ -9,7 +9,7 @@ if renderEnv.has_key('XERCESLIBDIR'):
 if renderEnv.has_key('XERCESLIB'):
 	renderEnv.Prepend(LIBS=renderEnv['XERCESLIB'])
 
-librender = renderEnv.SharedLibrary('mitsuba-render', [
+librender = renderEnv.SharedLibrary('mitsuba-render', ['basicshader.cpp',
 	'bsdf.cpp', 'film.cpp', 'integrator.cpp', 'emitter.cpp', 'sensor.cpp',
 	'skdtree.cpp', 'medium.cpp', 'renderjob.cpp', 'imageproc.cpp',
 	'rectwu.cpp', 'renderproc.cpp', 'imageblock.cpp', 'particleproc.cpp',

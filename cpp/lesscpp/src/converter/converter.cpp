@@ -139,7 +139,7 @@ void GeometryConverter::convert(const fs::path &inputFile,
 	std::string extension = boost::to_lower_copy(inputFile.extension().string());
 
 	if (extension == ".dae" || extension == ".zae") {
-		convertCollada(inputFile, os, textureDirectory, meshesDirectory);
+		//convertCollada(inputFile, os, textureDirectory, meshesDirectory);
 	} else if (extension == ".obj") {
 		convertOBJ(inputFile, os, textureDirectory, meshesDirectory);
 	} else {

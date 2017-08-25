@@ -187,8 +187,6 @@ public:
 		return AABB();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	std::string toString() const {
 		std::ostringstream oss;
 		oss << "DirectionalEmitter[" << endl
@@ -207,28 +205,6 @@ private:
 	Float m_invSurfaceArea;
 };
 
-// ================ Hardware shader implementation ================
-
-class DirectionalEmitterShader : public Shader {
-public:
-	DirectionalEmitterShader(Renderer *renderer)
-		: Shader(renderer, EEmitterShader) { }
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "    return vec3(1.0);" << endl
-			<< "}" << endl;
-	}
-
-	MTS_DECLARE_CLASS()
-};
-
-Shader *DirectionalEmitter::createShader(Renderer *renderer) const {
-	return new DirectionalEmitterShader(renderer);
-}
-
-MTS_IMPLEMENT_CLASS(DirectionalEmitterShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(DirectionalEmitter, false, Emitter)
 MTS_EXPORT_PLUGIN(DirectionalEmitter, "Directional emitter");
 MTS_NAMESPACE_END

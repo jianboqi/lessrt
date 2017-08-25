@@ -24,9 +24,6 @@
 #include <mitsuba/core/sched.h>
 #include <mitsuba/render/texture.h>
 #include <mitsuba/render/mipmap.h>
-#include <mitsuba/hw/renderer.h>
-#include <mitsuba/hw/gputexture.h>
-#include <mitsuba/hw/gpuprogram.h>
 #include <boost/algorithm/string.hpp>
 
 MTS_NAMESPACE_BEGIN
@@ -592,8 +589,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 protected:
 	ref<MIPMap> m_mipmap1;
@@ -606,111 +601,6 @@ protected:
 	fs::path m_filename;
 };
 
-// ================ Hardware shader implementation ================
-class BitmapTextureShader : public Shader {
-public:
-	BitmapTextureShader(Renderer *renderer, const std::string &filename,
-			const BitmapTexture::MIPMap* mipmap1, //before, it is MIPMap1
-			const BitmapTexture::MIPMap* mipmap3, //before, it is MIPMap2
-			const Point2 &uvOffset, const Vector2 &uvScale,
-			ReconstructionFilter::EBoundaryCondition wrapModeU,
-			ReconstructionFilter::EBoundaryCondition wrapModeV,
-			Float maxAnisotropy)
-		: Shader(renderer, ETextureShader), m_uvOffset(uvOffset), m_uvScale(uvScale) {
-
-		ref<Bitmap> bitmap = mipmap1 ? mipmap1->toBitmap() : mipmap3->toBitmap();
-		m_gpuTexture = renderer->createGPUTexture(filename, bitmap);
-
-		switch (wrapModeU) {
-			case ReconstructionFilter::EClamp:
-				m_gpuTexture->setWrapType(GPUTexture::EClampToEdge);
-				break;
-			case ReconstructionFilter::EMirror:
-				m_gpuTexture->setWrapType(GPUTexture::EMirror);
-				break;
-			case ReconstructionFilter::ERepeat:
-				m_gpuTexture->setWrapType(GPUTexture::ERepeat);
-				break;
-			case ReconstructionFilter::EZero:
-				m_gpuTexture->setWrapType(GPUTexture::EClampToBorder);
-				m_gpuTexture->setBorderColor(Color3(0.0f));
-				break;
-			case ReconstructionFilter::EOne:
-				m_gpuTexture->setWrapType(GPUTexture::EClampToBorder);
-				m_gpuTexture->setBorderColor(Color3(1.0f));
-				break;
-			default:
-				Log(EError, "Unknown wrap mode!");
-		}
-
-		switch (mipmap1 ? mipmap1->getFilterType() : mipmap3->getFilterType()) {
-			case ENearest:
-				m_gpuTexture->setFilterType(GPUTexture::ENearest);
-				break;
-			case EBilinear:
-				m_gpuTexture->setFilterType(GPUTexture::ELinear);
-				m_gpuTexture->setMipMapped(false);
-				break;
-			default:
-				m_gpuTexture->setFilterType(GPUTexture::EMipMapLinear);
-				break;
-		}
-
-		m_gpuTexture->setMaxAnisotropy(maxAnisotropy);
-		m_gpuTexture->setMaxAnisotropy(maxAnisotropy);
-		m_gpuTexture->initAndRelease();
-	}
-
-	void cleanup(Renderer *renderer) {
-		m_gpuTexture->cleanup();
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform sampler2D " << evalName << "_texture;" << endl
-			<< "uniform vec2 " << evalName << "_uvOffset;" << endl
-			<< "uniform vec2 " << evalName << "_uvScale;" << endl
-			<< endl
-			<< "vec3 " << evalName << "(vec2 uv) {" << endl
-			<< "    return texture2D(" << evalName << "_texture, vec2(" << endl
-			<< "          uv.x * " << evalName << "_uvScale.x + " << evalName << "_uvOffset.x," << endl
-			<< "          uv.y * " << evalName << "_uvScale.y + " << evalName << "_uvOffset.y)).rgb;" << endl
-			<< "}" << endl;
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_texture", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_uvOffset", false));
-		parameterIDs.push_back(program->getParameterID(evalName + "_uvScale", false));
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs,
-		int &textureUnitOffset) const {
-		m_gpuTexture->bind(textureUnitOffset++);
-		program->setParameter(parameterIDs[0], m_gpuTexture.get());
-		program->setParameter(parameterIDs[1], m_uvOffset);
-		program->setParameter(parameterIDs[2], m_uvScale);
-	}
-
-	void unbind() const {
-		m_gpuTexture->unbind();
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	ref<GPUTexture> m_gpuTexture;
-	Point2 m_uvOffset;
-	Vector2 m_uvScale;
-};
-
-Shader *BitmapTexture::createShader(Renderer *renderer) const {
-	return new BitmapTextureShader(renderer, m_filename.filename().string(),
-			m_mipmap1.get(), m_mipmap3.get(), m_uvOffset, m_uvScale,
-			m_wrapModeU, m_wrapModeV, m_maxAnisotropy);
-}
-
 MTS_IMPLEMENT_CLASS_S(BitmapTexture, false, Texture2D)
-MTS_IMPLEMENT_CLASS(BitmapTextureShader, false, Shader)
 MTS_EXPORT_PLUGIN(BitmapTexture, "Bitmap texture");
 MTS_NAMESPACE_END

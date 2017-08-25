@@ -18,7 +18,8 @@
 
 #include <mitsuba/render/texture.h>
 #include <mitsuba/render/shape.h>
-#include <mitsuba/hw/basicshader.h>
+#include <mitsuba/render/basicshader.h>
+#include <mitsuba/core/bitmap.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -142,8 +143,6 @@ public:
 		return m_nested->isMonochromatic();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	void serialize(Stream *stream, InstanceManager *manager) const {
 		Texture::serialize(stream, manager);
 		manager->serialize(stream, m_nested.get());
@@ -156,57 +155,6 @@ protected:
 	Spectrum m_scale;
 };
 
-// ================ Hardware shader implementation ================
-
-class ScalingTextureShader : public Shader {
-public:
-	ScalingTextureShader(Renderer *renderer, const Texture *nested, const Spectrum &scale)
-		: Shader(renderer, ETextureShader), m_nested(nested), m_scale(scale) {
-		m_nestedShader = renderer->registerShaderForResource(m_nested.get());
-	}
-
-	bool isComplete() const {
-		return m_nestedShader.get() != NULL;
-	}
-
-	void cleanup(Renderer *renderer) {
-		renderer->unregisterShaderForResource(m_nested.get());
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		deps.push_back(m_nestedShader.get());
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform vec3 " << evalName << "_scale;" << endl
-			<< endl
-			<< "vec3 " << evalName << "(vec2 uv) {" << endl
-			<< "    return " << depNames[0] << "(uv) * " << evalName << "_scale;" << endl
-			<< "}" << endl;
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_scale", false));
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs, int &nestedUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_scale);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	ref<const Texture> m_nested;
-	ref<Shader> m_nestedShader;
-	Spectrum m_scale;
-};
-
-Shader *ScalingTexture::createShader(Renderer *renderer) const {
-	return new ScalingTextureShader(renderer, m_nested.get(), m_scale);
-}
-
-MTS_IMPLEMENT_CLASS(ScalingTextureShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(ScalingTexture, false, Texture2D)
 MTS_EXPORT_PLUGIN(ScalingTexture, "Scaling texture");
 MTS_NAMESPACE_END

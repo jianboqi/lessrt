@@ -25,7 +25,7 @@
 #include <mitsuba/render/subsurface.h>
 #include <mitsuba/render/medium.h>
 #include <mitsuba/render/sensor.h>
-#include <mitsuba/hw/basicshader.h>
+#include <mitsuba/render/basicshader.h>
 #include <set>
 
 MTS_NAMESPACE_BEGIN

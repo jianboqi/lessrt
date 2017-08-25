@@ -34,8 +34,6 @@ def build(scriptFile, exports = [], duplicate = 0):
 build('src/libcore/SConscript')
 # Rendering-related APIs
 build('src/librender/SConscript')
-# Hardware acceleration
-# build('src/libhw/SConscript')
 # Bidirectional support library
 build('src/libbidir/SConscript')
 # Python binding library
@@ -48,7 +46,7 @@ env = env.Clone()
 mainEnv = build('src/mitsuba/SConscript')
 
 # Build the COLLADA converter
-# converter_objects = build('src/converter/SConscript', ['mainEnv'])
+converter_objects = build('src/converter/SConscript', ['mainEnv'])
 
 # Build the Qt-based GUI binaries
 # build('src/mtsgui/SConscript', ['mainEnv', 'converter_objects'], duplicate=True)

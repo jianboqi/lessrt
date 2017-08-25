@@ -23,7 +23,6 @@
 #include <mitsuba/mitsuba.h>
 #include <fstream>
 
-
 //#define MTS_INFO
 
 MTS_NAMESPACE_BEGIN

@@ -164,55 +164,10 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 private:
 	Spectrum m_intensity;
 };
-
-
-// ================ Hardware shader implementation ================
-
-class PointEmitterShader : public Shader {
-public:
-	PointEmitterShader(Renderer *renderer, const Spectrum &intensity)
-		: Shader(renderer, EEmitterShader), m_intensity(intensity) {
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName,
-			std::vector<int> &parameterIDs) const {
-		parameterIDs.push_back(program->getParameterID(evalName + "_intensity", false));
-	}
-
-	void generateCode(std::ostringstream &oss, const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		oss << "uniform vec3 " << evalName << "_intensity;" << endl
-			<< endl
-			<< "vec3 " << evalName << "_area(vec2 uv) {" << endl
-			<< "    return " << evalName << "_intensity * (4*pi);" << endl
-			<< "}" << endl
-			<< endl
-			<< "vec3 " << evalName << "_dir(vec3 wo) {" << endl
-			<< "    return vec3(inv_fourpi);" << endl
-			<< "}" << endl;
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs,
-		int &textureUnitOffset) const {
-		program->setParameter(parameterIDs[0], m_intensity);
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	Spectrum m_intensity;
-};
-
-Shader *PointEmitter::createShader(Renderer *renderer) const {
-	return new PointEmitterShader(renderer, m_intensity);
-}
-
-MTS_IMPLEMENT_CLASS(PointEmitterShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(PointEmitter, false, Emitter)
 MTS_EXPORT_PLUGIN(PointEmitter, "Point emitter");
 MTS_NAMESPACE_END
