@@ -4,12 +4,9 @@
     <list default="true" id="cb8a0852-0517-4df7-b478-afc7de90b729" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Constant.py" afterPath="$PROJECT_DIR$/Constant.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RasterHelper.py" afterPath="$PROJECT_DIR$/RasterHelper.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SceneGenerate.py" afterPath="$PROJECT_DIR$/SceneGenerate.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SceneParser.py" afterPath="$PROJECT_DIR$/SceneParser.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Simulation.py" afterPath="$PROJECT_DIR$/Simulation.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Singletree_detection_from_CHM.py" afterPath="$PROJECT_DIR$/Singletree_detection_from_CHM.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Utility/Raster2obj.py" afterPath="$PROJECT_DIR$/Utility/Raster2obj.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Utils.py" afterPath="$PROJECT_DIR$/Utils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/const.conf" afterPath="$PROJECT_DIR$/const.conf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/projManager.py" afterPath="$PROJECT_DIR$/projManager.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
@@ -46,7 +43,7 @@
         <entry file="file://$PROJECT_DIR$/SceneGenerate.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="420">
-              <caret line="223" column="53" lean-forward="false" selection-start-line="223" selection-start-column="53" selection-end-line="223" selection-end-column="53" />
+              <caret line="228" column="53" lean-forward="false" selection-start-line="228" selection-start-column="53" selection-end-line="228" selection-end-column="53" />
               <folding>
                 <element signature="e#27#42#0" expanded="true" />
               </folding>
@@ -97,8 +94,8 @@
       <file leaf-file-name="compile.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/compile.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="20" column="48" lean-forward="true" selection-start-line="20" selection-start-column="48" selection-end-line="20" selection-end-column="48" />
+            <state relative-caret-position="418">
+              <caret line="19" column="44" lean-forward="true" selection-start-line="19" selection-start-column="44" selection-end-line="19" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -208,10 +205,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
+    <option name="x" value="-181" />
+    <option name="y" value="-1209" />
     <option name="width" value="1938" />
-    <option name="height" value="1048" />
+    <option name="height" value="1168" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -543,7 +540,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1048" extended-state="7" />
+    <frame x="-181" y="-1209" width="1938" height="1168" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22515856" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -551,7 +548,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32875144" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.203" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24586289" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21532091" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16534542" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -930,7 +927,7 @@
     <entry file="file://$PROJECT_DIR$/SceneGenerate.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="420">
-          <caret line="223" column="53" lean-forward="false" selection-start-line="223" selection-start-column="53" selection-end-line="223" selection-end-column="53" />
+          <caret line="228" column="53" lean-forward="false" selection-start-line="228" selection-start-column="53" selection-end-line="228" selection-end-column="53" />
           <folding>
             <element signature="e#27#42#0" expanded="true" />
           </folding>
@@ -939,8 +936,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/compile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="20" column="48" lean-forward="true" selection-start-line="20" selection-start-column="48" selection-end-line="20" selection-end-column="48" />
+        <state relative-caret-position="418">
+          <caret line="19" column="44" lean-forward="true" selection-start-line="19" selection-start-column="44" selection-end-line="19" selection-end-column="44" />
           <folding />
         </state>
       </provider>
