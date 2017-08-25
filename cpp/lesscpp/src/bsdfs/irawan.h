@@ -31,7 +31,7 @@
 #include <boost/version.hpp>
 
 #if BOOST_VERSION >= 106000
-#include <boost/phoenix/bind/bind_member_variable.hpp>
+#include <bo
 #include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/statement/if.hpp>
 #else
