@@ -310,8 +310,6 @@ public:
 		return oss.str();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	MTS_DECLARE_CLASS()
 private:
 	std::vector<Float> m_weights;
@@ -321,121 +319,7 @@ private:
 	DiscreteDistribution m_pdf;
 };
 
-// ================ Hardware shader implementation ================
 
-class MixtureBSDFShader : public Shader {
-public:
-	MixtureBSDFShader(Renderer *renderer, const std::vector<BSDF *> &bsdfs, const std::vector<Float> &weights)
-		: Shader(renderer, EBSDFShader), m_bsdfs(bsdfs), m_weights(weights), m_complete(false) {
-		m_bsdfShader.resize(bsdfs.size());
-		for (size_t i=0; i<bsdfs.size(); ++i) {
-			ref<Shader> shader = renderer->registerShaderForResource(bsdfs[i]);
-			if (shader) {
-				shader->incRef();
-				/* At least one shader has a hardware implementation */
-				m_complete = true;
-			}
-			m_bsdfShader[i] = shader;
-		}
-	}
-
-	bool isComplete() const {
-		return m_complete;
-	}
-
-	void cleanup(Renderer *renderer) {
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			renderer->unregisterShaderForResource(m_bsdfs[i]);
-			if (m_bsdfShader[i])
-				m_bsdfShader[i]->decRef();
-		}
-		m_bsdfShader.clear();
-	}
-
-	void putDependencies(std::vector<Shader *> &deps) {
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (m_bsdfShader[i])
-				deps.push_back(m_bsdfShader[i]);
-		}
-	}
-
-	void generateCode(std::ostringstream &oss,
-			const std::string &evalName,
-			const std::vector<std::string> &depNames) const {
-		Assert(m_complete);
-		int ctr = 0;
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (!m_bsdfShader[i])
-				continue;
-			oss << "uniform float " << evalName << "_weight_" << ctr++ << ";" << endl;
-		}
-		oss << endl;
-		oss << "vec3 " << evalName << "(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    return ";
-		ctr = 0;
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (!m_bsdfShader[i])
-				continue;
-			oss << endl << "      ";
-			if (ctr != 0)
-				oss << "+ ";
-			else
-				oss << "  ";
-			oss << depNames[ctr] << "(uv, wi, wo) * "
-							  << evalName << "_weight_" << ctr;
-			ctr++;
-		}
-		oss << ";" << endl << "}" << endl << endl;
-		oss << "vec3 " << evalName << "_diffuse(vec2 uv, vec3 wi, vec3 wo) {" << endl
-			<< "    return ";
-		ctr = 0;
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (!m_bsdfShader[i])
-				continue;
-			oss << endl << "      ";
-			if (ctr != 0)
-				oss << "+ ";
-			else
-				oss << "  ";
-			oss << depNames[ctr] << "_diffuse(uv, wi, wo) * "
-							  << evalName << "_weight_" << ctr;
-			ctr++;
-		}
-		oss << ";" << endl << "}" << endl;
-	}
-
-	void resolve(const GPUProgram *program, const std::string &evalName, std::vector<int> &parameterIDs) const {
-		int ctr = 0;
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (!m_bsdfShader[i])
-				continue;
-			parameterIDs.push_back(
-				program->getParameterID(formatString("%s_weight_%i", evalName.c_str(), ctr++), false));
-		}
-	}
-
-	void bind(GPUProgram *program, const std::vector<int> &parameterIDs, int &textureUnitOffset) const {
-		int ctr = 0;
-		for (size_t i=0; i<m_bsdfs.size(); ++i) {
-			if (!m_bsdfShader[i])
-				continue;
-			program->setParameter(parameterIDs[ctr++], m_weights[i]);
-		}
-	}
-
-	MTS_DECLARE_CLASS()
-private:
-	std::vector<Shader *> m_bsdfShader;
-	const std::vector<BSDF *> &m_bsdfs;
-	const std::vector<Float> &m_weights;
-	bool m_complete;
-};
-
-Shader *MixtureBSDF::createShader(Renderer *renderer) const {
-	return new MixtureBSDFShader(renderer, m_bsdfs, m_weights);
-}
-
-MTS_IMPLEMENT_CLASS(MixtureBSDFShader, false, Shader)
 MTS_IMPLEMENT_CLASS_S(MixtureBSDF, false, BSDF)
 MTS_EXPORT_PLUGIN(MixtureBSDF, "Mixture BSDF")
 MTS_NAMESPACE_END

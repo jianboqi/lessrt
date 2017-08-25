@@ -35,7 +35,7 @@ build('src/libcore/SConscript')
 # Rendering-related APIs
 build('src/librender/SConscript')
 # Hardware acceleration
-build('src/libhw/SConscript')
+# build('src/libhw/SConscript')
 # Bidirectional support library
 build('src/libbidir/SConscript')
 # Python binding library
