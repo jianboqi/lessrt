@@ -10,7 +10,8 @@ from RasterHelper import *
 
 def do_simulation_multi_spectral(cores):
     currdir = os.path.split(os.path.realpath(__file__))[0]
-    os.environ['PATH'] = currdir + '/bin/rt/'+current_rt_program + os.pathsep + os.environ['PATH']
+    rt_dir = os.path.join(currdir + '/bin/rt/'+current_rt_program)
+    os.environ['PATH'] =  rt_dir + os.pathsep + os.environ['PATH']
     cfgfile = session.get_config_file()
     f = open(cfgfile, 'r')
     cfg = json.load(f)
@@ -31,17 +32,22 @@ def do_simulation_multi_spectral(cores):
     distFile = os.path.join(session.get_output_dir(), distFileName).encode("utf-8")
     scene_file_path = os.path.join(session.get_scenefile_path(), main_scene_xml_file).encode("utf-8")
 
+    server_file = os.path.join(session.get_input_dir(),"server.txt")
+    current_working_dir = os.getcwdu()
+    os.chdir(rt_dir)
     if cfg["Advanced"]["network_sim"]:
         if cores == -1:
-            subprocess.call([excuable, scene_file_path, "-o", distFile,"-s", os.path.join(session.get_input_dir(),"server.txt")])
+            subprocess.call([excuable, scene_file_path, "-o", distFile,"-s", server_file])
         else:
             subprocess.call(
-                [excuable, scene_file_path, "-o", distFile,"-p",str(cores), "-s", os.path.join(session.get_input_dir(), "server.txt")])
+                [excuable, scene_file_path, "-o", distFile,"-p",str(cores), "-s", server_file])
     else:
         if cores == -1:
             subprocess.call([excuable,scene_file_path,"-o",distFile])
         else:
             subprocess.call([excuable, scene_file_path, "-o", distFile,"-p",str(cores)])
+    os.chdir(current_working_dir)
+
     # subprocess.check_output([excuable,scene_file_path,"-o",distFile])
     # sys.exit(0)
     #write info.txt

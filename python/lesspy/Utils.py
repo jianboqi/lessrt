@@ -66,3 +66,8 @@ def emittion_spectral(temperature, lamdbda_list):
         spectral += str(radiance) + ","
     return spectral[0:len(spectral)-1]
 
+# create all dirs
+def ensureDirs(dir_path):
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+

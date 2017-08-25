@@ -4,8 +4,8 @@ BUILDDIR       = '#build/release-linux'
 DISTDIR        = '#dist-linux'
 CXX            = 'g++'
 CC             = 'gcc'
-CXXFLAGS       = ['-O3', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DSINGLE_PRECISION', '-std=c++11', '-DMTS_SSE', '-DMTS_HAS_COHERENT_RT', '-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2']
-LINKFLAGS      = []
+CXXFLAGS       = ['-O3', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DDOUBLE_PRECISION', '-std=c++11','-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2']
+LINKFLAGS      = ['-Wl,-rpath=.']
 SHLINKFLAGS    = ['-rdynamic', '-shared', '-fPIC', '-lstdc++']
 BASEINCLUDE    = ['#include']
 BASELIB        = ['dl', 'm', 'pthread', 'gomp']

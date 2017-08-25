@@ -4,7 +4,7 @@
 import platform
 from SceneParser import *
 from Loger import log
-from Utils import convert_obj_2_serialized, check_if_string_is_zero_and_comma
+from Utils import convert_obj_2_serialized, check_if_string_is_zero_and_comma, ensureDirs
 currdir = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/2.7/')
 os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + '/' + os.pathsep + os.environ['PATH']
@@ -21,12 +21,16 @@ class SceneGenerate:
 
         # write band number information to dist
         currdir = os.path.split(os.path.realpath(__file__))[0]
-        numCFGpath = os.path.join(currdir, "bin", "rt", current_rt_program, ".less", "num.cfg")
+        numCFGpath = os.path.join(currdir, "bin", "rt", current_rt_program, ".less")
+        ensureDirs(numCFGpath)
+        numCFGpath = os.path.join(numCFGpath, "num.cfg")
         cfgFile = open(numCFGpath, 'w')
-
         cfgFile.write(str(bandnum))
         cfgFile.close()
-        rangePath = os.path.join(currdir, "bin", "rt", current_rt_program, ".less", "range.cfg")
+
+        rangePath = os.path.join(currdir, "bin", "rt", current_rt_program, ".less")
+        ensureDirs(rangePath)
+        rangePath = os.path.join(rangePath, "range.cfg")
         cfgFile = open(rangePath, 'w')
         cfgFile.write(LESS_BAND_START + " " + LESS_BAND_END)
         cfgFile.close()
@@ -34,6 +38,7 @@ class SceneGenerate:
         # write num.cfg and range.cfg to .less/
         curr_dir = os.getcwdu()
         lessfolder = os.path.join(curr_dir, ".less")
+        ensureDirs(lessfolder)
         numCFGpath = os.path.join(lessfolder, "num.cfg")
         cfgFile = open(numCFGpath, 'w')
         cfgFile.write(str(bandnum))
