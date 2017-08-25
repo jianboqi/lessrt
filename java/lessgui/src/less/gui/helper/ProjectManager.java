@@ -117,7 +117,6 @@ public class ProjectManager {
 		}
 		if (Desktop.isDesktopSupported()) {
 		    try {
-		    	
 				Desktop.getDesktop().open(new File(getResultsDirPath()));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
