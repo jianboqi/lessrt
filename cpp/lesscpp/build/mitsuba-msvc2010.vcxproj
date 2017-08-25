@@ -487,62 +487,6 @@
     </ClInclude>
     <ClInclude Include="..\include\mitsuba\core\bitmap.h">
     </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglrenderer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\viewer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\renderer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglsession.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glxrenderer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\x11device.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wglsession.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glgeometry.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\x11session.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\vpl.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglkeys.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glprogram.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gputexture.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\basicshader.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\device.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wglrenderer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gltexture.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsgldevice.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpusync.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpuprogram.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpugeometry.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\shadow.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glrenderer.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glxdevice.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\session.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\font.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glsync.h">
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wgldevice.h">
-    </ClInclude>
     <ClInclude Include="..\include\mitsuba\bidir\pathsampler.h">
     </ClInclude>
     <ClInclude Include="..\include\mitsuba\bidir\common.h">
@@ -650,6 +594,7 @@
     <ClCompile Include="..\src\integrators\prt\prt.cpp" />
     <ClCompile Include="..\src\integrators\prt\prt_proc.cpp" />
     <ClCompile Include="..\src\integrators\prt\Tools.h" />
+    <ClCompile Include="..\src\librender\basicshader.cpp" />
     <ClCompile Include="..\src\librender\photonproc.cpp" />
     <ClCompile Include="..\src\librender\trimesh.cpp">
     </ClCompile>

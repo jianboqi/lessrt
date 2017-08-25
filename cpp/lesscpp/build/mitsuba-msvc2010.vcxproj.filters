@@ -135,9 +135,6 @@
     <Filter Include="Header Files\mitsuba\core">
       <UniqueIdentifier>{b74f25a9-ff20-4888-8dfc-57dd968b0b8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\mitsuba\hw">
-      <UniqueIdentifier>{18246123-74da-4fee-8581-bd2860451c40}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\mitsuba\bidir">
       <UniqueIdentifier>{3fdeab5a-5ccf-41c6-bf05-d9f7f510c741}</UniqueIdentifier>
     </Filter>
@@ -1115,6 +1112,9 @@
     <ClCompile Include="..\src\emitters\hemisphere.cpp">
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\librender\basicshader.cpp">
+      <Filter>Source Files\librender</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup Label="Header Files">
     <ClInclude Include="..\src\converter\converter.h">
@@ -1665,90 +1665,6 @@
     </ClInclude>
     <ClInclude Include="..\include\mitsuba\core\bitmap.h">
       <Filter>Header Files\mitsuba\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglrenderer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\viewer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\renderer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglsession.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glxrenderer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\x11device.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wglsession.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glgeometry.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\x11session.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\vpl.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsglkeys.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glprogram.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gputexture.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\basicshader.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\device.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wglrenderer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gltexture.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\nsgldevice.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpusync.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpuprogram.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\gpugeometry.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\shadow.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glrenderer.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glxdevice.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\session.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\font.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\glsync.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\mitsuba\hw\wgldevice.h">
-      <Filter>Header Files\mitsuba\hw</Filter>
     </ClInclude>
     <ClInclude Include="..\include\mitsuba\bidir\pathsampler.h">
       <Filter>Header Files\mitsuba\bidir</Filter>
