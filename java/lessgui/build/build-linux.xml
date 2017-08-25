@@ -176,6 +176,18 @@
 				<include name="*" />
 			</fileset>
 		</copy>
+		
+		<mkdir dir="dist/bin" />
+		<mkdir dir="dist/bin/python" />
+		<copy todir="dist/bin/python" >
+		    <fileset dir="/home/jimb/miniconda2" />
+		</copy>
+		
+		<mkdir dir="dist/bin/scripts" />
+		<mkdir dir="dist/bin/scripts/Lesspy" />
+		<copy todir="dist/bin/scripts/Lesspy" >
+		    <fileset dir="/home/jimb/lessproject/build/LessPyc" />
+		</copy>
 	
 	
 		<fx:resources id="appRes">

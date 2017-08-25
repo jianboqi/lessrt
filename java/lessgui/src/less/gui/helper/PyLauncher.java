@@ -57,7 +57,11 @@ public class PyLauncher extends Thread{
 			}
 			
 		}else{
-		    pypath = Paths.get(System.getProperty("user.dir"), "bin/python/","python").toString();
+			if(SystemUtils.IS_OS_LINUX){
+				pypath = Paths.get(System.getProperty("user.dir"), "bin/python/bin","python").toString();
+			}else{
+				 pypath = Paths.get(System.getProperty("user.dir"), "bin/python/","python").toString();
+			}	   
 		}
 		return pypath;
 	}
