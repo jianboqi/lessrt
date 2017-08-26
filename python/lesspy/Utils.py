@@ -25,7 +25,8 @@ def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
         subprocess.check_call(['mtsimport', inputobjpath.encode("utf-8"), outputserilizedpath.encode("utf-8")], stdout=devnull, stderr=subprocess.STDOUT)
     os.chdir(current_working_dir)
     # os.system(cmd)
-    shutil.rmtree(combine_file_path(os.getcwd(),"textures"))
+    if os.path.exists(os.path.join(os.getcwd(),"textures")):
+        shutil.rmtree(os.path.join(os.getcwd(),"textures"))
     xmlfile = combine_file_path(outputserilizeddir,xmlfilename)
     os.remove(xmlfile)
 
