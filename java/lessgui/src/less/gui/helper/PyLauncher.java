@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.junit.experimental.theories.Theories;
 
 import javafx.application.Platform;
 import less.gui.utils.Const;
@@ -32,6 +33,8 @@ public class PyLauncher extends Thread{
 	private static final String WINDOWS_KILL = "taskkill /F /IM ";
 	private static final String LINUX_KILL = "pkill ";
 	
+	public static String external_py_interpreter = "";
+	
 	private LessMainWindowController mwController;
 	private boolean isRunningLess = false;
 	
@@ -48,6 +51,9 @@ public class PyLauncher extends Thread{
 	}
 	
 	public static String getPyexe(){
+		if(!external_py_interpreter.equals("")){
+			return external_py_interpreter;
+		}
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
 			if(SystemUtils.IS_OS_LINUX){
@@ -199,14 +205,23 @@ public class PyLauncher extends Thread{
 	
 	public static void killLessRT(){
 		try {
-			Runtime.getRuntime().exec(WINDOWS_KILL + Const.LESS_RT_NAME_WINDOWS);
+			if(SystemUtils.IS_OS_WINDOWS){
+				Runtime.getRuntime().exec(WINDOWS_KILL + Const.LESS_RT_NAME_WINDOWS);
+			}else{
+				Runtime.getRuntime().exec(LINUX_KILL + Const.LESS_RT_NAME_LINUX);
+			}
+			
 		} catch (IOException e) {
 		}
 	}
 	
 	public void stop_current_job(){
 		try {
-			Runtime.getRuntime().exec(WINDOWS_KILL + Const.LESS_RT_NAME_WINDOWS);
+			if(SystemUtils.IS_OS_WINDOWS){
+				Runtime.getRuntime().exec(WINDOWS_KILL + Const.LESS_RT_NAME_WINDOWS);
+			}else{
+				Runtime.getRuntime().exec(LINUX_KILL + Const.LESS_RT_NAME_LINUX);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

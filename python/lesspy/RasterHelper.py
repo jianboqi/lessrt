@@ -39,7 +39,6 @@ class RasterHelper:
         dataarr = np.fliplr(dataarr)
         dataarr = np.reshape(dataarr, (XSize * YSize))
         dataarr = dataarr - dataarr.min()
-        print dataarr.min(),dataarr.max()
         heightStr = array.array('f', dataarr).tostring()
 
         data_dict = dict()

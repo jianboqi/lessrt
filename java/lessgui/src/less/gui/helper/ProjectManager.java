@@ -965,6 +965,19 @@ public class ProjectManager {
 			}
 		});
 	}
+	
+	//python interpreter
+	public void choosePyInterpreter(){
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Python Interpreter", "*.*"));
+	    // Show open file dialog
+	    File file = fileChooser.showOpenDialog(this.mwController.mainApp.getPrimaryStage());
+	    if(file !=null)
+	    {
+	    	this.mwController.PyInterpreterEdit.setText(file.toString());
+	    	PyLauncher.external_py_interpreter = file.toString();
+	    }
+	}
 		
 	
 	//lab 

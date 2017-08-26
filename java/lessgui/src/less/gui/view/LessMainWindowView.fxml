@@ -552,10 +552,13 @@
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <Label layoutX="14.0" layoutY="14.0" text="Minimum Iterations:" />
-                                    <TextField fx:id="minIterTextField" layoutX="191.0" layoutY="8.0" text="5" />
-                                    <Label layoutX="14.0" layoutY="58.0" text="Number of Cores:" />
-                                    <TextField fx:id="NumberofCoresTextField" layoutX="191.0" layoutY="52.0" text="5" />
+                                    <Label layoutX="14.0" layoutY="14.0" text="Minimum Iterations:" AnchorPane.leftAnchor="10.0" />
+                                    <TextField fx:id="minIterTextField" layoutX="217.0" layoutY="8.0" text="5" />
+                                    <Label layoutX="14.0" layoutY="58.0" text="Number of Cores:" AnchorPane.leftAnchor="10.0" />
+                                    <TextField fx:id="NumberofCoresTextField" layoutX="217.0" layoutY="52.0" text="5" />
+                                    <Label layoutX="14.0" layoutY="103.0" text="External Python Interpreter:" AnchorPane.leftAnchor="10.0" />
+                                    <TextField fx:id="PyInterpreterEdit" layoutX="217.0" layoutY="98.0" />
+                                    <Button layoutX="401.0" layoutY="98.0" mnemonicParsing="false" onAction="#choosePyInterpreter" text="..." />
                                  </children></AnchorPane>
                           </content>
                         </TitledPane>

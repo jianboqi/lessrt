@@ -12,6 +12,7 @@ import org.json.JSONTokener;
 import com.google.gson.JsonObject;
 
 import javafx.scene.control.Toggle;
+import less.gui.helper.PyLauncher;
 import less.gui.model.FacetOptical;
 import less.gui.model.SunPos;
 import less.gui.utils.Const;
@@ -206,6 +207,9 @@ public class ControlJsonWrapper {
 	    Advanced.put("minimum_iteration", Integer.parseInt(this.mwcontroller.minIterTextField.getText()));
 	    Advanced.put("network_sim", this.mwcontroller.projManager.isNetworkSim);
 	    Advanced.put("number_of_cores", Integer.parseInt(this.mwcontroller.NumberofCoresTextField.getText()));
+	    if(!this.mwcontroller.PyInterpreterEdit.getText().equals("")){
+	    	Advanced.put("external_py_interpreter", this.mwcontroller.PyInterpreterEdit.getText());
+	    }
 	    json.put("Advanced", Advanced);
 	    
 	    
@@ -396,6 +400,11 @@ public class ControlJsonWrapper {
 		}else{
 			this.mwcontroller.NumberofCoresTextField.setText(number_of_cores+"");
 		}
+		if(advanced.has("external_py_interpreter")){
+			this.mwcontroller.PyInterpreterEdit.setText(advanced.getString("external_py_interpreter"));
+			PyLauncher.external_py_interpreter = advanced.getString("external_py_interpreter");
+		}
+		
 		
 	}
 	

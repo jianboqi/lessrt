@@ -340,6 +340,8 @@ public class LessMainWindowController {
 	public TextField minIterTextField;
 	@FXML
 	public TextField NumberofCoresTextField;
+	@FXML
+	public TextField PyInterpreterEdit;
 	
 	public void setMainApp(LessMainApp mainApp)
 	{
@@ -1544,14 +1546,22 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
+	private void choosePyInterpreter(){
+		this.projManager.choosePyInterpreter();
+	}
+	
+	@FXML
 	private void startHelpViewer(){
 		this.projManager.startHelpViewer();
 	}
+	
 	
 	@FXML
 	private void OpenDoc(){
 		this.mainApp.getHostServices().showDocument(Const.LESS_HELP_ONLINE_URL);
 	}
+	
+	
 	
 	@FXML
 	private void test(){
@@ -1563,5 +1573,6 @@ public class LessMainWindowController {
 	private void PyJavaCommunication(){
 		this.projManager.PyJavaCommunication();
 	}
+	
 	
 }
