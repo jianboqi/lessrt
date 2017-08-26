@@ -167,43 +167,10 @@
     <ClCompile Include="..\src\converter\obj.cpp">
       <Filter>Source Files\converter</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\converter\collada.cpp">
-      <Filter>Source Files\converter</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\converter\converter.cpp">
       <Filter>Source Files\converter</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\bsdfs\plastic.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\thindielectric.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\irawan.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\phong.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\ward.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\bump.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\null.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\bsdfs\mixturebsdf.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\conductor.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\dielectric.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\hk.cpp">
       <Filter>Source Files\bsdfs</Filter>
     </ClCompile>
     <ClCompile Include="..\src\bsdfs\twosided.cpp">
@@ -213,30 +180,6 @@
       <Filter>Source Files\bsdfs</Filter>
     </ClCompile>
     <ClCompile Include="..\src\bsdfs\difftrans.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\mask.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughcoating.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughconductor.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\blendbsdf.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\coating.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughdiffuse.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughdielectric.cpp">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughplastic.cpp">
       <Filter>Source Files\bsdfs</Filter>
     </ClCompile>
     <ClCompile Include="..\src\librender\trimesh.cpp">
@@ -644,9 +587,6 @@
     <ClCompile Include="..\src\medium\homogeneous.cpp">
       <Filter>Source Files\medium</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\emitters\spot.cpp">
-      <Filter>Source Files\emitters</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\emitters\envmap.cpp">
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
@@ -656,9 +596,6 @@
     <ClCompile Include="..\src\emitters\area.cpp">
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\emitters\point.cpp">
-      <Filter>Source Files\emitters</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\emitters\directional.cpp">
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
@@ -666,9 +603,6 @@
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
     <ClCompile Include="..\src\emitters\sun.cpp">
-      <Filter>Source Files\emitters</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\emitters\collimated.cpp">
       <Filter>Source Files\emitters</Filter>
     </ClCompile>
     <ClCompile Include="..\src\emitters\sunsky.cpp">
@@ -1079,9 +1013,6 @@
     <ClCompile Include="..\src\integrators\prt\Tools.h">
       <Filter>Source Files\integrators\prt</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\films\mfilm-bandnum.cpp">
-      <Filter>Source Files\films</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\films\mfilm.cpp">
       <Filter>Source Files\films</Filter>
     </ClCompile>
@@ -1119,15 +1050,6 @@
   <ItemGroup Label="Header Files">
     <ClInclude Include="..\src\converter\converter.h">
       <Filter>Source Files\converter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\bsdfs\irawan.h">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\bsdfs\rtrans.h">
-      <Filter>Source Files\bsdfs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\bsdfs\microfacet.h">
-      <Filter>Source Files\bsdfs</Filter>
     </ClInclude>
     <ClInclude Include="..\src\bsdfs\ior.h">
       <Filter>Source Files\bsdfs</Filter>

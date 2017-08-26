@@ -115,12 +115,6 @@
     <ClInclude Include="..\include\mitsuba\render\photonproc.h" />
     <ClInclude Include="..\src\converter\converter.h">
     </ClInclude>
-    <ClInclude Include="..\src\bsdfs\irawan.h">
-    </ClInclude>
-    <ClInclude Include="..\src\bsdfs\rtrans.h">
-    </ClInclude>
-    <ClInclude Include="..\src\bsdfs\microfacet.h">
-    </ClInclude>
     <ClInclude Include="..\src\bsdfs\ior.h">
     </ClInclude>
     <ClInclude Include="..\src\integrators\lessptracer\lessptracer_proc.h" />
@@ -533,53 +527,15 @@
     </ClCompile>
     <ClCompile Include="..\src\converter\obj.cpp">
     </ClCompile>
-    <ClCompile Include="..\src\converter\collada.cpp">
-    </ClCompile>
     <ClCompile Include="..\src\converter\converter.cpp">
     </ClCompile>
-    <ClCompile Include="..\src\bsdfs\plastic.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\thindielectric.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\irawan.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\phong.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\ward.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\bump.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\null.cpp">
-    </ClCompile>
     <ClCompile Include="..\src\bsdfs\mixturebsdf.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\conductor.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\dielectric.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\hk.cpp">
     </ClCompile>
     <ClCompile Include="..\src\bsdfs\twosided.cpp">
     </ClCompile>
     <ClCompile Include="..\src\bsdfs\diffuse.cpp">
     </ClCompile>
     <ClCompile Include="..\src\bsdfs\difftrans.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\mask.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughcoating.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughconductor.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\blendbsdf.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\coating.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughdiffuse.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughdielectric.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\bsdfs\roughplastic.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\directsun.cpp" />
     <ClCompile Include="..\src\emitters\hemisphere.cpp" />
@@ -872,23 +828,17 @@
     </ClCompile>
     <ClCompile Include="..\src\medium\homogeneous.cpp">
     </ClCompile>
-    <ClCompile Include="..\src\emitters\spot.cpp">
-    </ClCompile>
     <ClCompile Include="..\src\emitters\envmap.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\sunsky\skymodel.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\area.cpp">
     </ClCompile>
-    <ClCompile Include="..\src\emitters\point.cpp">
-    </ClCompile>
     <ClCompile Include="..\src\emitters\directional.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\sky.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\sun.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\emitters\collimated.cpp">
     </ClCompile>
     <ClCompile Include="..\src\emitters\sunsky.cpp">
     </ClCompile>
@@ -1008,8 +958,6 @@
     <ClCompile Include="..\src\utils\joinrgb.cpp">
     </ClCompile>
     <ClCompile Include="..\src\utils\cylclip.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\films\mfilm-bandnum.cpp">
     </ClCompile>
     <ClCompile Include="..\src\films\tiledhdrfilm.cpp">
     </ClCompile>
