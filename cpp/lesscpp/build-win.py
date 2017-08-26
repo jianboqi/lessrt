@@ -1,5 +1,6 @@
 import shutil,os
-os.remove('config.py')
+if os.path.exits('config.py'):
+	os.remove('config.py')
 shutil.copy('config-win.py','config.py')
 os.system("scons -j6")
 print "copying files..."
