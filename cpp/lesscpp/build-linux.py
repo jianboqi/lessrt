@@ -1,4 +1,5 @@
 import shutil,os
+os.remove('config.py')
 shutil.copy('config-linux.py','config.py')
 os.system("scons -j6")
 

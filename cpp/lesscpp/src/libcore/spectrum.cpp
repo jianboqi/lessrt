@@ -34,13 +34,6 @@ extern const Float CIE_Z_entries[CIE_samples];
 extern const Float CIE_D65_entries[CIE_samples];
 /// @}
 
-#if !defined(__WINDOWS__)
-template<>
-const  int TSpectrum<Float>::dim = SPECTRUM_SAMPLES;
-template<>
-const  int TSpectrum<half>::dim = SPECTRUM_SAMPLES;
-#endif
-
 /**
  * @{ \name Forward declaration:
  * Smits-style Spectrum-to-RGB conversion data, data by Karl vom Berge

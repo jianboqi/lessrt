@@ -608,6 +608,9 @@ template<>
 const  int TSpectrum<Float>::dim = SPECTRUM_SAMPLES;
 template<>
 const  int TSpectrum<half>::dim = SPECTRUM_SAMPLES;
+#else
+template<T>
+const  int TSpectrum<T>::dim = SPECTRUM_SAMPLES;
 #endif
 
 //
