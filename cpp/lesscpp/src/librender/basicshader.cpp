@@ -108,9 +108,9 @@ ref<Bitmap> SpectrumSubtractionTexture::getBitmap(const Vector2i &sizeHint) cons
 	return Bitmap::arithmeticOperation(Bitmap::ESubtraction, bitmap1.get(), bitmap2.get());
 }
 
-MTS_IMPLEMENT_CLASS(ConstantSpectrumTexture, true, Texture)
-MTS_IMPLEMENT_CLASS(ConstantFloatTexture, true, Texture)
-MTS_IMPLEMENT_CLASS(SpectrumProductTexture, true, Texture)
-MTS_IMPLEMENT_CLASS(SpectrumAdditionTexture, true, Texture)
-MTS_IMPLEMENT_CLASS(SpectrumSubtractionTexture, true, Texture)
+MTS_IMPLEMENT_CLASS_S(ConstantSpectrumTexture, false, Texture)
+MTS_IMPLEMENT_CLASS_S(ConstantFloatTexture, false, Texture)
+MTS_IMPLEMENT_CLASS_S(SpectrumProductTexture, false, Texture)
+MTS_IMPLEMENT_CLASS_S(SpectrumAdditionTexture, false, Texture)
+MTS_IMPLEMENT_CLASS_S(SpectrumSubtractionTexture, false, Texture)
 MTS_NAMESPACE_END

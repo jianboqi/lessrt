@@ -76,8 +76,6 @@ public:
 		return m_value == Spectrum(m_value[0]);
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	ref<Bitmap> getBitmap(const Vector2i &resolutionHint) const;
 
 	void serialize(Stream *stream, InstanceManager *manager) const;
@@ -135,7 +133,6 @@ public:
 		return true;
 	}
 
-	Shader *createShader(Renderer *renderer) const;
 
 	ref<Bitmap> getBitmap(const Vector2i &resolutionHint) const;
 
@@ -198,8 +195,6 @@ public:
 		return m_a->isMonochromatic() && m_b->isMonochromatic();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
-
 	ref<Bitmap> getBitmap(const Vector2i &resolutionHint) const;
 
 	void serialize(Stream *stream, InstanceManager *manager) const;
@@ -261,7 +256,6 @@ public:
 		return m_a->isMonochromatic() && m_b->isMonochromatic();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
 
 	ref<Bitmap> getBitmap(const Vector2i &resolutionHint) const;
 
@@ -325,7 +319,6 @@ public:
 		return m_a->isMonochromatic() && m_b->isMonochromatic();
 	}
 
-	Shader *createShader(Renderer *renderer) const;
 
 	void serialize(Stream *stream, InstanceManager *manager) const;
 
