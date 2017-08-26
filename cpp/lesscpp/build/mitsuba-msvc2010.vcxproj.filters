@@ -30,9 +30,6 @@
     <Filter Include="Source Files\libhw\data">
       <UniqueIdentifier>{32a38ee8-b255-4e23-8efc-9491fc27c645}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\mitsuba">
-      <UniqueIdentifier>{9f6ef52b-2504-4722-a200-7aaa9603088a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\libcore">
       <UniqueIdentifier>{6c49af9f-8cac-477f-825b-ccb368e313c6}</UniqueIdentifier>
     </Filter>
@@ -141,9 +138,6 @@
     <Filter Include="Source Files\utils\LessSim">
       <UniqueIdentifier>{2db093a7-a884-4aaf-b6a8-59fe0888b4e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\mitsuba\LessSim">
-      <UniqueIdentifier>{f4430970-c9a1-4d27-87bc-0dc037503447}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\integrators\less">
       <UniqueIdentifier>{11244ee8-87bb-443c-83f3-d1058e80c37a}</UniqueIdentifier>
     </Filter>
@@ -158,6 +152,9 @@
     </Filter>
     <Filter Include="Source Files\integrators\photonrt">
       <UniqueIdentifier>{1d7d1136-a35a-401a-9412-490acaceb1cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lessmain">
+      <UniqueIdentifier>{9f6ef52b-2504-4722-a200-7aaa9603088a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup Label="Source Files">
@@ -403,15 +400,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libhw\basicshader.cpp">
       <Filter>Source Files\libhw</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mitsuba.cpp">
-      <Filter>Source Files\mitsuba</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mtsutil.cpp">
-      <Filter>Source Files\mitsuba</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mtssrv.cpp">
-      <Filter>Source Files\mitsuba</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libcore\platform_win32.cpp">
       <Filter>Source Files\libcore</Filter>
@@ -986,23 +974,11 @@
     <ClCompile Include="..\src\utils\LessSim\simjob.cpp">
       <Filter>Source Files\utils\LessSim</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mitsuba\less.cpp">
-      <Filter>Source Files\mitsuba</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\LessSim\simjob.cpp">
-      <Filter>Source Files\mitsuba\LessSim</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\integrators\less\lessIntegrator.cpp">
       <Filter>Source Files\integrators\less</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\less\directsun.cpp">
       <Filter>Source Files\integrators\less</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\LessSim\directsun.cpp">
-      <Filter>Source Files\mitsuba\LessSim</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mtsless.cpp">
-      <Filter>Source Files\mitsuba</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\prt\prt.cpp">
       <Filter>Source Files\integrators\prt</Filter>
@@ -1045,6 +1021,12 @@
     </ClCompile>
     <ClCompile Include="..\src\librender\basicshader.cpp">
       <Filter>Source Files\librender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lessmain\lessrt.cpp">
+      <Filter>Source Files\lessmain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\lessmain\lesssrv.cpp">
+      <Filter>Source Files\lessmain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup Label="Header Files">
@@ -1657,17 +1639,8 @@
     <ClInclude Include="..\src\utils\LessSim\directSunOnPlane\directsunwp.h">
       <Filter>Source Files\utils\LessSim</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\mitsuba\LessSim\simjob.h">
-      <Filter>Source Files\mitsuba\LessSim</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mitsuba\LessSim\Tools.h">
-      <Filter>Source Files\mitsuba\LessSim</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\integrators\less\directsun.h">
       <Filter>Source Files\integrators\less</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\mitsuba\LessSim\directsun.h">
-      <Filter>Source Files\mitsuba\LessSim</Filter>
     </ClInclude>
     <ClInclude Include="..\src\integrators\less\LessSim\Tools.h">
       <Filter>Source Files\integrators\less\lessSim</Filter>

@@ -122,9 +122,6 @@
     <ClInclude Include="..\src\integrators\less\LessSim\Tools.h" />
     <ClInclude Include="..\src\integrators\photonrt\photonrt_proc.h" />
     <ClInclude Include="..\src\integrators\prt\prt_proc.h" />
-    <ClInclude Include="..\src\mitsuba\LessSim\directsun.h" />
-    <ClInclude Include="..\src\mitsuba\LessSim\simjob.h" />
-    <ClInclude Include="..\src\mitsuba\LessSim\Tools.h" />
     <ClInclude Include="..\src\samplers\faure.h">
     </ClInclude>
     <ClInclude Include="..\src\samplers\sobolseq.h">
@@ -550,6 +547,8 @@
     <ClCompile Include="..\src\integrators\prt\prt.cpp" />
     <ClCompile Include="..\src\integrators\prt\prt_proc.cpp" />
     <ClCompile Include="..\src\integrators\prt\Tools.h" />
+    <ClCompile Include="..\src\lessmain\lessrt.cpp" />
+    <ClCompile Include="..\src\lessmain\lesssrv.cpp" />
     <ClCompile Include="..\src\librender\basicshader.cpp" />
     <ClCompile Include="..\src\librender\photonproc.cpp" />
     <ClCompile Include="..\src\librender\trimesh.cpp">
@@ -620,10 +619,6 @@
     </ClCompile>
     <ClCompile Include="..\src\librender\imageblock.cpp">
     </ClCompile>
-    <ClCompile Include="..\src\mitsuba\less.cpp" />
-    <ClCompile Include="..\src\mitsuba\LessSim\directsun.cpp" />
-    <ClCompile Include="..\src\mitsuba\LessSim\simjob.cpp" />
-    <ClCompile Include="..\src\mitsuba\mtsless.cpp" />
     <ClCompile Include="..\src\samplers\stratified.cpp">
     </ClCompile>
     <ClCompile Include="..\src\samplers\independent.cpp">
@@ -704,12 +699,6 @@
     <ClCompile Include="..\src\libhw\shadow.cpp">
     </ClCompile>
     <ClCompile Include="..\src\libhw\basicshader.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mitsuba.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mtsutil.cpp">
-    </ClCompile>
-    <ClCompile Include="..\src\mitsuba\mtssrv.cpp">
     </ClCompile>
     <ClCompile Include="..\src\libcore\platform_win32.cpp">
     </ClCompile>
