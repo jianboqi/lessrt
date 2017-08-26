@@ -54,8 +54,8 @@ if 'linux' in sys.platform:
 	if hasQt:
 		pass
 		#install(distDir, ['mtsgui/mtsgui'])
-	if hasCollada:
-		install(distDir, ['converter/mtsimport'])
+
+	install(distDir, ['converter/mtsimport'])
 if sys.platform == 'win32':
 	for plugin in plugins:
 		if '.dll' in plugin.__str__():
@@ -65,8 +65,7 @@ if sys.platform == 'win32':
 	archType = 'x64' if 'WIN64' in env['CXXFLAGS'] else 'i386'
 	dllprefix = '#dependencies/lib/%s_%s' % (archType, compilerType[:-1])
 
-	if hasCollada:
-		install(distDir, ['converter/mtsimport.exe'])
+	install(distDir, ['converter/mtsimport.exe'])
 	sdkDir = os.path.join(distDir, "sdk")
 	sdkLibDir = os.path.join(sdkDir, "lib")
 
@@ -117,8 +116,7 @@ elif sys.platform == 'darwin':
 		installTargets += env.Install(os.path.join(os.path.join(distDir, 'Headers'), includeDir),
 			[ ('#' + os.path.join(includeDir, fname)) for fname in entry[2] ])
 	install(os.path.join(distDir, 'Contents/MacOS'), ['mitsuba/mitsuba', 'mitsuba/mtssrv', 'mitsuba/mtsutil'])
-	if hasCollada:
-		install(os.path.join(distDir, 'Contents/MacOS'), ['converter/mtsimport'])
+	install(os.path.join(distDir, 'Contents/MacOS'), ['converter/mtsimport'])
 	plist = env.Install(os.path.join(distDir, 'Contents'), '#data/darwin/Info.plist')
 	installTargets += plist
 	installTargets += env.AddPostAction(plist, 'perl -pi -e "s/MTS_VERSION/%s/" $TARGET' % MTS_VERSION)
