@@ -36,24 +36,15 @@ basePath = env.GetBuildPath('#')
 for file in os.listdir(env.GetBuildPath('#data/schema')):
 	if fnmatch.fnmatch(file, '*.xsl') or fnmatch.fnmatch(file, '*.xsd'):
 		installTargets += env.Install(os.path.join(distDir, 'data/schema'), '#data/schema/' + file)
-for file in os.listdir(env.GetBuildPath('#data/ior')):
-	if fnmatch.fnmatch(file, '*.spd'):
-		installTargets += env.Install(os.path.join(distDir, 'data/ior'), '#data/ior/' + file)
-for file in os.listdir(env.GetBuildPath('#data/microfacet')):
-	if fnmatch.fnmatch(file, '*.dat'):
-		installTargets += env.Install(os.path.join(distDir, 'data/microfacet'), '#data/microfacet/' + file)
 
 if 'linux' in sys.platform:
 	for plugin in plugins:
 		installTargets += env.Install(os.path.join(distDir, 'plugins'), plugin)
 	install(distDir, ['libcore/libmitsuba-core.so',
-			'librender/libmitsuba-render.so', 'libbidir/libmitsuba-bidir.so'])
+			'librender/libmitsuba-render.so'])
 	for ver in hasPython:
 		installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.so'), 'libpython/mitsuba_python' + ver + '.so')
 	install(distDir, ['mitsuba/lessrt', 'mitsuba/lesssrv'])
-	if hasQt:
-		pass
-		#install(distDir, ['mtsgui/mtsgui'])
 
 	install(distDir, ['converter/mtsimport'])
 if sys.platform == 'win32':
@@ -71,9 +62,9 @@ if sys.platform == 'win32':
 
 	install(distDir, ['mitsuba/lessrt.exe', 'mitsuba/lesssrv.exe'])
 	install(distDir, ['libcore/libmitsuba-core.dll',
-			'librender/libmitsuba-render.dll', 'libbidir/libmitsuba-bidir.dll'])
+			'librender/libmitsuba-render.dll'])
 	install(sdkLibDir, ['libcore/mitsuba-core.lib',
-			'librender/mitsuba-render.lib', 'libbidir/mitsuba-bidir.lib'])
+			'librender/mitsuba-render.lib'])
 	for entry in os.walk(os.path.join(basePath, "include")):
 		includeDir = entry[0][len(basePath)+1:]
 		installTargets += env.Install(os.path.join(sdkDir, includeDir),
@@ -81,9 +72,9 @@ if sys.platform == 'win32':
 	for ver in hasPython:
 		installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.pyd'), 'libpython/mitsuba_python' + ver + '.dll')
 	install(distDir, ['Iex.dll', 'Half.dll','IlmThread.dll', 'Imath.dll','IlmImf.dll','zlib.dll',
-		'libpng16.dll',	'jpeg62.dll', 'xerces-c_3_1.dll', 'glew32mx.dll', 'libfftw-3.3.dll'],
+		'libpng16.dll',	'jpeg62.dll', 'xerces-c_3_1.dll', 'libfftw-3.3.dll'],
 		prefix=dllprefix)
-	install(distDir, ['libcollada14dom24.dll'], dllprefix)
+	#install(distDir, ['libcollada14dom24.dll'], dllprefix)
 	# for boostlib in ['python27', 'python32', 'python33', 'python34', 'system', 'filesystem', 'chrono', 'thread']:
 	for boostlib in ['python27', 'system', 'filesystem', 'chrono', 'thread']:
 		install(distDir, ['boost_%s-%s-mt-1_53.dll' % (boostlib, compilerType)], dllprefix)
@@ -125,7 +116,7 @@ elif sys.platform == 'darwin':
 	frameworkDir = os.path.join(distDir, 'Contents/Frameworks')
 
 	install(frameworkDir, ['libcore/libmitsuba-core.dylib',
-		'librender/libmitsuba-render.dylib', 'libbidir/libmitsuba-bidir.dylib'])
+		'librender/libmitsuba-render.dylib'])
 	for ver in hasPython:
 		installTargets += installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.so'), 'libpython/mitsuba_python'+ver+'.dylib')
 	for entry in os.walk(os.path.join(basePath, "dependencies/lib")):

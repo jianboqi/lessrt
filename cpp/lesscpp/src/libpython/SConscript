@@ -20,8 +20,8 @@ for ver in hasPython:
 	pythonEnv.Append(CPPDEFINES = [['MTS_BUILD_MODULE', 'MTS_MODULE_PYTHON']])
 	pythonEnv['SHLIBPREFIX']=''
 	pythonEnv.RelaxCompilerSettings()
-	pythonEnv.Append(LIBS=['mitsuba-bidir'])
-	pythonEnv.Append(LIBPATH=['#src/libbidir'])
+	# pythonEnv.Append(LIBS=['mitsuba-bidir'])
+	# pythonEnv.Append(LIBPATH=['#src/libbidir'])
 
 	if pythonEnv.has_key('XERCESINCLUDE'):
 		pythonEnv.Prepend(CPPPATH=pythonEnv['XERCESINCLUDE'])
@@ -44,7 +44,7 @@ for ver in hasPython:
 		# Linux: ensure that all core Mitsuba libraries are loaded when the plugin is used in Python
 		pythonEnv.Append(SHLINKFLAGS=['-Wl,-R,\'$$ORIGIN/../..\''])
 		# pythonEnv.Append(SHLINKFLAGS=['-Wl,-no-as-needed', '-lmitsuba-hw', '-Wl,-no-as-needed', '-lmitsuba-bidir'])
-		pythonEnv.Append(SHLINKFLAGS=['-Wl,-no-as-needed', '-lmitsuba-bidir'])
+		# pythonEnv.Append(SHLINKFLAGS=['-Wl,-no-as-needed', '-lmitsuba-bidir'])
 
 	libcore_obj = pythonEnv.SharedObject('core_'+ver, 'core.cpp')
 	librender_obj = pythonEnv.SharedObject('render_'+ver, 'render.cpp')
