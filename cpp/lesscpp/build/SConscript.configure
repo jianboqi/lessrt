@@ -92,15 +92,7 @@ vars.Add('QTDIR',           'Qt installation directory')
 vars.Add('QTINCLUDE',       'Additional Qt include directory')
 vars.Add('INTEL_COMPILER',  'Should the Intel C++ compiler be used?')
 
-try:
-	env = Environment(options=vars, ENV = os.environ, tools=['default', 'qt4', 'icl12'], toolpath=['#data/scons'])
-	print 'Checking for Qt 4.x... yes'
-	hasQt = True
-except Exception:
-	env = Environment(options=vars, ENV = os.environ, tools=['default', 'icl12'], toolpath=['#data/scons'])
-	print 'Unable to detect a Qt installation -- not building the GUI!'
-	hasQt = False
-print "manually setting hasQt to false"
+env = Environment(options=vars, ENV = os.environ, tools=['default', 'icl12'], toolpath=['#data/scons'])
 hasQt=False
 
 hasCollada=True
@@ -197,9 +189,6 @@ else:
 if not conf.CheckCXXHeader('xercesc/dom/DOMLSParser.hpp'):
 	print 'Xerces-C++ 3.x must be installed (install libxerces-c-dev)!'
 	Exit(1)
-if not conf.CheckCXXHeader('dae.h'):
-	hasCollada = False
-	print 'COLLADA DOM is missing: not building the COLLADA importer'
 
 hasBreakpad = '-DMTS_HAS_BREAKPAD' in env['CCFLAGS'] or 'MTS_HAS_BREAKPAD' in env['CXXFLAGS']
 
@@ -269,7 +258,7 @@ env.Replace(CPPPATH=cppPathPrevious)
 env.Replace(LIBPATH=libPathPrevious)
 env.Replace(CPPFLAGS=cppFlagsPrevious)
 env.Replace(CXXFLAGS=cxxFlagsPrevious)
-sys.stdout.write("Checking for Mitsuba version .. ")
+
 
 file = open(env.GetBuildPath('#include/mitsuba/core/version.h'), 'r')
 MTS_VERSION=""
@@ -279,8 +268,7 @@ for line in file:
 if MTS_VERSION == "":
 	print 'could not be determined!'
 	Exit(1)
-else:
-	print MTS_VERSION
+
 Export('MTS_VERSION')
 
 if needsBuildDependencies:

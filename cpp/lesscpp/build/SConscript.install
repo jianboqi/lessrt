@@ -44,7 +44,7 @@ if 'linux' in sys.platform:
 			'librender/libmitsuba-render.so'])
 	for ver in hasPython:
 		installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.so'), 'libpython/mitsuba_python' + ver + '.so')
-	install(distDir, ['mitsuba/lessrt', 'mitsuba/lesssrv'])
+	install(distDir, ['lessmain/lessrt', 'lessmain/lesssrv'])
 
 	install(distDir, ['converter/mtsimport'])
 if sys.platform == 'win32':
@@ -60,7 +60,7 @@ if sys.platform == 'win32':
 	sdkDir = os.path.join(distDir, "sdk")
 	sdkLibDir = os.path.join(sdkDir, "lib")
 
-	install(distDir, ['mitsuba/lessrt.exe', 'mitsuba/lesssrv.exe'])
+	install(distDir, ['lessmain/lessrt.exe', 'lessmain/lesssrv.exe'])
 	install(distDir, ['libcore/libmitsuba-core.dll',
 			'librender/libmitsuba-render.dll'])
 	install(sdkLibDir, ['libcore/mitsuba-core.lib',
@@ -87,8 +87,6 @@ if sys.platform == 'win32':
 	else:
 		installTargets += env.Install(distDir, '#dependencies/bin/vcredist_2010_sp1_x86.exe')
 
-	installTargets += env.Install(distDir, '#data/windows/README.txt')
-
 	if 'REDIST_PATH' in env:
 		install(distDir, ['libmmd.dll', 'libiomp5md.dll', 'svml_dispmd.dll'], prefix = env['REDIST_PATH'])
 
@@ -106,7 +104,7 @@ elif sys.platform == 'darwin':
 		includeDir = entry[0][len(basePath)+1:]
 		installTargets += env.Install(os.path.join(os.path.join(distDir, 'Headers'), includeDir),
 			[ ('#' + os.path.join(includeDir, fname)) for fname in entry[2] ])
-	install(os.path.join(distDir, 'Contents/MacOS'), ['mitsuba/mitsuba', 'mitsuba/mtssrv'])
+	install(os.path.join(distDir, 'Contents/MacOS'), ['lessmain/lessrt', 'lessmain/lesssrv'])
 	install(os.path.join(distDir, 'Contents/MacOS'), ['converter/mtsimport'])
 	plist = env.Install(os.path.join(distDir, 'Contents'), '#data/darwin/Info.plist')
 	installTargets += plist

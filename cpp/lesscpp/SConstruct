@@ -45,7 +45,7 @@ build('src/libpython/SConscript')
 env = env.Clone()
 
 # Build the command-line binaries
-mainEnv = build('src/mitsuba/SConscript')
+mainEnv = build('src/lessmain/SConscript')
 
 # Build the COLLADA converter
 converter_objects = build('src/converter/SConscript', ['mainEnv'])
