@@ -96,7 +96,7 @@ public class Const {
 	
 	
 	//cluster
-	public static String LESS_SERVER_EXE = "lesssrv.exe";
+	public static String LESS_SERVER_EXE = "lesssrv";
 	public static String LESS_SERVER_TXT_FILE = "server.txt";
 	
 	public static String LESS_HELP_ONLINE_URL = "http://ramm.bnu.edu.cn/projects/less/Documentation/";

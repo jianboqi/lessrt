@@ -89,12 +89,12 @@ public class RunningOnClusterController {
 	            }
 	        });
 		
-		//��ʼ����ť״̬�����ùرմ����ٴ򿪣�״̬�ı�
+		//锟斤拷始锟斤拷锟斤拷钮状态锟斤拷锟斤拷锟矫关闭达拷锟斤拷锟劫打开ｏ拷状态锟侥憋拷
 		changeStartServerBtn();
 	}
 	
 	/**
-	 * �ı�button��״̬
+	 * 锟侥憋拷button锟斤拷状态
 	 */
 	private void changeStartServerBtn(){
 		if(this.mwController.projManager.isServerStarted){
@@ -122,7 +122,7 @@ public class RunningOnClusterController {
 
 		    t.start();
 		}
-		else{//�Ѿ���������ر�
+		else{
 			this.mwController.projManager.isServerStarted = false;
 			changeStartServerBtn();
 			this.mwController.projManager.p.destroy();
@@ -138,7 +138,7 @@ public class RunningOnClusterController {
 		this.mwController.outputConsole.appendText("INFO: Starting server "+host +":"+port+"\n");
 		if(host.equals("") || port.equals(""))
 			return;
-		//ͨ��python����mtssrv��������
+		//
 		ProcessBuilder pd=new ProcessBuilder(this.getSrvexe(),"-i", host, "-l", port);
 		pd.directory(new File(this.getSrvDir()));
 		try {
@@ -151,7 +151,7 @@ public class RunningOnClusterController {
 				if(line.contains("Enter mtssrv -h")){
 					
 				}else if (line.contains("Send Ctrl-C to stop")){
-					changeStartServerBtn();//������ı䰴ť״̬
+					changeStartServerBtn();//
 					this.mwController.outputConsole.appendText("INFO: Server started, listening on "+host +":"+port+"\n");
 				}else{
 					String [] arr = line.split("]");
@@ -174,7 +174,7 @@ public class RunningOnClusterController {
 	
 	
 	/**
-	 * ���server
+	 * 锟斤拷锟絪erver
 	 */
 	@FXML
 	private void onAdd(){
@@ -252,7 +252,7 @@ public class RunningOnClusterController {
 	}
 	
 	/**
-	 * ���� mtssrv��·��
+	 * 
 	 * @return
 	 */
 	public String getSrvexe(){
