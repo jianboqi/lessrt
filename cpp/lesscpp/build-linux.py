@@ -1,5 +1,5 @@
 import shutil,os
-if os.path.exits('config.py'):
+if os.path.exists('config.py'):
 	os.remove('config.py')
 shutil.copy('config-linux.py','config.py')
 os.system("scons -j6")
