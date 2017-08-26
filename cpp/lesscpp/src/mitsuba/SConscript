@@ -24,7 +24,7 @@ if sys.platform == 'darwin':
 	stubs += [mainEnv_osx.StaticObject('darwin_stub.mm')]
 	mainEnv.Append(LINKFLAGS=['-Xlinker', '-rpath', '-Xlinker', '@executable_path/../Frameworks'])
 
-mainEnv.Program('mtsutil', stubs + winstubs + ['mtsutil.cpp'])
+# mainEnv.Program('mtsutil', stubs + winstubs + ['mtsutil.cpp'])
 
 # Build the command-line+GUI interface
 mainEnv.Program('lesssrv',  winstubs + ['mtssrv.cpp'])

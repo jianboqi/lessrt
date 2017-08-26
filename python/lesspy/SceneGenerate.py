@@ -403,13 +403,13 @@ class SceneGenerate:
             bound_dict[objName] = [arr[3]-arr[0],arr[4]-arr[1],arr[5]-arr[2]]
 
         scenepath = session.get_scenefile_path()
-        if "Windows" in platform.system():
-            scenepath = str(scenepath.replace('\\', '\\\\'))
+        # if "Windows" in platform.system():
+        #     scenepath = str(scenepath.replace('\\', '\\\\'))
         #得到高程信息 通过光线跟踪的方法精确得到高程信息
         fileResolver = Thread.getThread().getFileResolver()
         logger = Thread.getThread().getLogger()
         logger.clearAppenders()
-        fileResolver.appendPath(scenepath)
+        fileResolver.appendPath(str(scenepath))
         # 由于batch模式不会改变地形几何结构，因此在用地形打点计算树木的高程时，用第一个terrain文件即可，所以加上了_0_
         if(forest_prifix != ""):
             forest_prifix = forest_prifix[0:len(forest_prifix)-1] +"_0_"
