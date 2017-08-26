@@ -9,6 +9,8 @@ import math
 def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
     currdir = os.path.split(os.path.realpath(__file__))[0]
     os.environ['PATH'] = currdir + '/bin/rt/'+ current_rt_program +'/' + os.pathsep + os.environ['PATH']
+    rt_dir = os.path.join(currdir + '/bin/rt/' + current_rt_program)
+
     (filepath, tempfilename) = os.path.split(inputobjpath)
     xmlfilename = os.path.splitext(tempfilename)[0]
     outputserilizedpath = combine_file_path(outputserilizeddir, xmlfilename)
@@ -17,8 +19,11 @@ def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
     if os.path.exists(outputserilizedpath+".serialized"):
         log("INFO: Using cached file.")
         return
+    current_working_dir = os.getcwdu()
+    os.chdir(rt_dir)
     with open(os.devnull, 'wb') as devnull:
         subprocess.check_call(['mtsimport', inputobjpath.encode("utf-8"), outputserilizedpath.encode("utf-8")], stdout=devnull, stderr=subprocess.STDOUT)
+    os.chdir(current_working_dir)
     # os.system(cmd)
     shutil.rmtree(combine_file_path(os.getcwd(),"textures"))
     xmlfile = combine_file_path(outputserilizeddir,xmlfilename)
