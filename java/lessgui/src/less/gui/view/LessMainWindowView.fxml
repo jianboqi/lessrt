@@ -140,7 +140,7 @@
                                  </content>
                               </ScrollPane>
                               <Label layoutX="15.0" prefHeight="23.0" prefWidth="138.0" text="--------------&gt; x" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="-5.0" />
-                              <Label layoutX="-65.0" layoutY="34.0" prefHeight="23.0" prefWidth="140.0" style="-fx-rotate: -90;" text="y &lt;--------------" AnchorPane.leftAnchor="-65.0" AnchorPane.topAnchor="34.0" />
+                              <Label layoutX="-65.0" layoutY="25.0" prefHeight="23.0" prefWidth="140.0" style="-fx-rotate: -90;" text="y &lt;--------------" AnchorPane.leftAnchor="-65.0" AnchorPane.topAnchor="25.0" />
                               <Label layoutX="575.0" layoutY="79.0" text="North" AnchorPane.rightAnchor="39.0" AnchorPane.topAnchor="79.0" />
                               <Polygon layoutX="594.0" layoutY="45.0" scaleX="0.2" scaleY="0.2" stroke="BLACK" strokeType="INSIDE" AnchorPane.rightAnchor="18.0" AnchorPane.topAnchor="-15.0">
                                 <points>

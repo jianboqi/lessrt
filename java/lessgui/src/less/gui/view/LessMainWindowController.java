@@ -17,12 +17,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,9 +31,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitMenuButton;
@@ -363,6 +365,7 @@ public class LessMainWindowController {
         this.AddDEMType_Listener();
         this.initSensor();
         this.initSunAndIlluminationView();
+        this.initCanvasContextMenu();
         this.initOpticalTableView();
         this.initForestPosTableView();
         this.outputConsole = new OutputConsole(this.consoleTextArea);
@@ -393,6 +396,40 @@ public class LessMainWindowController {
 			this.importInstancesBtn.setVisible(false);
 			this.importObjectsBtn.setVisible(false);
 		}
+	}
+	
+	
+	private void initCanvasContextMenu(){
+		ContextMenu contextMenu = new ContextMenu();
+		RadioMenuItem arrowMenuItem = new RadioMenuItem("Show arrows");
+		arrowMenuItem.setSelected(true);
+		arrowMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(arrowMenuItem.isSelected()){
+            		DrawHelper.showArrows = true;
+            	}else{
+            		DrawHelper.showArrows = false;
+            	}
+                
+                reDrawAll();
+            }
+        });
+		RadioMenuItem gridMenuItem = new RadioMenuItem("Show grid");
+		gridMenuItem.setSelected(true);
+		gridMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(gridMenuItem.isSelected()){
+            		DrawHelper.showGrids = true;
+            	}else{
+            		DrawHelper.showGrids = false;
+            	}
+                reDrawAll();
+            }
+        });
+		contextMenu.getItems().addAll(arrowMenuItem, gridMenuItem);
+		canvas.setOnContextMenuRequested(e -> contextMenu.show(canvas, e.getScreenX(), e.getScreenY()));
 	}
 	
 	/**

@@ -17,7 +17,10 @@ public class DrawHelper {
 	private LessMainWindowController mwController;
 	public double max_canvas_length = 500;
 	private RandomColorFactory RndColorFactory = new RandomColorFactory();
-
+	
+	public static boolean showArrows = true;  //show arrows in 2D display or not, used by the contextMenu
+	public static boolean showGrids = true; //show basic grids in 2D display or not, used by the ocntextMenu
+	
 	public DrawHelper(LessMainWindowController mwController){
 		this.mwController = mwController;
 	}
@@ -25,7 +28,7 @@ public class DrawHelper {
 	/**
 	 * Draw basic grids on the canvas
 	 */
-	public void drawBasicGrids(){
+	public void drawBasicGrids(){		
 		double width = this.mwController.canvas.getWidth();
 		double height = this.mwController.canvas.getHeight();
 		double gridNum = 20.0;
@@ -33,6 +36,10 @@ public class DrawHelper {
 	    double interval_y = height/gridNum;
 	    GraphicsContext gc = this.mwController.canvas.getGraphicsContext2D();
 	    gc.clearRect(0, 0, width, height);
+	    
+	    if(!DrawHelper.showGrids)
+			return;
+	    
 	    gc.setStroke(Color.GRAY);
 	    for(int i=0;i<gridNum+1;i++){
 	    	double xpos = i * interval_x;
@@ -45,6 +52,9 @@ public class DrawHelper {
 	}
 	
 	public void drawSunAndView(){
+		if(!DrawHelper.showArrows)
+			return;
+		
 		if (this.mwController.sunAzimuthField.getText().equals(""))
 			return;
 		double width = this.mwController.canvas.getWidth();
