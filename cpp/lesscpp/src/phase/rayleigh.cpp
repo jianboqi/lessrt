@@ -59,6 +59,9 @@ public:
 		Point2 sample(sampler->next2D());
 
 		Float z = 2 * (2*sample.x - 1),
+
+
+
 			  tmp = std::sqrt(z*z+1),
 			  A = cuberoot(z+tmp),
 			  B = cuberoot(z-tmp),

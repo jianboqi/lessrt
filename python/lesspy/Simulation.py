@@ -20,7 +20,7 @@ def do_simulation_multi_spectral(cores):
     if cfg["sensor"]["sensor_type"] == "orthographic":
         distFileName = spectral_img_prefix + "VZ=" + str(cfg["observation"]["obs_zenith"]) + \
                 "_VA=" + str(cfg["observation"]["obs_azimuth"])
-    if cfg["sensor"]["sensor_type"] == "perspective":
+    if cfg["sensor"]["sensor_type"] == "perspective" or cfg["sensor"]["sensor_type"] == "CircularFisheye":
         ox,oy,oz,tx,ty,tz = cfg["observation"]["obs_o_x"], cfg["observation"]["obs_o_y"], cfg["observation"]["obs_o_z"],\
                             cfg["observation"]["obs_t_x"], cfg["observation"]["obs_t_y"], cfg["observation"]["obs_t_z"]
         distFileName = spectral_img_prefix + "ox=%.2f_oy=%.2f_oz=%.2f_tx=%.2f_ty=%.2f_tz=%.2f"%(ox,oy,oz,tx,ty,tz)

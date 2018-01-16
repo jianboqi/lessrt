@@ -89,12 +89,12 @@ public class RunningOnClusterController {
 	            }
 	        });
 		
-		//锟斤拷始锟斤拷锟斤拷钮状态锟斤拷锟斤拷锟矫关闭达拷锟斤拷锟劫打开ｏ拷状态锟侥憋拷
+		//
 		changeStartServerBtn();
 	}
 	
 	/**
-	 * 锟侥憋拷button锟斤拷状态
+	 * 
 	 */
 	private void changeStartServerBtn(){
 		if(this.mwController.projManager.isServerStarted){

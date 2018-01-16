@@ -31,6 +31,7 @@ public class Const {
 	public static String LESS_SENSOR_TYPE_ORTH = "orthographic";
 	public static String LESS_SENSOR_TYPE_PER = "perspective";
 	public static String LESS_SENSOR_TYPE_PT = "PhotonTracing";
+	public static String LESS_SENSOR_TYPE_CF = "CircularFisheye";
 	
 	public static String LESS_OBJECTS_FILE_NAME = "objects.txt"; //for store objects of tree models.
 	public static String LESS_INSTANCE_FILE_NAME = "instances.txt"; //for store the position of tree models.
@@ -54,8 +55,8 @@ public class Const {
 	
 	
 	// LESS Mode
-	public static String LESS_MODE= "development";
-	public static String LESS_VERSION = "V1.6";
+	public static String LESS_MODE= "development11";
+	public static String LESS_VERSION = "V1.7";
 	
 	public static boolean LESS_OUT_ALL = false;
 	

@@ -526,9 +526,18 @@ public class Display3DController {
 		int index = 0;
 		System.out.println("INFO: Displaying objects...");
 		
+		//hide selected objects
+		ObservableList<String> tobeHide = null;
+		if(this.mwController.HideSelectedCheck.isSelected()){
+			tobeHide = this.mwController.objectLV.getSelectionModel().getSelectedItems();
+		}
+		
 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.mwController.objectAndPositionMap.entrySet()){
 			String objName = entry.getKey();
 			
+			if(tobeHide!=null && tobeHide.contains(objName)){
+				continue;
+			}
 			ArrayList<Mesh> objMeshes = null;
 			ArrayList<Color> compColorList = null;//
 			if (!ballAsObjects){

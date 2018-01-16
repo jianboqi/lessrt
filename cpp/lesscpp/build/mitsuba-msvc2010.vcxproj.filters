@@ -812,16 +812,7 @@
     <ClCompile Include="..\src\shapes\disk.cpp">
       <Filter>Source Files\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\integrators\vpl\vpl.cpp">
-      <Filter>Source Files\integrators\vpl</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\integrators\misc\adaptive.cpp">
-      <Filter>Source Files\integrators\misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\misc\irrcache.cpp">
-      <Filter>Source Files\integrators\misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\misc\irrcache_proc.cpp">
       <Filter>Source Files\integrators\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\direct\direct.cpp">
@@ -829,15 +820,6 @@
     </ClCompile>
     <ClCompile Include="..\src\integrators\direct\ao.cpp">
       <Filter>Source Files\integrators\direct</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\pssmlt\pssmlt.cpp">
-      <Filter>Source Files\integrators\pssmlt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\pssmlt\pssmlt_sampler.cpp">
-      <Filter>Source Files\integrators\pssmlt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\pssmlt\pssmlt_proc.cpp">
-      <Filter>Source Files\integrators\pssmlt</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\photonmapper\ppm.cpp">
       <Filter>Source Files\integrators\photonmapper</Filter>
@@ -859,27 +841,6 @@
     </ClCompile>
     <ClCompile Include="..\src\integrators\path\volpath.cpp">
       <Filter>Source Files\integrators\path</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\mlt\mlt_proc.cpp">
-      <Filter>Source Files\integrators\mlt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\mlt\mlt.cpp">
-      <Filter>Source Files\integrators\mlt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\bdpt\bdpt_wr.cpp">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\bdpt\bdpt_proc.cpp">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\bdpt\bdpt.cpp">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\erpt\erpt.cpp">
-      <Filter>Source Files\integrators\erpt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\erpt\erpt_proc.cpp">
-      <Filter>Source Files\integrators\erpt</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\ptracer\ptracer.cpp">
       <Filter>Source Files\integrators\ptracer</Filter>
@@ -974,29 +935,8 @@
     <ClCompile Include="..\src\utils\LessSim\simjob.cpp">
       <Filter>Source Files\utils\LessSim</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\integrators\less\lessIntegrator.cpp">
-      <Filter>Source Files\integrators\less</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\less\directsun.cpp">
-      <Filter>Source Files\integrators\less</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\prt\prt.cpp">
-      <Filter>Source Files\integrators\prt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\prt\prt_proc.cpp">
-      <Filter>Source Files\integrators\prt</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\prt\Tools.h">
-      <Filter>Source Files\integrators\prt</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\films\mfilm.cpp">
       <Filter>Source Files\films</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\lessptracer\lessptracer.cpp">
-      <Filter>Source Files\integrators\lessptracer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\integrators\lessptracer\lessptracer_proc.cpp">
-      <Filter>Source Files\integrators\lessptracer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\integrators\photonmapper\pmrt.cpp">
       <Filter>Source Files\integrators\photonmapper</Filter>
@@ -1027,6 +967,9 @@
     </ClCompile>
     <ClCompile Include="..\src\lessmain\lesssrv.cpp">
       <Filter>Source Files\lessmain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sensors\hemispherical_fisheye.cpp">
+      <Filter>Source Files\sensors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup Label="Header Files">
@@ -1174,41 +1117,8 @@
     <ClInclude Include="..\src\shapes\instance.h">
       <Filter>Source Files\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\integrators\misc\irrcache_proc.h">
-      <Filter>Source Files\integrators\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\pssmlt\pssmlt_sampler.h">
-      <Filter>Source Files\integrators\pssmlt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\pssmlt\pssmlt.h">
-      <Filter>Source Files\integrators\pssmlt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\pssmlt\pssmlt_proc.h">
-      <Filter>Source Files\integrators\pssmlt</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\integrators\photonmapper\bre.h">
       <Filter>Source Files\integrators\photonmapper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\mlt\mlt.h">
-      <Filter>Source Files\integrators\mlt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\mlt\mlt_proc.h">
-      <Filter>Source Files\integrators\mlt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\bdpt\bdpt_proc.h">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\bdpt\bdpt.h">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\bdpt\bdpt_wr.h">
-      <Filter>Source Files\integrators\bdpt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\erpt\erpt.h">
-      <Filter>Source Files\integrators\erpt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\erpt\erpt_proc.h">
-      <Filter>Source Files\integrators\erpt</Filter>
     </ClInclude>
     <ClInclude Include="..\src\integrators\ptracer\ptracer_proc.h">
       <Filter>Source Files\integrators\ptracer</Filter>
@@ -1638,18 +1548,6 @@
     </ClInclude>
     <ClInclude Include="..\src\utils\LessSim\directSunOnPlane\directsunwp.h">
       <Filter>Source Files\utils\LessSim</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\less\directsun.h">
-      <Filter>Source Files\integrators\less</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\less\LessSim\Tools.h">
-      <Filter>Source Files\integrators\less\lessSim</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\prt\prt_proc.h">
-      <Filter>Source Files\integrators\prt</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\integrators\lessptracer\lessptracer_proc.h">
-      <Filter>Source Files\integrators\lessptracer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\integrators\photonrt\photonrt_proc.h">
       <Filter>Source Files\integrators\photonrt</Filter>

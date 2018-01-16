@@ -150,7 +150,7 @@ public class DrawToolBarHelper {
 	
 	
 	/**
-	 * ���ݴ�����polygon������л���
+	 * 
 	 */
 	public void reDrawPolygon(){
 		if(polygonLayer != null && xs.size()>0 && mwConstroller.DrawPolygonCheckbox.isSelected()){
@@ -173,7 +173,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ���Ʊ�����
+	 * background image
 	 */
 	public void DrawBackground(){
 		if(backgroundLayer != null && backgroundImgFile != null){
@@ -184,7 +184,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ��ձ�����
+	 * 
 	 */
 	private void clearBackgroundImg(){
 		if(this.backgroundLayer != null){
@@ -222,7 +222,7 @@ public class DrawToolBarHelper {
 		    			 fisrt_x = x;
 		    			 first_y = y;
 	    			 }
-	    			 //������֮����Ҫ��toolbar���ڶ��㣬��ֹ��canvas��Χ����toolbarʱ��toolbar������
+	    			 //
 	    			 mwConstroller.DrawToolBar.toFront();
 	    			 //mwConstroller.canvasScrollPane.toFront();
 			    }
@@ -310,7 +310,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ����ά��ͼ����
+	 * 
 	 */
 	public void open3dViewer(Boolean isSimplified){
 				
@@ -339,7 +339,7 @@ public class DrawToolBarHelper {
 	
 	
 	/**
-	 * ��ʼ������
+	 * 
 	 */
 	public void initDrawToolBar(){
 		//scroll bar
@@ -561,9 +561,9 @@ public class DrawToolBarHelper {
 				return;
 			}
 			
-			//ֻ������Щ��ѡ�е�
+			//
 			ObservableList<String> selectedObjs = this.mwConstroller.objectLV.getSelectionModel().getSelectedItems();
-			if(selectedObjs.size() == 0){//��ֻѡ�񲿷�ʱ����ֻ�Բ��ֽ�������
+			if(selectedObjs.size() == 0){//
 				System.out.println("Please choose at least one object to populate.");
 				return;
 			}
@@ -605,7 +605,7 @@ public class DrawToolBarHelper {
 						
 		});
 		
-		//��ѡ�е�objectӦ�õ����еĵ�֮��
+		//
 		mwConstroller.ApplyTreeSpeciesBtn.setOnAction((event) -> {
 			if(xs.size()== 0){
 				mwConstroller.outputConsole.log("Please draw a polygon.\n");
@@ -615,9 +615,9 @@ public class DrawToolBarHelper {
 				mwConstroller.outputConsole.log("No simulation.\n");
 				return;
 			}
-			//ֻ������Щ��ѡ�е�
+			//
 			ObservableList<String> selectedObjs = this.mwConstroller.objectLV.getSelectionModel().getSelectedItems();
-			if(selectedObjs.size() == 0){//��ֻѡ�񲿷�ʱ����ֻ�Բ��ֽ�������
+			if(selectedObjs.size() == 0){//
 				System.out.println("Please choose at least one object to populate.");
 				return;
 			}
@@ -687,7 +687,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ѡ��һ��mask�ļ�
+	 * 
 	 */
 	public void chooseMaskImg(){
 		if(this.mwConstroller.simulation_path == null){
@@ -706,7 +706,7 @@ public class DrawToolBarHelper {
         File file = fileChooser.showOpenDialog(this.mwConstroller.mainApp.getPrimaryStage());
         if(file !=null)
         {
-        	//����pythonǰ���ȱ���instances�ļ�
+        	//
         	this.mwConstroller.save_tree_pos_xy();
         	//using python gdal to read and write 
         	String pyExe = PyLauncher.getPyexe();
@@ -744,7 +744,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ѡ��һ�������ļ�
+	 * 
 	 */
 	public void chooseBackgroundImg(){
 		if(this.mwConstroller.simulation_path == null){
@@ -771,7 +771,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ��ȡpolygon
+	 * polygon
 	 */
 	public void onLoadPolygon(){
 		if(!mwConstroller.DrawPolygonCheckbox.isSelected()){
@@ -812,7 +812,7 @@ public class DrawToolBarHelper {
 	}
 	
 	/**
-	 * ����polygon
+	 * 
 	 */
 	public void onSavePolygon(){
 		

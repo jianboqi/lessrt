@@ -915,11 +915,43 @@ public class ProjectManager {
 		AnchorPane.setRightAnchor(mwController.illumResTextField, 20.0);
 		AnchorPane.setTopAnchor(illumResolution, 5.0);
 	}
+	
+	private void createFisheEyeConfigPanel(){
+		mwController.cfConfigPanel = new AnchorPane();
+		Label fov = new Label("FOV:");
+		mwController.cfConfigPanel.getChildren().add(fov);
+		AnchorPane.setLeftAnchor(fov, 0.0);
+		mwController.cfFovTextField = new TextField("165");
+		mwController.cfConfigPanel.getChildren().add(mwController.cfFovTextField);
+		AnchorPane.setLeftAnchor(mwController.cfFovTextField, 150.0);
+		AnchorPane.setRightAnchor(mwController.cfFovTextField, 20.0);
+		AnchorPane.setTopAnchor(fov, 5.0);
+		//projection type
+		Label proj_type = new Label("Fisheye Projection: ");
+		mwController.cfConfigPanel.getChildren().add(proj_type);
+		AnchorPane.setLeftAnchor(proj_type, 0.0);
+		AnchorPane.setTopAnchor(proj_type, 45.0);
+		
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "equisolid",
+			        "orthographic",
+			        "equidistant",
+			        "stereographic"
+			    );
+		mwController.combobox = new ComboBox<String>(options);
+		mwController.combobox.getSelectionModel().select(0);
+		mwController.cfConfigPanel.getChildren().add(mwController.combobox);
+		AnchorPane.setLeftAnchor(mwController.combobox, 150.0);
+		AnchorPane.setRightAnchor(mwController.combobox, 20.0);
+		AnchorPane.setTopAnchor(mwController.combobox, 40.0);
+	}
 
 	//sensor
 	public void initSensor(){
 		
 		createPhotonTracingConfigPanel();
+		createFisheEyeConfigPanel();
 					
 		//init radio button for rgb and spectrum
 		this.mwController.ImageFormatRadioroup = new ToggleGroup();
@@ -936,6 +968,7 @@ public class ProjectManager {
 			@Override 
 			public void changed(ObservableValue ov, String oldVal, String newVal) {
 				if (newVal.equals(Const.LESS_SENSOR_TYPE_ORTH)){
+					mwController.sensorVbox.getChildren().remove(mwController.cfConfigPanel);
 					mwController.sensorVbox.getChildren().remove(mwController.perspectivePane);
 					mwController.sensorVbox.getChildren().add(mwController.orthographicPane);
 					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
@@ -945,15 +978,32 @@ public class ProjectManager {
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PER)){
+					mwController.sensorVbox.getChildren().remove(mwController.cfConfigPanel);
 					mwController.sensorVbox.getChildren().remove(mwController.orthographicPane);
 					mwController.sensorVbox.getChildren().add(mwController.perspectivePane);
 					mwController.obsVbox.getChildren().remove(mwController.obsOrthographicPane);
+					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
 					mwController.obsVbox.getChildren().add(mwController.obsPerspectivePane);
 					mwController.pixelUnitLabel.setText("Samples [/pixel]:");
 					mwController.sensorVbox.getChildren().remove(mwController.ptConfigPanel);
 					mwController.reDrawAll();
 				}
+				if(newVal.equals(Const.LESS_SENSOR_TYPE_CF)){
+					mwController.sensorVbox.getChildren().remove(mwController.orthographicPane);
+					mwController.sensorVbox.getChildren().remove(mwController.perspectivePane);
+					mwController.sensorVbox.getChildren().remove(mwController.ptConfigPanel);
+					mwController.sensorVbox.getChildren().add(mwController.cfConfigPanel);
+					mwController.pixelUnitLabel.setText("Samples [/pixel]:");
+					mwController.obsVbox.getChildren().remove(mwController.obsOrthographicPane);
+					// fisheye uese the same obsVbox as perspective
+					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
+					mwController.obsVbox.getChildren().add(mwController.obsPerspectivePane);
+					//mwController.pixelUnitLabel.setText("Samples [/pixel]:");
+					
+					mwController.reDrawAll();
+				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PT)){
+					mwController.sensorVbox.getChildren().remove(mwController.cfConfigPanel);
 					mwController.sensorVbox.getChildren().remove(mwController.orthographicPane);
 					mwController.sensorVbox.getChildren().remove(mwController.perspectivePane);
 					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);

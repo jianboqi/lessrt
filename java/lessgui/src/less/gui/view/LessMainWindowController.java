@@ -189,6 +189,7 @@ public class LessMainWindowController {
 	@FXML
 	public AnchorPane perspectivePane;
 	public AnchorPane ptConfigPanel;//for photon tracing parameters
+	public AnchorPane cfConfigPanel;//for fisheye parameters
 	@FXML
 	public ComboBox<String> comboBoxSensorType;
 	@FXML 
@@ -206,6 +207,8 @@ public class LessMainWindowController {
 	@FXML
 	public TextField sensorYExtentField;
 	public TextField illumResTextField;// for photon tracing
+	public TextField cfFovTextField;// for fisheye parameters
+	public ComboBox<String> combobox;
 	@FXML
 	public TextField xfovField;
 	@FXML
@@ -223,6 +226,8 @@ public class LessMainWindowController {
 	@FXML 
 	public RadioButton rgbRadio;
 	public ToggleGroup ImageFormatRadioroup;
+	@FXML
+	public TextField sensorNoDataValueField;
 	
 	
 	//observation and illumination
@@ -248,6 +253,8 @@ public class LessMainWindowController {
 	public TextField pers_t_y_field;
 	@FXML
 	public TextField pers_t_z_field;
+	@FXML
+	public CheckBox CameraPosRelativeHeightCheckbox;
 	
 	@FXML
 	public TextField sunZenithField;

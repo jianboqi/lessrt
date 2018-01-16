@@ -58,14 +58,16 @@ public class ControlJsonWrapper {
 	    	observation.put("obs_R", 3000);
 	    }
 	    
-	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_PER)){
+	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_PER) || sensorType.equals(Const.LESS_SENSOR_TYPE_CF)){
 	    	observation.put("obs_o_x", Double.parseDouble(this.mwcontroller.pers_o_x_field.getText().replaceAll(",", "")));
 	    	observation.put("obs_o_y", Double.parseDouble(this.mwcontroller.pers_o_y_field.getText().replaceAll(",", "")));
 	    	observation.put("obs_o_z", Double.parseDouble(this.mwcontroller.pers_o_z_field.getText().replaceAll(",", "")));
 	    	observation.put("obs_t_x", Double.parseDouble(this.mwcontroller.pers_t_x_field.getText().replaceAll(",", "")));
 	    	observation.put("obs_t_y", Double.parseDouble(this.mwcontroller.pers_t_y_field.getText().replaceAll(",", "")));
 	    	observation.put("obs_t_z", Double.parseDouble(this.mwcontroller.pers_t_z_field.getText().replaceAll(",", "")));
+	    	observation.put("relative_height", this.mwcontroller.CameraPosRelativeHeightCheckbox.isSelected());
 	    }
+	  
 	    json.put("observation", observation);
 	    
 	    //illumination
@@ -108,6 +110,7 @@ public class ControlJsonWrapper {
 	    	sensor.put("record_only_direct", -1);
 	    }
 	    sensor.put("thermal_radiation", this.mwcontroller.ThermalCheckbox.isSelected());
+	    sensor.put("NoDataValue", Double.parseDouble(this.mwcontroller.sensorNoDataValueField.getText()));
 	    
 	    sensor.put("sensor_type", sensorType);
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH) || sensorType.equals(Const.LESS_SENSOR_TYPE_PT)){
@@ -126,6 +129,15 @@ public class ControlJsonWrapper {
 	    	perspective.put("sample_per_square_meter", Integer.parseInt(this.mwcontroller.sensorSampleField.getText().replaceAll(",", "")));
 	    	sensor.put("perspective", perspective);
 	    }
+	    
+	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_CF)){
+	    	JSONObject circularFisheye = new JSONObject();
+	    	circularFisheye.put("angular_fov", Double.parseDouble(this.mwcontroller.cfFovTextField.getText()));
+	    	circularFisheye.put("sample_per_square_meter", Integer.parseInt(this.mwcontroller.sensorSampleField.getText().replaceAll(",", "")));
+	    	circularFisheye.put("projection_type", this.mwcontroller.combobox.getSelectionModel().getSelectedItem());
+	    	sensor.put("CircularFisheye", circularFisheye);
+	    }
+	    
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_PT)){
 	    	JSONObject photontracing = new JSONObject();
 	    	photontracing.put("sunRayResolution", Double.parseDouble(mwcontroller.illumResTextField.getText().replaceAll(",", "")));
@@ -270,7 +282,9 @@ public class ControlJsonWrapper {
 			this.mwcontroller.firstOrderCheckbox.setSelected(true);
 		}
 		this.mwcontroller.ThermalCheckbox.setSelected(sensor.getBoolean("thermal_radiation"));
-		
+		if(sensor.has("NoDataValue")){
+			this.mwcontroller.sensorNoDataValueField.setText(sensor.getDouble("NoDataValue")+"");
+		}
 		this.mwcontroller.sensorWidthField.setText(sensor.getInt("image_width")+"");
 		this.mwcontroller.sensorHeightField.setText(sensor.getInt("image_height")+"");
 		this.mwcontroller.sensorBandsField.setText(sensor.getString("bands"));
@@ -292,6 +306,14 @@ public class ControlJsonWrapper {
 			this.mwcontroller.yfovField.setText(camera.getDouble("fovy")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
 		}
+		
+		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_CF)){
+			JSONObject camera = sensor.getJSONObject("CircularFisheye");
+			this.mwcontroller.cfFovTextField.setText(camera.getDouble("angular_fov")+"");
+			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
+			this.mwcontroller.combobox.getSelectionModel().select(camera.getString("projection_type"));
+		}
+		
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PT)){
 			JSONObject camera = sensor.getJSONObject("PhotonTracing");
@@ -325,13 +347,17 @@ public class ControlJsonWrapper {
 			this.mwcontroller.obsAzimuthField.setText(observation.getDouble("obs_azimuth")+"");
 		}
 		
-		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PER)){
+		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PER) || sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_CF)){
 			this.mwcontroller.pers_o_x_field.setText(observation.getDouble("obs_o_x")+"");
 			this.mwcontroller.pers_o_y_field.setText(observation.getDouble("obs_o_y")+"");
 			this.mwcontroller.pers_o_z_field.setText(observation.getDouble("obs_o_z")+"");
 			this.mwcontroller.pers_t_x_field.setText(observation.getDouble("obs_t_x")+"");
 			this.mwcontroller.pers_t_y_field.setText(observation.getDouble("obs_t_y")+"");
 			this.mwcontroller.pers_t_z_field.setText(observation.getDouble("obs_t_z")+"");
+			if(observation.has("relative_height")){
+				this.mwcontroller.CameraPosRelativeHeightCheckbox.setSelected(observation.getBoolean("relative_height"));
+			}
+			
 		}
 		
 		

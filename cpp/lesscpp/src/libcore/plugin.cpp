@@ -236,7 +236,6 @@ void PluginManager::ensurePluginLoaded(const std::string &name) {
 
 	const FileResolver *resolver = Thread::getThread()->getFileResolver();
 	fs::path path = resolver->resolve(shortName);
-
 	if (fs::exists(path)) {
 
 #if defined(MTS_INFO)

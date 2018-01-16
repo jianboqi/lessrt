@@ -246,7 +246,7 @@
                                        <content>
                                           <VBox fx:id="sensorVbox" prefHeight="561.0" prefWidth="624.0">
                                              <children>
-                                                <AnchorPane prefHeight="332.0" prefWidth="495.0">
+                                                <AnchorPane prefHeight="367.0" prefWidth="624.0">
                                                    <children>
                                                       <Label layoutY="5.0" text="Type:">
                                                          <tooltip>
@@ -258,6 +258,7 @@
                                                             <FXCollections fx:factory="observableArrayList">
                                                                <String fx:value="orthographic" />
                                                                <String fx:value="perspective" />
+                                                               <String fx:value="CircularFisheye" />
                                                                <String fx:value="PhotonTracing" />
                                                             </FXCollections>
                                                          </items>
@@ -280,6 +281,8 @@
                                                       <RadioButton fx:id="rgbRadio" layoutX="275.0" layoutY="227.0" mnemonicParsing="false" text="Synthesized RGB Image" />
                                                       <CheckBox fx:id="ThermalCheckbox" layoutX="150.0" layoutY="307.0" mnemonicParsing="false" onAction="#handleThermalRadiationCheckbox" prefWidth="0.0" />
                                                       <Label layoutX="2.0" layoutY="307.0" text="Thermal Radiation:" />
+                                                      <Label layoutX="3.0" layoutY="343.0" text="NoData Value:" />
+                                                      <TextField fx:id="sensorNoDataValueField" layoutX="140.0" layoutY="336.0" prefHeight="35.0" prefWidth="292.0" text="-1.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane fx:id="orthographicPane" prefHeight="138.0" prefWidth="671.0">
@@ -330,7 +333,7 @@
                                                 <TextField fx:id="obsAzimuthField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="180" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="45.0" />
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="obsPerspectivePane" prefHeight="123.0" prefWidth="671.0">
+                                          <AnchorPane fx:id="obsPerspectivePane" prefHeight="132.0" prefWidth="636.0">
                                              <children>
                                                 <Label layoutX="14.0" layoutY="14.0" text="Camera Position:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                 <Label layoutX="7.0" layoutY="33.0" text="Target:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
@@ -346,6 +349,8 @@
                                                 <Label layoutX="168.0" layoutY="51.0" text="X" />
                                                 <Label layoutX="305.0" layoutY="51.0" text="Y" />
                                                 <Label layoutX="446.0" layoutY="51.0" text="Z" />
+                                                <Label layoutY="100.0" text="Relative Height:" />
+                                                <CheckBox fx:id="CameraPosRelativeHeightCheckbox" layoutX="167.0" layoutY="100.0" mnemonicParsing="false" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="10.0" />

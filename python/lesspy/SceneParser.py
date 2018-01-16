@@ -11,6 +11,36 @@ class SceneParser:
     def __init__(self):
         self.BoundingInfomation = []
 
+    def getCameraAltitudeHeight(self, main_scene_xml_file_prifix, pos_x, pos_z):
+        currdir = os.path.split(os.path.realpath(__file__))[0]
+        sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/2.7/')
+        os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + os.pathsep + os.environ['PATH']
+        import mitsuba
+        from mitsuba.core import Vector, Point, Ray, Thread
+        from mitsuba.render import SceneHandler
+        import platform
+        scenepath = session.get_scenefile_path()
+        fileResolver = Thread.getThread().getFileResolver()
+        logger = Thread.getThread().getLogger()
+        logger.clearAppenders()
+        scenepath = scenepath.encode('utf-8')
+        fileResolver.appendPath(scenepath)
+        filepath = os.path.join(session.get_scenefile_path(), main_scene_xml_file_prifix + terr_scene_file).encode(
+            "utf-8")
+        scene = SceneHandler.loadScene(fileResolver.resolve(filepath))
+        scene.configure()
+        scene.initialize()
+        ray = Ray()
+        ray.setOrigin(Point(pos_x, 999999999, pos_z))
+        ray.setDirection(Vector(0, -1, 0))
+        its = scene.rayIntersect(ray)
+        if not its is None:
+            return its.p[1]
+        else:
+            print "Camera is outside of the scene, do not use relative height"
+            return 0
+
+
     def getBoundingSperheInfo(self, main_scene_xml_file_prifix):
         # get bounding sphere
         currdir = os.path.split(os.path.realpath(__file__))[0]
@@ -86,8 +116,14 @@ class SceneParser:
         integerNode.setAttribute("value", str(cfg["Advanced"]["minimum_iteration"]))
         integratorNode.appendChild(integerNode)
 
+        floatNode = doc.createElement("float")
+        floatNode.setAttribute("name", "NoDataValue")
+        floatNode.setAttribute("value", str(cfg["sensor"]["NoDataValue"]))
+        integratorNode.appendChild(floatNode)
+
         # <boolean name="hideEmitters" value="true"/>
-        if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"]:
+        if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"] and cfg["sensor"]["sensor_type"]\
+                != "CircularFisheye":
             boolNode = doc.createElement("boolean")
             integratorNode.appendChild(boolNode)
             boolNode.setAttribute("name", "hideEmitters")
@@ -138,6 +174,9 @@ class SceneParser:
 
         if cfg["sensor"]["sensor_type"] == "perspective":
             sensor_node.setAttribute("type", "perspective")
+
+        if cfg["sensor"]["sensor_type"] == "CircularFisheye":
+            sensor_node.setAttribute("type", "hemispherical_fisheye")
 
         trans_node = doc.createElement("transform")
         sensor_node.appendChild(trans_node)
@@ -213,14 +252,51 @@ class SceneParser:
             floatNode.setAttribute("name","aspect")
             floatNode.setAttribute("value", str(fovx/fovy))
 
+            scene_width = cfg["scene"]["terrain"]["extent_width"]
+            scene_height = cfg["scene"]["terrain"]["extent_height"]
 
-            x = cfg["observation"]["obs_o_x"]
-            y = cfg["observation"]["obs_o_y"]
-            z = cfg["observation"]["obs_o_z"]
-            target_x = cfg["observation"]["obs_t_x"]
-            target_y = cfg["observation"]["obs_t_y"]
-            target_z = cfg["observation"]["obs_t_z"]
+            x = scene_width * 0.5 - cfg["observation"]["obs_o_x"]
+            z = scene_height*0.5 - cfg["observation"]["obs_o_y"]
+            y = cfg["observation"]["obs_o_z"]
+            target_x = scene_width * 0.5 - cfg["observation"]["obs_t_x"]
+            target_y = cfg["observation"]["obs_t_z"]
+            target_z =  scene_height*0.5 - cfg["observation"]["obs_t_y"]
+            if cfg["observation"]["relative_height"]:
+                y += self.getCameraAltitudeHeight(main_scene_xml_file_prifix, x, z)
+                target_y += self.getCameraAltitudeHeight(main_scene_xml_file_prifix, x, z)
             phi = -(180 - 90) / 180.0 * np.pi
+
+        if cfg["sensor"]["sensor_type"] == "CircularFisheye":
+            floatnode = doc.createElement("float")
+            floatnode.setAttribute("name", "angular_fov")
+            floatnode.setAttribute("value", str(cfg["sensor"]["CircularFisheye"]["angular_fov"]))
+            sensor_node.appendChild(floatnode)
+
+            strNode = doc.createElement("string")
+            strNode.setAttribute("name", "projection_type")
+            strNode.setAttribute("value", cfg["sensor"]["CircularFisheye"]["projection_type"])
+            sensor_node.appendChild(strNode)
+
+            rotate_node = doc.createElement("rotate")
+            rotate_node.setAttribute("x","1")
+            rotate_node.setAttribute("angle","90")
+            trans_node.appendChild(rotate_node)
+
+            scene_width = cfg["scene"]["terrain"]["extent_width"]
+            scene_height = cfg["scene"]["terrain"]["extent_height"]
+
+            x = scene_width * 0.5 - cfg["observation"]["obs_o_x"]
+            z = scene_height * 0.5 - cfg["observation"]["obs_o_y"]
+            y = cfg["observation"]["obs_o_z"]
+            target_x = scene_width * 0.5 - cfg["observation"]["obs_t_x"]
+            target_y = cfg["observation"]["obs_t_z"]
+            target_z = scene_height * 0.5 - cfg["observation"]["obs_t_y"]
+            if cfg["observation"]["relative_height"]:
+                y += self.getCameraAltitudeHeight(main_scene_xml_file_prifix, x, z)
+                target_y += self.getCameraAltitudeHeight(main_scene_xml_file_prifix, x, z)
+            phi = -(180 - 90) / 180.0 * np.pi
+
+
 
         lookat_node = doc.createElement("lookat")
         trans_node.appendChild(lookat_node)
@@ -258,6 +334,10 @@ class SceneParser:
         if cfg["sensor"]["sensor_type"] == "perspective":
             #首先计算perspective覆盖的范围
             i_node.setAttribute("value", str(cfg["sensor"]["perspective"]["sample_per_square_meter"]))
+
+        if cfg["sensor"]["sensor_type"] == "CircularFisheye":
+            #首先计算perspective覆盖的范围
+            i_node.setAttribute("value", str(cfg["sensor"]["CircularFisheye"]["sample_per_square_meter"]))
 
 
         film_node = doc.createElement("film")

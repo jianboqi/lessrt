@@ -73,9 +73,9 @@ public class LAICaculatorThread extends Thread{
 	}
 	
 	class ObjectAreaAndMesh{
-		double area=0;  //�����
-		ArrayList<Point3D> points = new ArrayList<Point3D>(); //���еĶ���
-		ArrayList<Integer> facets = new ArrayList<Integer>(); // ���е���Ԫ������
+		double area=0;  //
+		ArrayList<Point3D> points = new ArrayList<Point3D>(); //
+		ArrayList<Integer> facets = new ArrayList<Integer>(); // 
 	}
 	
 	private ObjectAreaAndMesh getObjectArea(ArrayList<TriangleMesh> meshList){
@@ -99,7 +99,7 @@ public class LAICaculatorThread extends Thread{
 				objMesh.facets.add(index1);
 				objMesh.facets.add(index2);
 				objMesh.facets.add(index3);
-				//�������������
+				//
 				Point3D p1 = objMesh.points.get(index1);
 				Point3D p2 = objMesh.points.get(index2);
 				Point3D p3 = objMesh.points.get(index3);
@@ -133,7 +133,6 @@ public class LAICaculatorThread extends Thread{
 	}
 	
    private void LAICalculate(){
-	 //��ÿ�������ȼ�����boundingbox�Ƿ���ȫ������һ��pixel�С�
 	 		if(this.laiController.LAITextField.getText().equals("")){
 	 			return;
 	 		}
@@ -150,7 +149,6 @@ public class LAICaculatorThread extends Thread{
 	 		int rows = (new Double(drows)).intValue();
 	 		int cols = (new Double(dcols)).intValue();
 	 		double [][] lais = new double [rows][cols];
-	 		//ÿ��component�����
 	 		Map<String, Double> opticalcomponentArea = new HashMap<String, Double>();		
 	 		ArrayList<String> selectedComps = this.getselectedComps();
 	 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
@@ -161,10 +159,8 @@ public class LAICaculatorThread extends Thread{
 	 			double yExtent = objBoundingbox.getYExtent();
 	 			ObservableList<PositionXY> positionXYZs = entry.getValue();
 	 			
-	 			//ÿһ��object�����
 	 			Map<String, ObjectAreaAndMesh> objectArea = new HashMap<String, ObjectAreaAndMesh>();
 	 			
-	 			//read all components һ��object������mesh
 	 			ArrayList<TriangleMesh> objectMeshes = new ArrayList<TriangleMesh>();
 	 			ObservableList<String> comps = this.laiController.mwController.objectsAndCompomentsMap.get(objName);
 	 			for(int i=0;i<comps.size();i++){
@@ -189,7 +185,7 @@ public class LAICaculatorThread extends Thread{
 	 				int right_index = new Double(Math.floor(right/laiResolution)).intValue();
 	 				int up_index = new Double(Math.floor(up/laiResolution)).intValue();
 	 				int down_index = new Double(Math.floor(down/laiResolution)).intValue();
-	 				//���һ��object��ȫ������һ��pixel����û���
+	 				//
 	 				if(left_index == right_index && up_index == down_index){
 	 					if(objectArea.containsKey(objName)){
 	 						lais[up_index][left_index] += objectArea.get(objName).area;
@@ -198,7 +194,7 @@ public class LAICaculatorThread extends Thread{
 	 						lais[up_index][left_index] += objectAreaAndMesh.area;
 	 						objectArea.put(objName, objectAreaAndMesh);
 	 					}
-	 				}else{//���һ��object������ˣ��ǾͰ������ν��м���
+	 				}else{//
 	 					if(!objectArea.containsKey(objName)){
 	 						objectArea.put(objName, this.getObjectArea(objectMeshes));
 	 					}

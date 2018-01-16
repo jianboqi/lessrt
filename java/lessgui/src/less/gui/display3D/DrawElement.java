@@ -73,7 +73,7 @@ public class DrawElement {
 		double z = R*Math.sin(theta)*Math.sin(phi);
 		double y = R*Math.cos(theta);
 		
-		//ʹ�ü��㸲�Ƿ�Χʱ�ܹ��������
+		//
 		double norm_distance = sub_h*0.5*Math.tan(theta)/R;
 		
 		Box box = DrawElement.drawBox(new Point3D(x, y, z), new Point3D(-x*norm_distance, -y*norm_distance, -z*norm_distance), sub_w, sub_h);
@@ -90,7 +90,7 @@ public class DrawElement {
 	public static Xform drawPerspectiveFrustum(Point3D origin, Point3D target, double fovx, double fovy, PhongMaterial volMtl){		
 		Xform re = new Xform();
 		
-		//�ӳ�target
+		//
 		target = target.add(target.subtract(origin));
 		
 		Point3D yAxis = new Point3D(0, 1, 0);
@@ -208,7 +208,7 @@ public class DrawElement {
 	}
 	
 	/**
-	 * ��ȡһ��obj�ļ��е�����Mesh�����浽һ��List��
+	 * 
 	 * @param objPath
 	 * @return
 	 */
@@ -252,7 +252,7 @@ public class DrawElement {
 	}
 	
 	/**
-	 * ���Ƚ�meshתΪmeshview��Ȼ���ٺϲ���xform
+	 * convert mesh
 	 * @param meshlist
 	 */
 	public static Xform ConvertMeshList2xform(ArrayList<Mesh> meshlist, ArrayList<Color> compColorList){
@@ -274,7 +274,7 @@ public class DrawElement {
 		return objXform;
 	}
 	/**
-	 * �����obj�ļ���ȡ��һ��xform�У����Ƕ�������Ŀ¼parentpath��
+	 * 
 	 * @param objectsList
 	 * @param parentPath
 	 * @return

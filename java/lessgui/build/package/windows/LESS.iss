@@ -3,7 +3,7 @@
 [Setup]
 AppId={{fxApplication}}
 AppName=LESS
-AppVersion=1.6       
+AppVersion=1.7       
 AppVerName=LESS 1.0
 AppPublisher=Jianbo Qi
 AppComments=LessGUI
@@ -24,7 +24,7 @@ DefaultGroupName=Jianbo Qi
 LicenseFile=
 ;WinXP or above
 MinVersion=0,5.1 
-OutputBaseFilename=LESS-1.6
+OutputBaseFilename=LESS-1.7
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest

@@ -10,5 +10,6 @@ plugins += env.SharedLibrary('orthographic', ['orthographic.cpp'])
 # plugins += env.SharedLibrary('telecentric', ['telecentric.cpp'])
 plugins += env.SharedLibrary('spherical', ['spherical.cpp'])
 plugins += env.SharedLibrary('pushbroom', ['pushbroom.cpp'])
+plugins += env.SharedLibrary('hemispherical_fisheye', ['hemispherical_fisheye.cpp'])
 
 Export('plugins')

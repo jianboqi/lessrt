@@ -25,7 +25,7 @@ plugins += env.SharedLibrary('mixturebsdf', ['mixturebsdf.cpp'])
 # plugins += env.SharedLibrary('phong', ['phong.cpp'])
 plugins += env.SharedLibrary('difftrans', ['difftrans.cpp'])
 # plugins += env.SharedLibrary('hk', ['hk.cpp'])
-# plugins += env.SharedLibrary('null', ['null.cpp'])
+plugins += env.SharedLibrary('null', ['null.cpp'])
 # plugins += env.SharedLibrary('thindielectric', ['thindielectric.cpp'])
 
 # The Irawan-Marschner plugin uses a Boost::Spirit parser, which makes it

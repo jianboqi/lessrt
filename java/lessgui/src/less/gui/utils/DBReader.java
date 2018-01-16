@@ -58,8 +58,8 @@ public class DBReader {
 	}
 	
 	/**
-	 * ���ݹ������֣�ѡ�񲨶εķ����ʻ���͸����
-	 * @param opticalName ��������
+	 * 
+	 * @param opticalName 
 	 * @return
 	 */
 	public ArrayList<String> getOpticalByName(String opticalName, String wavelength_and_bandwidth){
@@ -93,7 +93,7 @@ public class DBReader {
 					br /= num;
 					trans /= num;
 				}else{
-					//��û���ҵ����ʵĲ����ǣ�����в�ֵ.
+					//
 					sql = "SELECT wavelength, front_ref,back_ref,transmittance FROM "+opticalName+" order by abs(wavelength-"+center_w
 							+ ") LIMIT 2";
 					rs = stmt.executeQuery(sql);
@@ -105,7 +105,7 @@ public class DBReader {
 					double front_ref2 = rs.getDouble("front_ref");
 					double back_ref2 = rs.getDouble("back_ref");
 					double transmittance2 = rs.getDouble("transmittance");
-					fr = 0.5*(front_ref1+front_ref2); //Ӧ�������Բ�ֵ���������ھͼ�ƽ����
+					fr = 0.5*(front_ref1+front_ref2); //
 					br = 0.5*(back_ref1+back_ref2);
 					trans = 0.5 * (transmittance1+transmittance2);
 				}
@@ -131,7 +131,7 @@ public class DBReader {
 	}
 	
 	/**
-	 * ���ݹ��׿��еĶ���Ľ��и��£�����ı䲨�ε������
+	 * 
 	 * @param opticalData
 	 */
 	public void refreshOpticalDB(ObservableList<FacetOptical> opticalData,String waveLength_and_bandwidth){
