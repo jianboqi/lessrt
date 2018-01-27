@@ -109,6 +109,7 @@ public class LAICaculatorThread extends Thread{
 				objMesh.area += triarea;
 			}
 		}
+		System.out.println(objMesh.area);
 		return objMesh;
 	}
 	
