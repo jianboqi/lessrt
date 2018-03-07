@@ -11,7 +11,7 @@ import org.json.JSONTokener;
 import less.gui.helper.PyLauncher;
 
 /**
- * ��json�����ļ��ж�ȡ���еĳ���
+ * 
  * @author Jim
  *
  */

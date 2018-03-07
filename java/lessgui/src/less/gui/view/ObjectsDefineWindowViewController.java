@@ -276,6 +276,15 @@ public class ObjectsDefineWindowViewController {
 		    	alert.getButtonTypes().setAll(buttonTypeOne);
 				alert.showAndWait();
 			}
+			else if(objectName.contains(" ")) {
+				Alert alert = new Alert(AlertType.WARNING);
+				alert.setTitle("Warnning");
+				alert.setHeaderText("Warnning");
+				alert.setContentText("Space is not allowed when defining the object name!");
+				ButtonType buttonTypeOne = new ButtonType("OK");
+		    	alert.getButtonTypes().setAll(buttonTypeOne);
+				alert.showAndWait();
+			}
 			else{
 				mwController.objectsList.add(objectName);
 				//this.objectsLV.getSelectionModel().select(objectName);
@@ -482,7 +491,7 @@ public class ObjectsDefineWindowViewController {
 	
 	
 	/**
-	 * �÷���Ŀǰ�Ѿ�����ʹ�ã�ȫ��תΪ��ȡÿ��obj��group importFromObjGroups
+	 * importFromObjGroups: not used
 	 */
 	@FXML
 	private void importObjs(){
@@ -498,6 +507,7 @@ public class ObjectsDefineWindowViewController {
 	        {
 	        	this.mwController.setLastOpenedPath(Const.LAST_OPNED_CHOOSE_OBJ,file.getParent().toString());
 	        	String targetFileName = this.objectsLV.getSelectionModel().getSelectedItem()+"_"+file.getName().replaceAll(" ", "_");
+	        	System.out.println(targetFileName);
 	        	mwController.objectsAndCompomentsMap.get(this.objectsLV.getSelectionModel().getSelectedItem()).add(targetFileName);
 	        	
 	        	//copy mtl file if exits
@@ -556,7 +566,7 @@ public class ObjectsDefineWindowViewController {
 	}
 	
 	/**
-	 * ����OBJ�ļ�������ȡ���ÿһ��group
+	 * import from objfile into groups
 	 */
 	@FXML
 	public void importFromObjGroups(){

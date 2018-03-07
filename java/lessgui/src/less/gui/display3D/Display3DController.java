@@ -6,11 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;

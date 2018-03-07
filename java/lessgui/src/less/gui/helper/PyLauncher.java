@@ -59,7 +59,7 @@ public class PyLauncher extends Thread{
 			if(SystemUtils.IS_OS_LINUX){
 				pypath= Paths.get("/home/jimb/miniconda2/bin/","python").toString();
 			}else{
-				pypath= Paths.get("c:\\python27","python").toString();
+				pypath= Paths.get("d:\\python364","python").toString();
 			}
 			
 		}else{
