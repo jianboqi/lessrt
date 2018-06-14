@@ -87,11 +87,18 @@ public:
 	/// Pointer to the associated medium
 	const Medium *medium;
 
+	//this phase function is different at different places
+	ref<PhaseFunction> sampledPhaseFun; //space varying phase func. 
+
 public:
 	inline MediumSamplingRecord() : medium(NULL) { }
 
 	/// Return a pointer to the phase function
 	inline const PhaseFunction *getPhaseFunction() const;
+
+	inline const PhaseFunction *getSampledPhaseFunction() {
+		return sampledPhaseFun.get();
+	}
 
 	/// Return a string representation
 	std::string toString() const;

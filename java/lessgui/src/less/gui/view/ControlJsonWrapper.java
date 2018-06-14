@@ -55,7 +55,7 @@ public class ControlJsonWrapper {
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH) || sensorType.equals(Const.LESS_SENSOR_TYPE_PT) ){
 	    	observation.put("obs_zenith", Double.parseDouble(this.mwcontroller.obsZenithField.getText().replaceAll(",", "")));
 	    	observation.put("obs_azimuth", Double.parseDouble(this.mwcontroller.obsAzimuthField.getText().replaceAll(",", "")));
-	    	observation.put("obs_R", 3000);
+	    	observation.put("obs_R", Double.parseDouble(this.mwcontroller.obsAGLField.getText().replaceAll(",", "")));
 	    }
 	    
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_PER) || sensorType.equals(Const.LESS_SENSOR_TYPE_CF)){
@@ -79,7 +79,10 @@ public class ControlJsonWrapper {
 	    JSONObject atmosphere = new JSONObject();
 	    // currently, only one choice
 	    atmosphere.put("ats_type", this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem());
-	    atmosphere.put("percentage", this.mwcontroller.atsPercentageField.getText());
+	    if(this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem().equals(Const.LESS_ATS_TYPE_SKY)) {
+		    atmosphere.put("percentage", this.mwcontroller.atsPercentageField.getText());
+	    }else {
+	    }
 	    illumination.put("atmosphere", atmosphere);
 	    json.put("illumination",illumination);
 	    
@@ -141,6 +144,12 @@ public class ControlJsonWrapper {
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_PT)){
 	    	JSONObject photontracing = new JSONObject();
 	    	photontracing.put("sunRayResolution", Double.parseDouble(mwcontroller.illumResTextField.getText().replaceAll(",", "")));
+	    	photontracing.put("BRFProduct", mwcontroller.productBRFCheckbox.isSelected());
+	    	if(mwcontroller.productBRFCheckbox.isSelected()) {
+	    		photontracing.put("virtualDirections", mwcontroller.virtualDirTextField.getText());
+	    		photontracing.put("NumberOfDirections",Integer.parseInt( mwcontroller.numOfDirectionTextField.getText()));
+	    	}
+	    	photontracing.put("UpDownProduct", mwcontroller.productUpDownRadiationCheckbox.isSelected());
 	    	sensor.put("PhotonTracing", photontracing);
 	    }
 	    
@@ -250,9 +259,13 @@ public class ControlJsonWrapper {
 		this.mwcontroller.sunZenithField.setText(sun.getDouble("sun_zenith")+"");
 		this.mwcontroller.sunAzimuthField.setText(sun.getDouble("sun_azimuth")+"");
 		JSONObject ats = illumination.getJSONObject("atmosphere");
-		this.mwcontroller.atsPercentageField.setText(ats.getString("percentage"));
 		String ats_type = ats.getString("ats_type");
 		this.mwcontroller.atsTypeCombobox.getSelectionModel().select(ats_type);
+		if(ats_type.equals(Const.LESS_ATS_TYPE_SKY)) {
+			this.mwcontroller.atsPercentageField.setText(ats.getString("percentage"));
+		}else {
+			
+		}
 		
 		//solar spectrum
 		if(ats.has("sky_spectrum")){
@@ -297,7 +310,7 @@ public class ControlJsonWrapper {
 			this.mwcontroller.sensorXExtentField.setText(camera.getDouble("sub_region_width")+"");
 			this.mwcontroller.sensorYExtentField.setText(camera.getDouble("sub_region_height")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
-			
+			this.mwcontroller.virtualPlaneCheckbox.setDisable(false);
 		}
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PER)){
@@ -305,6 +318,7 @@ public class ControlJsonWrapper {
 			this.mwcontroller.xfovField.setText(camera.getDouble("fovx")+"");
 			this.mwcontroller.yfovField.setText(camera.getDouble("fovy")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
+			this.mwcontroller.virtualPlaneCheckbox.setDisable(true);
 		}
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_CF)){
@@ -312,12 +326,21 @@ public class ControlJsonWrapper {
 			this.mwcontroller.cfFovTextField.setText(camera.getDouble("angular_fov")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
 			this.mwcontroller.combobox.getSelectionModel().select(camera.getString("projection_type"));
+			this.mwcontroller.virtualPlaneCheckbox.setDisable(true);
 		}
-		
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PT)){
 			JSONObject camera = sensor.getJSONObject("PhotonTracing");
 			this.mwcontroller.illumResTextField.setText(camera.getDouble("sunRayResolution")+"");
+			if(camera.has("BRFProduct")) {
+				this.mwcontroller.productBRFCheckbox.setSelected(camera.getBoolean("BRFProduct"));
+				if(camera.has("virtualDirections"))
+					this.mwcontroller.virtualDirTextField.setText(camera.getString("virtualDirections"));
+				if(camera.has("NumberOfDirections"))
+					this.mwcontroller.numOfDirectionTextField.setText(camera.getInt("NumberOfDirections")+"");
+			}
+			if(camera.has("UpDownProduct")) this.mwcontroller.productUpDownRadiationCheckbox.setSelected(camera.getBoolean("UpDownProduct"));
+			this.mwcontroller.virtualPlaneCheckbox.setDisable(false);
 	    }
 		
 		String imageformat = sensor.getString("film_type");
@@ -337,6 +360,8 @@ public class ControlJsonWrapper {
 	    	this.mwcontroller.projManager.zpos.setText(virtualPlaneObj.getString("vz"));
 	    	this.mwcontroller.projManager.xsizepos.setText(virtualPlaneObj.getString("sizex"));
 	    	this.mwcontroller.projManager.ysizepos.setText(virtualPlaneObj.getString("sizey"));
+	    }else {
+	    	this.mwcontroller.virtualPlaneCheckbox.setSelected(false);
 	    }
 		
 		
@@ -345,6 +370,7 @@ public class ControlJsonWrapper {
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_ORTH)){
 			this.mwcontroller.obsZenithField.setText(observation.getDouble("obs_zenith")+"");
 			this.mwcontroller.obsAzimuthField.setText(observation.getDouble("obs_azimuth")+"");
+			this.mwcontroller.obsAGLField.setText(observation.getDouble("obs_R")+"");
 		}
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PER) || sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_CF)){

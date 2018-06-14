@@ -47,14 +47,14 @@ def readIrr(irrFilePath):
     for line in f:
         if index == 1:
             arr = line.replace("\n","").strip().split(" ")
-            sunirr = map(lambda x:float(x), arr[1:])
+            sunirr = list(map(lambda x:float(x), arr[1:]))
         if index == 2:
             arr = line.replace("\n","").strip().split(" ")
-            skyirr = map(lambda x:float(x),arr[1:])
+            skyirr = list(map(lambda x:float(x),arr[1:]))
         index = index + 1
 
     if skyirr != []:
-        sunirr = map(lambda x,y:x+y,sunirr,skyirr)
+        sunirr = list(map(lambda x,y:x+y,sunirr,skyirr))
     f.close()
     return sunirr
 
@@ -69,11 +69,11 @@ def read_irr_for_seq(seq_name):
             irr_map[current_seq] = []
         else:
             arr = line.replace("\n", "").strip().split(" ")
-            irr = map(lambda x: float(x), arr[1:])
+            irr = list(map(lambda x: float(x), arr[1:]))
             if len(irr_map[current_seq]) == 0:
                 irr_map[current_seq] = irr
             else:
-                irr_map[current_seq] = map(lambda x,y:x+y,irr,irr_map[current_seq])
+                irr_map[current_seq] = list(map(lambda x,y:x+y,irr,irr_map[current_seq]))
     return irr_map
 
 

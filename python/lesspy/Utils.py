@@ -19,10 +19,10 @@ def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
     if os.path.exists(outputserilizedpath+".serialized"):
         log("INFO: Using cached file.")
         return
-    current_working_dir = os.getcwdu()
+    current_working_dir = os.getcwd()
     os.chdir(rt_dir)
     with open(os.devnull, 'wb') as devnull:
-        subprocess.check_call(['mtsimport', inputobjpath.encode("utf-8"), outputserilizedpath.encode("utf-8")], stdout=devnull, stderr=subprocess.STDOUT)
+        subprocess.check_call(['mtsimport', inputobjpath, outputserilizedpath], stdout=devnull, stderr=subprocess.STDOUT)
     os.chdir(current_working_dir)
     # os.system(cmd)
     if os.path.exists(os.path.join(os.getcwd(),"textures")):

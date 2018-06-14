@@ -86,163 +86,7 @@ void PhotonTracer::prepare() {
 
 //采用随机分布
 void PhotonTracer::process(const WorkUnit *workUnit, WorkResult *workResult,
-	const bool &stop) {
-
-	const RangeWorkUnit *range = static_cast<const RangeWorkUnit *>(workUnit);
-	Intersection its;
-	ref<Sensor> sensor = m_scene->getSensor();
-	PositionSamplingRecord pRec(sensor->getShutterOpen()
-		+ 0.5f * sensor->getShutterOpenTime());
-	m_sampler->generate(Point2i(0));
-	//std::ofstream out("out.txt", std::ios::app);
-	for (size_t index = range->getRangeStart(); index <= range->getRangeEnd() && !stop; ++index) {
-		m_sampler->setSampleIndex(index);
-
-		const Emitter *emitter = NULL;
-		const Medium *medium;
-		Spectrum power;
-		Ray ray;
-		power = m_scene->sampleEmitterRay(ray, emitter,
-			m_sampler->next2D(), m_sampler->next2D(), pRec.time);
-		medium = emitter->getMedium();
-	//	out << ray.o.x << " " << ray.o.z << " " << ray.o.y << endl;
-
-		int depth = 1, nullInteractions = 0;
-		bool delta = false;
-		Point previousPoint = Point(std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity());
-
-		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
-		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
-			m_scene->rayIntersect(ray, its);
-
-			
-			if (its.t == std::numeric_limits<Float>::infinity()) {
-				/* There is no surface in this direction */
-				//Float near, far;
-				//aabb.rayIntersect(ray, near, far);
-				//Point farPoint = ray.o + far*ray.d;
-				//if (farPoint.y < aabb.max.y && farPoint.y > aabb.min.y) {
-
-				//}
-				handleSurfaceInteractionExt(depth, nullInteractions, delta, its, previousPoint, medium, throughput*power);
-				break;
-			}
-			else {
-				//处理BRDF
-				const BSDF *bsdf = its.getBSDF();
-				BSDFSamplingRecord bRec(its, m_sampler, EImportance);
-				Spectrum bsdfWeight = bsdf->sample(bRec, m_sampler->next2D()); //bsdfWeight: 方向反射率
-
-				if (bsdfWeight == Spectrum(-1)) {// -1表示碰撞点位于单面材质的背面
-					if (depth == 1) {
-						break;
-					}
-					else {//多次散射时，如果碰到了底面，则停止
-						its.t = std::numeric_limits<Float>::infinity();
-						handleSurfaceInteractionExt(depth, nullInteractions, delta, its, previousPoint, medium, throughput*power);
-						break;
-					}
-				}
-				handleSurfaceInteractionExt(depth, nullInteractions, delta, its, previousPoint, medium, throughput*power);
-
-				if (bsdfWeight.isZero()) {
-					break;
-				}
-					
-				throughput *= bsdfWeight;
-				Vector wo = its.toWorld(bRec.wo);
-				ray.setOrigin(its.p);
-				ray.setDirection(wo);
-				ray.mint = Epsilon;
-
-				previousPoint = its.p;
-
-				if (depth++ >= m_rrDepth) { //当深度超过了设置的最小深度时，采用Russian roulette方法决定是否停止
-					Float q = std::min(throughput.max(), (Float) 0.95f);
-					if (m_sampler->next1D() >= q)
-						break;
-					throughput /= q;
-				}
-			}
-		}
-	}
-
-	//out.close();
-
-}
-
-#ifdef _SHOW_
-//主要处理过程 执行光子跟踪
-void PhotonTracer::process(const WorkUnit *workUnit, WorkResult *workResult,
-	const bool &stop) {
-
-	const RangeWorkUnit *range = static_cast<const RangeWorkUnit *>(workUnit);
-	Intersection its;
-	ref<Sensor> sensor = m_scene->getSensor();
-	PositionSamplingRecord pRec(sensor->getShutterOpen()
-		+ 0.5f * sensor->getShutterOpenTime());
-	m_sampler->generate(Point2i(0));
-
-	Float sunRayResolution = m_scene->getIntegrator()->getProperties().getFloat("sunRayResolution", 0.05);
-
-	Float invert_resolutin = 1 / sunRayResolution;
-	AABB aabb = m_scene->getKDTree()->getAABB();
-	Point2 scene_min = Point2(aabb.min.x >= 0 ? std::ceil(aabb.min.x) : std::floor(aabb.min.x),
-		aabb.min.z >= 0 ? std::ceil(aabb.min.z) : std::floor(aabb.min.z));
-	Point2 scene_max = Point2(aabb.max.x >= 0 ? std::ceil(aabb.max.x) : std::floor(aabb.max.x),
-		aabb.max.z >= 0 ? std::ceil(aabb.max.z) : std::floor(aabb.max.z));
-	Vector2 extent = scene_max - scene_min;
-	size_t N = static_cast<size_t>(invert_resolutin *invert_resolutin * extent.x*extent.y);
-	size_t w = static_cast<size_t>(extent.x * invert_resolutin);
-	size_t h = static_cast<size_t>(extent.y * invert_resolutin);
-
-	Ray ray;
-	const Emitter *emitter = NULL;
-	m_scene->sampleEmitterRay(ray, emitter,Point2(-1), Point2(-1), pRec.time);
-	Float distance = aabb.getExtents().y/dot(ray.d, Vector(0, -1, 0));
-	Vector displacementVec = -ray.d*distance;
-
-	for (size_t index = range->getRangeStart(); index <= range->getRangeEnd() && !stop; ++index) {
-		m_sampler->setSampleIndex(index);
-
-		size_t row = index / w;
-		size_t col = index - row*w;
-
-		const Emitter *emitter = NULL;
-		const Medium *medium;
-		Spectrum power;
-		Ray ray;
-		power = m_scene->sampleEmitterRay(ray, emitter,
-			m_sampler->next2D(), m_sampler->next2D(), pRec.time);
-
-		ray.o.z = scene_max.y - (row + 0.5)*sunRayResolution + displacementVec.z;
-		ray.o.x = scene_max.x - (col + 0.5)*sunRayResolution + displacementVec.x;
-
-		medium = emitter->getMedium();
-
-		int depth = 1, nullInteractions = 0;
-		bool delta = false;
-		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
-		m_scene->rayIntersectAll(ray, its);
-		if (its.t == std::numeric_limits<Float>::infinity()) {
-			/* There is no surface in this direction */
-			Float near, far;
-			aabb.rayIntersect(ray, near, far);
-			Point farPoint = ray.o + far*ray.d;
-			if (farPoint.y < aabb.max.y && farPoint.y > aabb.min.y) {
-
-			}
-		}
-		else {
-			/* Forward the surface scattering event to the attached handler */
-			handleSurfaceInteraction(depth, nullInteractions, delta, its, medium, throughput*power);
-			
-		}
-		
-	}
-
-}
-#endif
+	const bool &stop) {}
 
 void PhotonTracer::handleEmission(const PositionSamplingRecord &pRec,
 	const Medium *medium, const Spectrum &weight) { }
@@ -254,9 +98,9 @@ void PhotonTracer::handleSurfaceInteraction(int depth, int nullInteractions,
 	const Spectrum &weight) {
 }
 
-void PhotonTracer::handleSurfaceInteractionExt(int depth, int nullInteractions,
-	bool delta, const Intersection &its, Point &previousPoint, const Medium *medium,
-	const Spectrum &weight) {};
+//void PhotonTracer::handleSurfaceInteractionExt(int depth, int nullInteractions,
+//	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+//	const Spectrum &weight) {};
 
 void PhotonTracer::handleMediumInteraction(int depth, int nullInteractions,
 	bool delta, const MediumSamplingRecord &mRec, const Medium *medium,

@@ -31,8 +31,8 @@ def compute_bounding_box(input_File, cell_resolution):
 def interpolate(data_arr, size=1):
     rows, cols = data_arr.shape
     rpos, cpos = np.where(data_arr==0)
-    print "Processing empty cells... "
-    print "Total empty cells: ", len(rpos)
+    print("Processing empty cells... ")
+    print("Total empty cells: ", len(rpos))
     for i in range(0, len(rpos)):
         while True:
             left = max(0, cpos[i]-size)
@@ -76,7 +76,7 @@ def sub_fun_dem(d_xyz, output_arr_dem, _output_dem_num, _seg_index, _num_w, _num
     # corresponding interval
     lower = _seg_index * _seg_size
     upper = min((_seg_index+1) * _seg_size, len(d_xyz))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     # For each point, find its corresponding cell
     for i in range(lower, upper):
         row = int(d_xyz[i][1] / _resolution)  # row of the corresponding cell
@@ -113,7 +113,7 @@ def sub_fun_dsm_dem(d_xyz, _classification, output_arr_dem, _output_dem_num, out
     # corresponding interval
     lower = _seg_index * _seg_size
     upper = min((_seg_index+1) * _seg_size, len(d_xyz))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     for i in range(lower, upper):
         row = int(d_xyz[i][1] / _resolution)
         col = int(d_xyz[i][0] / _resolution)
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         has_dsm = True
 
     start = time.clock()
-    print "Reading data..."
+    print("Reading data...")
     # read point cloud
     inFile = laspy.file.File(input_las_file, mode='r')
     # x y z of each point
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     else:
         xyz = xyz_total[classification == 2]
     point_number = len(xyz)
-    print "Total points:", point_number
+    print("Total points:", point_number)
     # offset: relative to the left and bottom corner.
     # computing the xy bounding box of the whole terrain, and number of cells according to resolution
     min_x, min_y, width, height, num_w, num_h = compute_bounding_box(inFile, resolution)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     delta_xyz = xyz - np.array([min_x, min_y, 0])
     # Radius fill
     if args.fill_radius is not None:
-        print "Radius filling...: radius =", args.fill_radius
+        print("Radius filling...: radius =", args.fill_radius)
         NUM = args.fill_num
         newXY = map(lambda x: [args.fill_radius*math.cos(x/float(NUM)*2*math.pi),
                                 args.fill_radius * math.sin(x / float(NUM) * 2*math.pi)], range(0, NUM))
@@ -214,10 +214,10 @@ if __name__ == "__main__":
         delta_xyz = np.vstack((delta_xyz, tmp_point))
         classification = np.hstack((classification, tmp_classification))
 
-        print "Updated points: ", len(delta_xyz)
+        print("Updated points: ", len(delta_xyz))
 
     # delta_xy = xyz[:, 0:2] - np.array([min_x, min_y])
-    print "Start to calculate..."
+    print("Start to calculate...")
 
     # prepare for parallel computing
     # segment the array into multiple segmentation by define a maximum size of each part
@@ -230,8 +230,8 @@ if __name__ == "__main__":
     dsm_out_name = os.path.join(folder, 'dsm')
     # this stores the final estimated DEM
     try:
-        print "DEM size: ", "Width: ", num_w," Height: ", num_h
-        print "DEM resolution:", resolution
+        print("DEM size: ", "Width: ", num_w," Height: ", num_h)
+        print("DEM resolution:", resolution)
         output_dem = np.memmap(dem_out_name, dtype=float, shape=(num_h, num_w), mode='w+')
         output_dem_num = np.memmap(dem_out_num_name, dtype=int, shape=(num_h, num_w), mode='w+')
         if has_dsm:
@@ -256,7 +256,7 @@ if __name__ == "__main__":
             chm = output_dsm - output_dem
             chm[chm<0] = 0
             if args.fillholeofchm is not None:
-                print "Filling holes with  "
+                print("Filling holes with  ")
                 fillHoleofchm(chm, args.fillholeofchm)
             saveToHdr(chm, args.chm, geoTransform)
         if has_dsm:
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
         del output_dem
         del output_dem_num
-        print "Done."
+        print("Done.")
     finally:
         try:
             shutil.rmtree(folder)
@@ -272,4 +272,4 @@ if __name__ == "__main__":
             print("Failed to delete: " + folder)
 
     end = time.clock()
-    print "Time: ", "%.3fs" % (end - start)
+    print("Time: ", "%.3fs" % (end - start))

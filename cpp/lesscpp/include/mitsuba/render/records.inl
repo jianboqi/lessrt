@@ -120,7 +120,6 @@ inline bool RadianceQueryRecord::rayIntersect(const RayDifferential &ray) {
 		scene->rayIntersect(ray, its);
 		if (type & EOpacity) {
 			int unused = INT_MAX;
-
 			if (its.isValid()) {
 				if (EXPECT_TAKEN(!its.isMediumTransition()))
 					alpha = 1.0f;
@@ -138,6 +137,7 @@ inline bool RadianceQueryRecord::rayIntersect(const RayDifferential &ray) {
 		}
 		if (type & EDistance)
 			dist = its.t;
+			
 		type ^= EIntersection; // unset the intersection bit
 	}
 	return its.isValid();

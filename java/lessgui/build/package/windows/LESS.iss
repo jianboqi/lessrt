@@ -3,11 +3,11 @@
 [Setup]
 AppId={{fxApplication}}
 AppName=LESS
-AppVersion=1.7       
-AppVerName=LESS 1.0
+AppVersion=1.8       
+AppVerName=LESS 1.8
 AppPublisher=Jianbo Qi
 AppComments=LessGUI
-AppCopyright=Copyright (C) 2017
+AppCopyright=Copyright (C) 2018
 ;AppPublisherURL=http://java.com/
 ;AppSupportURL=http://java.com/
 ;AppUpdatesURL=http://java.com/
@@ -24,7 +24,7 @@ DefaultGroupName=Jianbo Qi
 LicenseFile=
 ;WinXP or above
 MinVersion=0,5.1 
-OutputBaseFilename=LESS-1.7
+OutputBaseFilename=LESS-1.8
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest

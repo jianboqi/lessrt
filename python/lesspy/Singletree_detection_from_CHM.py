@@ -15,7 +15,7 @@ def log(*args):
     outstr = ""
     for i in args:
         outstr += str(i)
-    print outstr
+    print(outstr.encode("utf-8").decode("gbk"))
     sys.stdout.flush()
 
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("-seg_size", help="Tree number for each core. ", type=int, default=2000)
     parser.add_argument("-subregion", help="Divide image into subregions (pixels). ", type=int, default=1000)
     parser.add_argument("-height_threshold", help="Threshold to remove grass, bushes etc. ", type=float, default=3)
-    parser.add_argument("-window_size", help="Window size for segmentation. ", type=int, default=7)
+    parser.add_argument("-window_size", help="Window size for segmentation. ", type=int, default=5)
     parser.add_argument("-real_coordinate", help="Whether output real coordinates or pixel positions. ",
                         type=bool, default=True)
     args = parser.parse_args()

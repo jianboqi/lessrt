@@ -34,7 +34,7 @@ def generate_brf_multiscene():
                     data_arr = data_arr[data_arr > 0]
                     data_arr = data_arr[data_arr < 7]
                     output += str(data_arr.mean() / float(total[i-1]) * math.pi) + " "
-                print output
+                print(output)
 
 def generate_brf_seq():
     outputdir = session.get_output_dir()
@@ -53,7 +53,7 @@ def generate_brf_seq():
                     azimuth = arr[6]
                 reddata = reddata[reddata>0]
                 nirdata = nirdata[nirdata > 0]
-                print azimuth, zenith, reddata.mean(),nirdata.mean()
+                print(azimuth, zenith, reddata.mean(),nirdata.mean())
 
 def generate_brf():
     outputdir = session.get_output_dir()
@@ -67,7 +67,7 @@ def generate_brf():
                 w, h, nir = RasterHelper.read_as_array(filepath, 2)
                 red = red[red > 0]
                 nir = nir[nir > 0]
-                print "RED, NIR: ", red.mean(), nir.mean()
+                print("RED, NIR: ", red.mean(), nir.mean())
                 f.write(str(red.mean())+" "+str(nir.mean())+"\n");
     f.close()
 

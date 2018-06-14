@@ -1,5 +1,6 @@
 package less.gui.view;
 
+import java.awt.Checkbox;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -55,6 +56,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -206,7 +208,17 @@ public class LessMainWindowController {
 	public TextField sensorXExtentField;
 	@FXML
 	public TextField sensorYExtentField;
+	
+	@FXML
+	public TextField obsAGLField;
+	
 	public TextField illumResTextField;// for photon tracing
+	public CheckBox productBRFCheckbox;// for photon tracing
+	public Label virtualLabel;
+	public TextField virtualDirTextField;
+	public Label numOfDirectionLabel;
+	public TextField numOfDirectionTextField;
+	public CheckBox productUpDownRadiationCheckbox;// for photon tracing
 	public TextField cfFovTextField;// for fisheye parameters
 	public ComboBox<String> combobox;
 	@FXML
@@ -255,6 +267,8 @@ public class LessMainWindowController {
 	public TextField pers_t_z_field;
 	@FXML
 	public CheckBox CameraPosRelativeHeightCheckbox;
+	@FXML
+	public CheckBox showCameraPosCheckbox;
 	
 	@FXML
 	public TextField sunZenithField;
@@ -274,6 +288,10 @@ public class LessMainWindowController {
 	public TextField SolarSpectrumSunTextField;
 	@FXML
 	public TextField SolarSpectrumSkyTextField;
+	@FXML
+	public AnchorPane SkyTotalPane;
+	@FXML
+	public AnchorPane skyPane;
 	
 	
 	//console
@@ -370,6 +388,7 @@ public class LessMainWindowController {
 		this.drawOrthographicSensor();
 		this.inputValidation();
         this.AddDEMType_Listener();
+        this.addAtmsphereType_Listener();
         this.initSensor();
         this.initSunAndIlluminationView();
         this.initCanvasContextMenu();
@@ -726,6 +745,25 @@ public class LessMainWindowController {
 		});
 	}
 	
+	private void addAtmsphereType_Listener() {
+		atsTypeCombobox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override 
+			public void changed(ObservableValue ov, String oldVal, String newVal) {
+				if(newVal.equals(Const.LESS_ATS_TYPE_SKY)){
+					skyPane.getChildren().add(SkyTotalPane);
+				}
+				if (newVal.equals(Const.LESS_ATS_TYPE_ATS)){
+					skyPane.getChildren().remove(SkyTotalPane);
+					//add a button to show atmosphere dialog
+					Button button = new Button("Define Atmosphere...");
+					skyPane.getChildren().add(button);
+					AnchorPane.setLeftAnchor(button, 150.0);
+					AnchorPane.setTopAnchor(button, 80.0);
+				}
+		    } 
+		});
+	}
+	
 	/**
 	 * 
 	 */
@@ -913,6 +951,11 @@ public class LessMainWindowController {
 		FacetOptical facetOptical = (FacetOptical) opticalTable.getSelectionModel().getSelectedItem();
 		if(facetOptical != null){
 			String newName = facetOptical.getOpticalName()+"_copy";
+			for(FacetOptical fo: opticalData) {
+				if(fo.getOpticalName().equals(newName)) {
+					newName += "_copy";
+				}
+			}
 			opticalData.add(new FacetOptical(
 					newName,
 					facetOptical.getReflectanceFront(),
@@ -1079,6 +1122,11 @@ public class LessMainWindowController {
 		
 	}
 	
+	@FXML
+	private void showCameraPos() {
+		this.reDrawAll();
+	}
+	
 	
 	/**
 	 * open window for define forests
@@ -1159,17 +1207,31 @@ public class LessMainWindowController {
 		        		this.objectAndPositionMap.get(objName).addListener(tree_pos_change_listener);
 		        	}
 		        	ObservableList<String> compList = FXCollections.observableArrayList();
-		        	for(int i=1;i<arr.length;i=i+3){
-		        		String compName = arr[i];
-		        		compList.add(compName);
-		        		String opticalName = arr[i+1];
-		        		String temperName = arr[i+2];
-		        		OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName);
-		        		if(CommonUitls.contain_branch_names(compName)){
-		        			property.setComponentColor(Const.LESS_DEFAULT_BRANCH_COLOR);
-		        		}
-		        		opticalcomponentMap.put(objName+"_"+compName, property);
+		        	//compatible with older simulation project
+		        	if(arr[4].startsWith("0x")) {
+		        		for(int i=1;i<arr.length;i=i+4){
+			        		String compName = arr[i];
+			        		compList.add(compName);
+			        		String opticalName = arr[i+1];
+			        		String temperName = arr[i+2];
+			        		String colorStr = arr[i+3];
+			        		OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName, colorStr);
+			        		opticalcomponentMap.put(objName+"_"+compName, property);
+			        	}
+		        	}else {
+		        		for(int i=1;i<arr.length;i=i+3){
+			        		String compName = arr[i];
+			        		compList.add(compName);
+			        		String opticalName = arr[i+1];
+			        		String temperName = arr[i+2];
+			        		OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName);
+			        		if(CommonUitls.contain_branch_names(compName)){
+			        			property.setComponentColor(Const.LESS_DEFAULT_BRANCH_COLOR);
+			        		}
+			        		opticalcomponentMap.put(objName+"_"+compName, property);
+			        	}
 		        	}
+		        	
 		        	objectsAndCompomentsMap.put(objName, compList);
 		        }  
 

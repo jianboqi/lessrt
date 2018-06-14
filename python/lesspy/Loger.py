@@ -4,5 +4,6 @@ def log(*args):
     outstr = ""
     for i in args:
         outstr += str(i)
-    print outstr
+    # print(outstr.encode("utf-8").decode("gbk"))
+    print(outstr)
     sys.stdout.flush()

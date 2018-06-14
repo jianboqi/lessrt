@@ -27,6 +27,10 @@
 #include <mitsuba/render/sensor.h>
 #include <mitsuba/render/basicshader.h>
 #include <set>
+#if defined(__WINDOWS__)
+#include <codecvt>
+#endif
+
 
 MTS_NAMESPACE_BEGIN
 
@@ -221,7 +225,15 @@ public:
 
 		/* Load the geometry */
 		Log(EInfo, "Loading geometry from \"%s\" ..", path.filename().string().c_str());
+#if defined(__WINDOWS__)
+		//convert narrow bytes (fname) to widestring and using _wfopen
+		//to handle path with Chinese character
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+		std::wstring wideStr = conv.from_bytes(path.string());
+		fs::ifstream is(wideStr);
+#else
 		fs::ifstream is(path);
+#endif  
 		if (is.bad() || is.fail())
 			Log(EError, "Wavefront OBJ file '%s' not found!", path.string().c_str());
 

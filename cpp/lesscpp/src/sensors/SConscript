@@ -1,7 +1,7 @@
 Import('env', 'plugins')
 
 # plugins += env.SharedLibrary('radiancemeter', ['radiancemeter.cpp'])
-# plugins += env.SharedLibrary('irradiancemeter', ['irradiancemeter.cpp'])
+plugins += env.SharedLibrary('irradiancemeter', ['irradiancemeter.cpp'])
 # plugins += env.SharedLibrary('fluencemeter', ['fluencemeter.cpp'])
 plugins += env.SharedLibrary('perspective', ['perspective.cpp'])
 # plugins += env.SharedLibrary('perspective_rdist', ['perspective_rdist.cpp'])

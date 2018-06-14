@@ -24,7 +24,7 @@ if not transform is None:
     pixel_x = abs(transform[1])
     pixel_y = abs(transform[5])
 else:
-    print "no geo transform."
+    print("no geo transform.")
 XSize = band.XSize
 YSize = band.YSize
 xExtend = XSize * pixel_x

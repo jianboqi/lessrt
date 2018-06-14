@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
+
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -22,7 +26,10 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -64,10 +71,17 @@ public class Display3DController {
 	@FXML
 	private CheckBox CameraVolCheck;
 	@FXML
+	private CheckBox ShowObjectCheck;
+	@FXML
 	private ColorPicker backgroundColorPicker;
 	@FXML
 	private ColorPicker cameraVolColorPicker;
 	private PhongMaterial volMtl;//
+	
+	@FXML
+	private RadioButton FullDetailRadioBtn;
+	@FXML
+	private RadioButton BoundingBoxRadioBtn;
 	
 	private LessMainWindowController mwController;
 	private Stage parentStage;
@@ -90,6 +104,9 @@ public class Display3DController {
     private Xform gridGroup;
     public Xform sunray;
     public Xform cameraVolume;
+    
+    public ArrayList<Xform> instanceList;
+    private ToggleGroup tg;
     
     //view control
     private static final double CONTROL_MULTIPLIER = 2;    
@@ -133,7 +150,7 @@ public class Display3DController {
 	    displayScene.setFill(Color.rgb(10, 10, 40));
 	    backgroundColorPicker.setValue(Color.rgb(10, 10, 40));
 	    
-	    //��ʼ��camera ����ɫ
+	    //camera
 	    cameraVolColorPicker.setValue(Color.web("1212ee50"));
 	    cameraVolColorPicker.setDisable(true);
 	    final PhongMaterial colortrans = new PhongMaterial();
@@ -141,7 +158,8 @@ public class Display3DController {
 		colortrans.setSpecularColor(Color.web("1212ee50"));
 		colortrans.setSpecularPower(Double.POSITIVE_INFINITY);
 		volMtl = colortrans;
-
+		
+		initRadioButtons();
 	    
 	    buildCamera();
 	   // buildLighting();
@@ -164,6 +182,34 @@ public class Display3DController {
 
         t.start();
 		event_handle();
+	}
+	
+	private void initRadioButtons() {
+		tg = new ToggleGroup();
+		FullDetailRadioBtn.setToggleGroup(tg);
+		FullDetailRadioBtn.setSelected(!isSimplified);
+		FullDetailRadioBtn.setUserData("F");
+		BoundingBoxRadioBtn.setToggleGroup(tg);
+		BoundingBoxRadioBtn.setSelected(isSimplified);
+		BoundingBoxRadioBtn.setUserData("B");
+		tg.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+		      public void changed(ObservableValue<? extends Toggle> ov,
+		          Toggle old_toggle, Toggle new_toggle) {
+		        if (tg.getSelectedToggle() != null) {
+		          if(tg.getSelectedToggle().getUserData().toString().equals("F")) {
+		        	  isSimplified = false;
+		          }else {
+		        	  isSimplified = true;
+		          }
+		          Thread t = new Thread(new Runnable() {
+		          	public void run () {
+		          		 drawObjectsAndInstances();
+		          	}
+		          });
+		          t.start();
+		        }
+		      }
+		    });
 	}
 	
 	private void buildCamera() {
@@ -324,6 +370,25 @@ public class Display3DController {
 		}
 	}
 	
+	@FXML
+	private void onShowObjects() {
+		if(ShowObjectCheck.isSelected()) {
+			if(instanceList != null) {
+				for(int i=0;i<instanceList.size();i++) {
+					Xform xform = instanceList.get(i);
+					xform.setVisible(true);
+				}
+			}
+		}else {
+			if(instanceList != null) {
+				for(int i=0;i<instanceList.size();i++) {
+					Xform xform = instanceList.get(i);
+					xform.setVisible(false);
+				}
+			}
+		}
+	}
+	
 
 	private void handleMouse(SubScene scene, final Node root) {
 		 
@@ -478,6 +543,14 @@ public class Display3DController {
 	}
 	
 	public void drawObjectsAndInstances(){
+		//clear before
+		if(instanceList != null) {
+			for(int i=0;i<instanceList.size();i++) {
+				Xform xform = instanceList.get(i);
+				Platform.runLater(() ->world.getChildren().remove(xform));
+			}
+		}
+		
 		double width = Double.parseDouble(this.mwController.sceneXSizeField.getText().replaceAll(",", ""));
 		double height = Double.parseDouble(this.mwController.sceneYSizeField.getText().replaceAll(",", ""));
 		
@@ -515,6 +588,7 @@ public class Display3DController {
 			    }
 			}
 		}
+		instanceList = new ArrayList<Xform>();
 		Boolean ballAsObjects = this.isSimplified; //simplified objects
 		final PhongMaterial darkGreen = new PhongMaterial();
 		darkGreen.setDiffuseColor(Color.DARKGREEN);
@@ -560,6 +634,7 @@ public class Display3DController {
 						instanceForm.setTranslateY(altitudeList.get(index)+pos_z);
 					else
 						instanceForm.setTranslateY(pos_z);
+					instanceList.add(instanceForm);
 					Platform.runLater(() ->world.getChildren().add(instanceForm));
 				}else
 				{//boundingbox 
@@ -572,7 +647,10 @@ public class Display3DController {
 						box.setTranslateY(altitudeList.get(index)+box.getHeight()+pos_z);
 					else
 						box.setTranslateY(box.getHeight()*0.5+pos_z);
-					Platform.runLater(() ->world.getChildren().add(box));
+					Xform objXform = new Xform();
+					objXform.getChildren().add(box);
+					instanceList.add(objXform);
+					Platform.runLater(() ->world.getChildren().add(objXform));
 				}
 				
 				index++;

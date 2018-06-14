@@ -18,7 +18,7 @@ def sub_fun_classify(_fieldList, _threshold, _class_arr, _seg_index, _seg_size):
     # corresponding interval
     lower = _seg_index * _seg_size
     upper = min((_seg_index+1) * _seg_size, len(_fieldList))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     # For each point, find its corresponding cell
     for i in range(lower, upper):
         if _fieldList[i] <= _threshold:
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     threshold = args.value
 
     start = time.clock()
-    print "Reading data..."
+    print("Reading data...")
     # read point cloud
     inFile = laspy.file.File(input_las_file, mode='r')
     # field list
@@ -65,13 +65,13 @@ if __name__ == "__main__":
         fieldList = inFile.gps_time
 
     if len(fieldList) == 0:
-        print "No field found."
+        print("No field found.")
         import sys
         sys.exit(0)
 
     point_number = len(fieldList)
-    print "Total points:", point_number
-    print "Start to classify..."
+    print("Total points:", point_number)
+    print("Start to classify...")
 
     # prepare for parallel computing
     # segment the array into multiple segmentation by define a maximum size of each part
@@ -88,11 +88,11 @@ if __name__ == "__main__":
     out_File.points = inFile.points
     out_File.set_classification(class_arr.tolist())
     out_File.close()
-    print "Done."
+    print("Done.")
     del class_arr
     try:
         shutil.rmtree(folder)
     except OSError:
         print("Failed to delete: " + folder)
     end = time.clock()
-    print "Time: ", "%.3fs" % (end - start)
+    print("Time: ", "%.3fs" % (end - start))

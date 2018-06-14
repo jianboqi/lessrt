@@ -7,21 +7,31 @@
 #include <mitsuba/render/range.h>
 #include <mitsuba/render/renderjob.h>
 #include <mitsuba/core/bitmap.h>
+#include "DirectionalBRF.h"
 MTS_NAMESPACE_BEGIN
 
 //结果保存到图像中
-class CapturePhotonWorkResult :public ImageBlock {
+class CapturePhotonWorkResult :public WorkResult {
 public:
-	inline CapturePhotonWorkResult(const Vector2i &res, const ReconstructionFilter *filter)
-		: ImageBlock(Bitmap::ESpectrum, res, filter) {
-		setOffset(Point2i(0, 0));
-		setSize(res);
+	inline CapturePhotonWorkResult(const Vector2i &res, const ReconstructionFilter *filter, 
+		bool hasBRFProducts, bool hasUpDownProducts, string virtualDirectionStr, int numberOfDirections){
 		m_range = new RangeWorkUnit();
 
-		m_downwellingWorkResult = new ImageBlock(Bitmap::ESpectrum, res, filter);
-		m_upwellingWorkResult = new ImageBlock(Bitmap::ESpectrum, res, filter);
-		m_PhtonsEachProcess = 0;
+		m_hasUpDownProducts = hasUpDownProducts;
+		if (m_hasUpDownProducts) {
+			m_downwellingWorkResult = new ImageBlock(Bitmap::ESpectrum, res, filter);
+			m_upwellingWorkResult = new ImageBlock(Bitmap::ESpectrum, res, filter);
+		}
+		
+		m_hasBRFProducts = hasBRFProducts;
+		m_numberOfDirections = numberOfDirections;
 
+		if (m_hasBRFProducts) {
+			m_dirBRFWorkResult = new DirectionalBRF(m_numberOfDirections);
+			m_dirBRFWorkResult->readVirtualDirections(virtualDirectionStr);
+		}
+		
+		m_PhtonsEachProcess = 0;
 	}
 
 	inline const RangeWorkUnit *getRangeWorkUnit() const {
@@ -36,6 +46,12 @@ public:
 	void load(Stream *stream);
 	void save(Stream *stream) const;
 
+
+	std::string toString() const {
+		std::ostringstream oss;
+		oss << "CapturePhotonWorkResult" << endl;
+		return oss.str();
+	}
 	MTS_DECLARE_CLASS()
 protected:
 	/// Virtual destructor
@@ -45,7 +61,11 @@ protected:
 public:
 	ref<ImageBlock> m_downwellingWorkResult;
 	ref<ImageBlock> m_upwellingWorkResult;
+	ref<DirectionalBRF> m_dirBRFWorkResult;
+	bool m_hasBRFProducts;
+	bool m_hasUpDownProducts;
 	size_t m_PhtonsEachProcess;
+	int m_numberOfDirections;
 };
 
 
@@ -59,19 +79,30 @@ public:
 */
 class CapturePhotonWorker : public PhotonTracer {
 public:
+	enum EPhotonType {
+		ETypeNull = 0x0001,
+		ETypeBRF = 0x0002,
+		ETypeUpDown = 0x0004,
+		EtypeBRFUpDown = ETypeBRF | ETypeUpDown
+	};
+
 	inline CapturePhotonWorker(int maxDepth, int maxPathDepth,
-		int rrDepth, bool bruteForce) : PhotonTracer(maxDepth, rrDepth, true),
-		m_maxPathDepth(maxPathDepth), m_bruteForce(bruteForce) { }
+		int rrDepth, bool bruteForce, bool hasBRFProducts, bool hasUpDownProducts, string virtualDirections,
+		int numberOfDirections) : PhotonTracer(maxDepth, rrDepth, true),
+		m_maxPathDepth(maxPathDepth), m_bruteForce(bruteForce), m_hasBRFProducts(hasBRFProducts),
+		m_hasUpDownProducts(hasUpDownProducts), m_virtualDirections(virtualDirections),
+		m_numberOfDirections(numberOfDirections){ }
 
 	CapturePhotonWorker(Stream *stream, InstanceManager *manager);
 
 	void serialize(Stream *stream, InstanceManager *manager) const;
 
 	void prepare();
-	ref<WorkProcessor> clone() const;
-	ref<WorkResult> createWorkResult() const;
 	void process(const WorkUnit *workUnit, WorkResult *workResult,
 		const bool &stop);
+
+	ref<WorkProcessor> clone() const;
+	ref<WorkResult> createWorkResult() const;
 
 	/**
 	* \brief Handles particles emitted by a light source
@@ -94,13 +125,17 @@ public:
 
 	/**
 	* \brief extended version of handleSurfaceInteraction
-	*
+	* * This is 
 	* If a connection to the sensor is possible, compute the importance
 	* and accumulate in the proper pixel of the accumulation buffer.
 	*/
-	void handleSurfaceInteractionExt(int depth, int nullInteractions,
-		bool delta, const Intersection &its, Point &previousPoint, const Medium *medium,
-		const Spectrum &weight);
+	void handleSurfaceInteractionBRF(int depth, int nullInteractions,
+		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+		const Spectrum &weight, int photoType);
+
+	void handleSurfaceInteractionUpDown(int depth, int nullInteractions,
+		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+		const Spectrum &weight, int photoType);
 
 	/**
 	* \brief Handles particles interacting with a medium
@@ -122,6 +157,19 @@ private:
 	ref<CapturePhotonWorkResult> m_workResult;
 	int m_maxPathDepth;
 	bool m_bruteForce;
+
+	//query parameters from scene xml
+	Vector2 m_subSceneUpperLeft;
+	Vector2i m_filmSize;
+
+	AABB m_sceneBounds;
+
+	AABB m_virtualBounds;
+
+	bool m_hasBRFProducts;
+	bool m_hasUpDownProducts;
+	string m_virtualDirections;
+	int m_numberOfDirections;
 };
 
 
@@ -136,11 +184,14 @@ class CapturePhotonProcess : public PhotonProcess {
 public:
 	CapturePhotonProcess(const RenderJob *job, RenderQueue *queue,
 		size_t sampleCount, size_t granularity, int maxDepth,
-		int maxPathDepth, int rrDepth, bool bruteForce)
+		int maxPathDepth, int rrDepth, bool bruteForce, bool hasBRFProducts, bool hasUpDownProducts,
+		int numberOfDirections)
 		: PhotonProcess(PhotonProcess::ETrace, sampleCount,
 			granularity, "Simulating", job), m_job(job), m_queue(queue),
 		m_maxDepth(maxDepth), m_maxPathDepth(maxPathDepth),
-		m_rrDepth(rrDepth), m_bruteForce(bruteForce) {
+		m_rrDepth(rrDepth), m_bruteForce(bruteForce), m_hasBRFProducts(hasBRFProducts),
+		m_hasUpDownProducts(hasUpDownProducts),
+		m_numberOfDirections(numberOfDirections){
 	}
 
 	void develop();
@@ -157,7 +208,6 @@ protected:
 private:
 	ref<const RenderJob> m_job;
 	ref<RenderQueue> m_queue;
-	ref<Film> m_film;
 	//ref<ImageBlock> m_accum;
 	int m_maxDepth;
 	int m_maxPathDepth;
@@ -166,10 +216,18 @@ private:
 
 	ref<Scene> m_scene;
 
+	ref<Film> m_film_downwell;
 	ref<ImageBlock> m_accum_downwell;
 
 	ref<Film> m_film_upwell;
 	ref<ImageBlock> m_accum_upwell;
+	ref<DirectionalBRF> m_dirBRFs;
+
+	//Products
+	bool m_hasBRFProducts;
+	bool m_hasUpDownProducts;
+	string m_virtualDirections;
+	int m_numberOfDirections;
 
 	size_t m_totalPhotons;
 };

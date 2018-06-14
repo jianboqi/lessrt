@@ -178,6 +178,7 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			Spectrum spec = sensor->sampleRayDifferential(
 				sensorRay, samplePos, apertureSample, timeSample);
 
+
 			sensorRay.scaleDifferential(diffScaleFactor);
 
 			spec *= Li(sensorRay, rRec);

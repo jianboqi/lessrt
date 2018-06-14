@@ -184,8 +184,8 @@ class sun_irradiance_db:
     @staticmethod
     def read_toa_with_bandwidth_SKYLs(wave_list_with_bandwidth, skyls):
         irr_list = sun_irradiance_db.read_toa_with_bandwidth(wave_list_with_bandwidth)
-        sky_irr_list = map(lambda x, y: x*y, irr_list, skyls)
-        sun_irr_list = map(lambda x, y: x*(1-y),irr_list, skyls)
+        sky_irr_list = list(map(lambda x, y: x*y, irr_list, skyls))
+        sun_irr_list = list(map(lambda x, y: x*(1-y),irr_list, skyls))
         return sun_irr_list,sky_irr_list
 
 
@@ -263,4 +263,4 @@ if __name__=="__main__":
     #                   from Lambertian where Name=\"" + obj_name + "\"")
     # re = cu.fetchall()
     # log(obj_name)
-    print sun_irradiance_db.read_toa_with_bandwidth_SKYLs("600:10,700:10",[0.2,0.1])
+    log(sun_irradiance_db.read_toa_with_bandwidth_SKYLs("600:10,700:10",[0.2,0.1]))

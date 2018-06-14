@@ -28,6 +28,30 @@ public:
 		configure();
 	}
 
+	Float getPointAngle(Point pixelSample) const{
+		Float coord_x = pixelSample.x * m_invResolution.x;
+		Float coord_y = pixelSample.y * m_invResolution.y;
+		Float dist = math::safe_sqrt((coord_x - 0.5)*(coord_x - 0.5) + (coord_y - 0.5)*(coord_y - 0.5));
+		Float point_angle = 0;
+
+		if (m_projectionType == "equisolid") {
+			point_angle = 2 * math::safe_asin(SQRT_TWO*dist);
+		}
+		else if (m_projectionType == "orthographic") {
+			point_angle = math::safe_asin(dist / 0.5);
+		}
+		else if (m_projectionType == "equidistant") {
+			point_angle = dist * M_PI;
+		}
+		else if (m_projectionType == "stereographic") {
+			point_angle = 2 * atanf(dist / 0.5);
+		}
+		else {//default: equisolid
+			point_angle = 2 * math::safe_asin(SQRT_TWO*dist);
+		}
+		return point_angle;
+	}
+
 	Spectrum sampleRay(Ray &ray, const Point2 &pixelSample,
 		const Point2 &otherSample, Float timeSample) const {
 		ray.time = sampleTime(timeSample);
@@ -54,7 +78,7 @@ public:
 			point_angle = 2 * atanf(dist/0.5);
 		}
 		else{//default: equisolid
-			point_angle = 2 * math::safe_asin(dist);
+			point_angle = 2 * math::safe_asin(SQRT_TWO*dist);
 		}
 		
 		const Transform &trafo = m_worldTransform->eval(ray.time);
@@ -70,7 +94,7 @@ public:
 		ray.setDirection(trafo(d));
 
 		if (point_angle >= m_angular_fov / 2.0){
-			return Spectrum(-1.0f);
+			return Spectrum(0.0f);
 		}
 		return Spectrum(1.0f);
 	}
@@ -128,7 +152,7 @@ public:
 			point_angle = 2 * atanf(dist/0.5);
 		}
 		else{//default: equisolid
-			point_angle = 2 * math::safe_asin(dist);
+			point_angle = 2 * math::safe_asin(SQRT_TWO*dist);
 		}
 
 		Float sinPhi, cosPhi, sinTheta, cosTheta;
@@ -143,7 +167,6 @@ public:
 		if (point_angle >= m_angular_fov / 2.0){
 			return Spectrum(-1.0f);
 		}
-
 		return Spectrum(1.0f);
 	}
 
@@ -151,7 +174,6 @@ public:
 		const PositionSamplingRecord &pRec) const {
 		if (dRec.measure != ESolidAngle)
 			return 0.0f;
-
 		Vector d = m_worldTransform->eval(pRec.time).inverse()(dRec.d);
 		Float sinTheta = math::safe_sqrt(1 - d.y*d.y);
 
@@ -162,7 +184,6 @@ public:
 		const PositionSamplingRecord &pRec) const {
 		if (dRec.measure != ESolidAngle)
 			return Spectrum(0.0f);
-
 		Vector d = m_worldTransform->eval(pRec.time).inverse()(dRec.d);
 		Float sinTheta = math::safe_sqrt(1 - d.y*d.y);
 

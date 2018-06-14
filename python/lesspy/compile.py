@@ -2,13 +2,15 @@
 
 import glob, os, shutil
 
+
 #delete pyc first
 files = glob.iglob(os.path.join("./", "*.pyc"))
 for file in files:
     if os.path.isfile(file):
         os.remove(file)
 
-os.system("python -m compileall .")
+os.system(r"d:\Python36\python -m compileall -b .")
+# compileall.compile_dir("./")
 
 # copy to
 files = glob.iglob(os.path.join("./", "*.pyc"))

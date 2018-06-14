@@ -20,7 +20,6 @@ for line in f:
 #统计计算
 totalsum = 0.0
 for i in range(0,len(points_list),8):
-	print i
 	v12 = points_list[i+1]-points_list[i]
 	v16 = points_list[i+5]-points_list[i]
 	v15 = points_list[i+4]-points_list[i]
@@ -53,4 +52,4 @@ for i in range(0,len(points_list),8):
 
 	singleArea = (s126+s165+s237+s276+s348+s387)/2
 	totalsum = totalsum + singleArea
-print totalsum
+print(totalsum)

@@ -338,6 +338,49 @@ MTS_NAMESPACE_BEGIN
 		return true;
 	}
 
+	/** An extended version of ray box intersection which provides information of exiting face.
+	* exitFace: 0 for x, 1 for y, 2 for z
+	*/
+	FINLINE bool rayIntersectExt(const RayType &ray, Float &nearT, Float &farT, int &exitFace) const {
+		nearT = -std::numeric_limits<Float>::infinity();
+		farT = std::numeric_limits<Float>::infinity();
+
+		/* For each pair of AABB planes */
+		for (int i = 0; i<PointType::dim; i++) {
+			const Float origin = ray.o[i];
+			const Float minVal = min[i], maxVal = max[i];
+
+			if (ray.d[i] == 0) {
+				/* The ray is parallel to the planes */
+				if (origin < minVal || origin > maxVal)
+					return false;
+			}
+			else {
+				/* Calculate intersection distances */
+				Float t1 = (minVal - origin) * ray.dRcp[i];
+				Float t2 = (maxVal - origin) * ray.dRcp[i];
+
+				if (t1 > t2)
+					std::swap(t1, t2);
+
+				if (t2 < farT)
+					exitFace = i;
+
+				nearT = std::max(t1, nearT);
+				farT = std::min(t2, farT);
+
+				if (!(nearT <= farT))
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+
+
+
+
 	/** \brief Calculate the overlap between an axis-aligned bounding box
 	 * and a ray segment
 	 *

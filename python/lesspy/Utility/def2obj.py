@@ -9,7 +9,7 @@ def read_single_layer_file(rami_path, obj_path, leaf_radius=0.05):
     fref = open(rami_path, 'r')
     s = np.pi * leaf_radius * leaf_radius
     fptop = open(obj_path, 'w')
-    print "componentName:" + obj_path
+    print("componentName:" + obj_path)
     r = math.sqrt(s)
     p0 = np.array([[r, r, 0], [r, -r, 0], [-r, -r, 0], [-r, r, 0]])
     topcount = 0
@@ -41,7 +41,7 @@ def read_double_layer_file(first_layer_name, rami_path, obj_path, leaf_radius=0.
     p0 = np.array([[r, r, 0], [r, -r, 0], [-r, -r, 0], [-r, r, 0]])
 
     fptop = open(first_layer_name + "_" + obj_path, 'w')
-    print "componentName:"+first_layer_name + "_" + obj_path
+    print("componentName:"+first_layer_name + "_" + obj_path)
     sys.stdout.flush()
     topcount = 0
     pre_name = first_layer_name
@@ -55,7 +55,7 @@ def read_double_layer_file(first_layer_name, rami_path, obj_path, leaf_radius=0.
                     "f " + str(i * 4 + 1) + " " + str(i * 4 + 2) + " " + str(i * 4 + 3) + " " + str(i * 4 + 4) + "\n")
             fptop.close()
             fptop = open(layerName + "_" + obj_path, 'w')
-            print "componentName:"+layerName + "_" + obj_path
+            print("componentName:"+layerName + "_" + obj_path)
             sys.stdout.flush()
             pre_name = layerName
             topcount = 0

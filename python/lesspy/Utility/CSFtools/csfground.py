@@ -69,5 +69,5 @@ if __name__ == "__main__":
     out_File.close()
 
     end = time.clock()
-    print "Done."
-    print "Time: ", "%.3fs" % (end - start)
+    print("Done.")
+    print("Time: ", "%.3fs" % (end - start))

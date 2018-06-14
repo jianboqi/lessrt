@@ -58,7 +58,6 @@ import less.gui.utils.Const;
 
 public class ObjectsDefineWindowViewController {
 	
-	
 	@FXML
 	public ListView<String> objectsLV;
 	@FXML
@@ -213,7 +212,8 @@ public class ObjectsDefineWindowViewController {
 				}
 				
 				 //change color of single object display
-			     displaySingleObject3DController.changeMeshColor();
+				if(displaySingleObject3DController != null)
+					displaySingleObject3DController.changeMeshColor();
 		     }
 		 });
 		
@@ -399,7 +399,7 @@ public class ObjectsDefineWindowViewController {
 					}
 				}
 				OpticalThermalProperty ot = this.mwController.opticalcomponentMap.get(opticalKey);
-				totalStr += " "+compName + " " + ot.getOpticalName() + " " +ot.getTermperatureName();
+				totalStr += " "+compName + " " + ot.getOpticalName() + " " +ot.getTermperatureName()+" "+ ot.getComponentColor().toString();
 				initObjectAndPositionMap(objName);
 			}
 			totalStr += System.getProperty("line.separator");

@@ -75,11 +75,23 @@ static StatsCounter avgPathLength("Volumetric path tracer", "Average path length
  */
 class VolumetricPathTracer : public MonteCarloIntegrator {
 public:
-	VolumetricPathTracer(const Properties &props) : MonteCarloIntegrator(props) { }
+	VolumetricPathTracer(const Properties &props) : MonteCarloIntegrator(props) {
+		m_NoDataValue = props.getFloat("NoDataValue", -1.0);
+		m_virtualPlane = props.getBoolean("SceneVirtualPlane", false);
+		if (m_virtualPlane) {
+			m_virtualPlane_vx = props.getFloat("vx", 0.0);
+			m_virtualPlane_vz = props.getFloat("vz", 0.0);
+			m_virtualPlane_vy = props.getString("vy", "MAX");
+			m_virtualPlane_size_x = props.getFloat("sizex", 100.0);
+			m_virtualPlane_size_y = props.getFloat("sizez", 100.0);
+		}
+	
+	}
 
 	/// Unserialize from a binary data stream
 	VolumetricPathTracer(Stream *stream, InstanceManager *manager)
 	 : MonteCarloIntegrator(stream, manager) { }
+
 
 	Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
 		/* Some aliases and local variables */
@@ -89,6 +101,41 @@ public:
 		RayDifferential ray(r);
 		Spectrum Li(0.0f);
 		Float eta = 1.0f;
+
+		//handle virtual plane
+		if (m_virtualPlane)
+		{
+			AABB scene_bound = scene->getKDTree()->getAABB();
+			double bound_max = scene_bound.max.y;
+			if (m_virtualPlane_vy == "MAX" || m_virtualPlane_vy == "TOP") {
+				double value = atof(m_virtualPlane_vy.c_str());
+				bound_max = value;
+			}
+
+			double x_min = m_virtualPlane_vx - 0.5*m_virtualPlane_size_x;
+			double x_max = m_virtualPlane_vx + 0.5*m_virtualPlane_size_x;
+			double z_min = m_virtualPlane_vz - 0.5*m_virtualPlane_size_y;
+			double z_max = m_virtualPlane_vz + 0.5*m_virtualPlane_size_y;
+
+			double H = r.o[1] - bound_max;
+			if (H > 0)
+			{
+				double a = r.d.x;
+				double b = r.d.y;
+				double c = r.d.z;
+				Point its_p = r.o + Point(-a / b * H, -H, -c / b * H);
+				if (!(its_p.x >= x_min && its_p.x <= x_max
+					&& its_p.z >= z_min && its_p.z <= z_max
+					))
+				{
+					return Spectrum(m_NoDataValue);
+				}
+			}
+			else
+			{
+				return Spectrum(m_NoDataValue);
+			}
+		}
 
 		/* Perform the first ray intersection (or ignore if the
 		   intersection has already been provided). */
@@ -105,7 +152,8 @@ public:
 				/* Sample the integral
 				   \int_x^y tau(x, x') [ \sigma_s \int_{S^2} \rho(\omega,\omega') L(x,\omega') d\omega' ] dx'
 				*/
-				const PhaseFunction *phase = mRec.getPhaseFunction();
+				//const PhaseFunction *phase = mRec.getPhaseFunction();
+				const PhaseFunction *phase = mRec.getSampledPhaseFunction();
 
 				if (rRec.depth >= m_maxDepth && m_maxDepth != -1) // No more scattering events allowed
 					break;
@@ -118,7 +166,6 @@ public:
 
 				/* Estimate the single scattering component if this is requested */
 				DirectSamplingRecord dRec(mRec.p, mRec.time);
-
 				if (rRec.type & RadianceQueryRecord::EDirectMediumRadiance) {
 					int interactions = m_maxDepth - rRec.depth - 1;
 
@@ -191,6 +238,12 @@ public:
 				if (!its.isValid()) {
 					/* If no intersection could be found, possibly return
 					   attenuated radiance from a background luminaire */
+					//If the emitter is hiden, return -1 
+					if (m_hideEmitters)
+					{
+						Li = Spectrum(m_NoDataValue);
+						break;
+					}
 					if ((rRec.type & RadianceQueryRecord::EEmittedRadiance)
 						&& (!m_hideEmitters || scattered)) {
 						Spectrum value = throughput * scene->evalEnvironment(ray);
@@ -226,6 +279,7 @@ public:
 
 				const BSDF *bsdf = its.getBSDF(ray);
 				DirectSamplingRecord dRec(its);
+
 
 				/* Estimate the direct illumination if this is requested */
 				if ((rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance) &&
@@ -286,6 +340,9 @@ public:
 				   refractive index along the path */
 				throughput *= bsdfWeight;
 				eta *= bRec.eta;
+
+
+
 				if (its.isMediumTransition())
 					rRec.medium = its.getTargetMedium(ray.d);
 
@@ -447,6 +504,14 @@ public:
 	}
 
 	MTS_DECLARE_CLASS()
+protected:
+	double m_NoDataValue;
+	bool m_virtualPlane;
+	Float m_virtualPlane_vx;
+	std::string m_virtualPlane_vy;
+	Float m_virtualPlane_vz;
+	Float m_virtualPlane_size_x;
+	Float m_virtualPlane_size_y;
 };
 
 MTS_IMPLEMENT_CLASS_S(VolumetricPathTracer, false, MonteCarloIntegrator)

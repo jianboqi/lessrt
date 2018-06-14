@@ -112,7 +112,6 @@ public:
 			|| Frame::cosTheta(bRec.wi) <= 0
 			|| Frame::cosTheta(bRec.wo) <= 0)
 			return Spectrum(0.0f);
-
 		return m_reflectance->eval(bRec.its)
 			* (INV_PI * Frame::cosTheta(bRec.wo));
 	}

@@ -278,7 +278,7 @@ public:
 		Float samplingDensity = m_samplingDensity;
 
 		if (rand < m_mediumSamplingWeight) {
-			rand /= m_mediumSamplingWeight;
+			rand /= m_mediumSamplingWeight; //albedo
 			if (m_strategy != EMaximum) {
 				/* Choose the sampling density to be used */
 				if (m_strategy == EBalance) {
@@ -296,7 +296,6 @@ public:
 		}
 		Float distSurf = ray.maxt - ray.mint;
 		bool success = true;
-
 		if (sampledDistance < distSurf) {
 			mRec.t = sampledDistance + ray.mint;
 			mRec.p = ray(mRec.t);

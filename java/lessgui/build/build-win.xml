@@ -92,7 +92,7 @@
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
 		<copy todir="dist/bin/python" >
-		    <fileset dir="c:\Python27" />
+		    <fileset dir="d:\Python36" />
 		</copy>
 		
 		<mkdir dir="dist/bin/scripts" />
@@ -128,7 +128,7 @@
 			<manifest>
 				<attribute name="Implementation-Vendor" value="Jianbo Qi"/>
 				<attribute name="Implementation-Title" value="LESS"/>
-				<attribute name="Implementation-Version" value="1.6"/>
+				<attribute name="Implementation-Version" value="1.8"/>
 				<attribute name="JavaFX-Feature-Proxy" value="None"/>
 			</manifest>
 		</fx:jar>

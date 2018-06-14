@@ -117,6 +117,8 @@
     </ClInclude>
     <ClInclude Include="..\src\bsdfs\ior.h">
     </ClInclude>
+    <ClInclude Include="..\src\integrators\photonrt\DirectionalBRF.h" />
+    <ClInclude Include="..\src\integrators\photonrt\photonRTUtils.h" />
     <ClInclude Include="..\src\integrators\photonrt\photonrt_proc.h" />
     <ClInclude Include="..\src\samplers\faure.h">
     </ClInclude>
@@ -510,6 +512,7 @@
     </ClCompile>
     <ClCompile Include="..\src\emitters\directsun.cpp" />
     <ClCompile Include="..\src\emitters\hemisphere.cpp" />
+    <ClCompile Include="..\src\emitters\sunsphere.cpp" />
     <ClCompile Include="..\src\films\mfilm.cpp" />
     <ClCompile Include="..\src\integrators\photonmapper\pmrt.cpp" />
     <ClCompile Include="..\src\integrators\photonrt\photonrt.cpp" />
@@ -586,6 +589,7 @@
     </ClCompile>
     <ClCompile Include="..\src\librender\imageblock.cpp">
     </ClCompile>
+    <ClCompile Include="..\src\medium\planeparallel.cpp" />
     <ClCompile Include="..\src\samplers\stratified.cpp">
     </ClCompile>
     <ClCompile Include="..\src\samplers\independent.cpp">

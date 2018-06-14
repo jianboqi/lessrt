@@ -5,6 +5,7 @@ from DBReader import *
 from session import *
 import math
 from RasterHelper import *
+from Atmosphere import *
 from create_envmap import create_isotropic_diffuse_sky
 
 class SceneParser:
@@ -37,7 +38,7 @@ class SceneParser:
         if not its is None:
             return its.p[1]
         else:
-            print "Camera is outside of the scene, do not use relative height"
+            print("Camera is outside of the scene, do not use relative height")
             return 0
 
 
@@ -98,11 +99,41 @@ class SceneParser:
             yExtendNode.setAttribute("name", "subSceneZSize")
             yExtendNode.setAttribute("value", str(cfg["scene"]["terrain"]["extent_height"]))
 
+            boolNode = doc.createElement("boolean")
+            integratorNode.appendChild(boolNode)
+            boolNode.setAttribute("name","BRFProduct")
+            boolNode.setAttribute("value","true" if cfg["sensor"]["PhotonTracing"]["BRFProduct"] else "false")
+
+            boolNode = doc.createElement("boolean")
+            integratorNode.appendChild(boolNode)
+            boolNode.setAttribute("name", "UpDownProduct")
+            boolNode.setAttribute("value", "true" if cfg["sensor"]["PhotonTracing"]["UpDownProduct"] else "false")
+
+            # virtual directions virtualDirections
+            virtualDirectionStr = cfg["sensor"]["PhotonTracing"]["virtualDirections"]
+            if virtualDirectionStr != "":
+                strNode = doc.createElement("string")
+                integratorNode.appendChild(strNode)
+                strNode.setAttribute("name","virtualDirections")
+                strNode.setAttribute("value",virtualDirectionStr)
+
+            # Number of directions for solid patches
+            intNode = doc.createElement("integer")
+            integratorNode.appendChild(intNode)
+            intNode.setAttribute("name","NumberOfDirections")
+            intNode.setAttribute("value",str(cfg["sensor"]["PhotonTracing"]["NumberOfDirections"]))
+
         else:
-            integratorNode.setAttribute("type", "path")
+            integratorNode.setAttribute("type", "volpath_simple")
         rootNode.appendChild(integratorNode)
 
         # integrator
+
+        boolNode = doc.createElement("boolean")
+        integratorNode.appendChild(boolNode)
+        boolNode.setAttribute("name","strictNormals")
+        boolNode.setAttribute("value","true")
+
         integerNode = doc.createElement("integer")
         integerNode.setAttribute("name", "maxDepth")
         integerNode.setAttribute("value", str(cfg["sensor"]["record_only_direct"]))
@@ -120,6 +151,18 @@ class SceneParser:
         floatNode.setAttribute("name", "NoDataValue")
         floatNode.setAttribute("value", str(cfg["sensor"]["NoDataValue"]))
         integratorNode.appendChild(floatNode)
+
+        if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
+            # generate atmosphere xml file
+            generateAtsXmlNF(r"D:\DART\user_data\simulations\Hemisphere\skyView\output\atmosphereMaket.txt",
+                             os.path.join(session.get_scenefile_path(), atmosphere_scene_file), 50000, 50000)
+            includenode = doc.createElement("include")
+            rootNode.appendChild(includenode)
+            includenode.setAttribute("filename", atmosphere_scene_file)
+        else:
+            if os.path.exists(os.path.join(session.get_scenefile_path(), atmosphere_scene_file)):
+                os.remove(os.path.join(session.get_scenefile_path(), atmosphere_scene_file))
+
 
         # <boolean name="hideEmitters" value="true"/>
         if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"] and cfg["sensor"]["sensor_type"]\
@@ -177,6 +220,15 @@ class SceneParser:
 
         if cfg["sensor"]["sensor_type"] == "CircularFisheye":
             sensor_node.setAttribute("type", "hemispherical_fisheye")
+
+        clidNode = doc.createElement("float")
+        sensor_node.appendChild(clidNode)
+        clidNode.setAttribute("name","nearClip")
+        clidNode.setAttribute("value", "0.0000001")
+        clidNode = doc.createElement("float")
+        sensor_node.appendChild(clidNode)
+        clidNode.setAttribute("name", "farClip")
+        clidNode.setAttribute("value", "10000000000")
 
         trans_node = doc.createElement("transform")
         sensor_node.appendChild(trans_node)
@@ -388,7 +440,10 @@ class SceneParser:
         i_node.setAttribute("name", "height")
         i_node.setAttribute("value", str(cfg["sensor"]["image_height"]))
 
-
+        if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
+            refNode = doc.createElement("ref")
+            sensor_node.appendChild(refNode)
+            refNode.setAttribute("id","ats_medium")
 
         #emitters
         #direct
@@ -413,21 +468,26 @@ class SceneParser:
         # write BOA to output  batch模式下，每个运行单元的irradiance可能不同，需要分别计算
         # fi = open(combine_file_path(session.get_output_dir(), main_scene_xml_file_prifix+irradiance_file), 'w')
         irr_str = "" #返回一个字符串，包含了太阳水平下行辐射和天空光辐射
-        if cfg["illumination"]["atmosphere"]["ats_type"] == "SKY_TO_TOTAL":
+        if cfg["illumination"]["atmosphere"]["ats_type"] == "SKY_TO_TOTAL" or cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
             spectrum_node = doc.createElement("spectrum")
             d_e_node.appendChild(spectrum_node)
             spectrum_node.setAttribute("name", "irradiance")
-            SKYL = cfg["illumination"]["atmosphere"]["percentage"]
+            bands = cfg["sensor"]["bands"].split(",")
+            bandnum = len(bands)
+            if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
+                SKYL = ','.join(['0' for i in range(bandnum)])
+            else:
+                SKYL = cfg["illumination"]["atmosphere"]["percentage"]
 
-            skyls = map(lambda x:float(x), SKYL.split(","))
+            skyls = list(map(lambda x:float(x), SKYL.split(",")))
             if (not "sun_spectrum" in cfg["illumination"]["sun"])  and (not "sky_spectrum" in cfg["illumination"]["atmosphere"]):
                 sun_irr, sky_irr = sun_irradiance_db.read_toa_with_bandwidth_SKYLs( cfg["sensor"]["bands"],skyls)
             else:
-                sun_irr = map(lambda x:float(x), cfg["illumination"]["sun"]["sun_spectrum"].split(","))
-                sky_irr = map(lambda x: float(x), cfg["illumination"]["atmosphere"]["sky_spectrum"].split(","))
+                sun_irr = list(map(lambda x:float(x), cfg["illumination"]["sun"]["sun_spectrum"].split(",")))
+                sky_irr = list(map(lambda x: float(x), cfg["illumination"]["atmosphere"]["sky_spectrum"].split(",")))
 
             # write sun
-            tmp = map(lambda x:str(x),sun_irr)
+            tmp = list(map(lambda x:str(x),sun_irr))
             spectrum_node.setAttribute("value", ','.join(tmp))
 
             irr_str = "BOA_SUN "
@@ -454,11 +514,11 @@ class SceneParser:
                 spectrum_node = doc.createElement("spectrum")
                 sky_e_node.appendChild(spectrum_node)
                 spectrum_node.setAttribute("name", "radiance")
-                tmp = map(lambda x: str(x/math.pi), sky_irr)
+                tmp = list(map(lambda x: str(x/math.pi), sky_irr))
                 spectrum_node.setAttribute("value", ','.join(tmp))
 
                 # sampling weight
-                sampleRatio = max(map(lambda x, y: x/float(x+y), sun_irr, sky_irr))
+                sampleRatio = max(list(map(lambda x, y: x/float(x+y), sun_irr, sky_irr)))
                 floatNode = doc.createElement("float")
                 d_e_node.appendChild(floatNode)
                 floatNode.setAttribute("name", "samplingWeight")
@@ -473,6 +533,7 @@ class SceneParser:
                 for i in range(0, len(sky_irr)):
                     irr_str += str(sky_irr[i]) + " "
                 # fi.write(irr_str)
+
 
         #include terrain and forest
         if cfg["scene"]["terrain"]["terr_file"] == "" and \

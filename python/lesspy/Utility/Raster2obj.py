@@ -9,7 +9,7 @@ import argparse
 from osgeo import gdal
 import numpy as np
 import math
-import mahotas
+# import mahotas
 
 
 # approximate the terrain with 256*256 meshes for 3D display
@@ -26,7 +26,7 @@ def approximate_terrain_with_mesh(rasterfile, dist_obj_file, xExtend=-1, zExtend
             pixel_x = abs(transform[1])
             pixel_y = abs(transform[5])
         else:
-            print "no geo transform."
+            print("no geo transform.")
             return
         xExtend = XSize * pixel_x
         zExtend = YSize * pixel_y
@@ -41,12 +41,15 @@ def approximate_terrain_with_mesh(rasterfile, dist_obj_file, xExtend=-1, zExtend
     dataarr = band.ReadAsArray(0, 0, band.XSize, band.YSize)
     dataarr = dataarr - dataarr.min()
 
+    dst_w = int(dst_w)
+    dst_h = int(dst_h)
+
     scale_x = XSize/float(dst_w-1)
     scale_y = YSize/float(dst_h-1)
     f = open(dist_obj_file,'w')
-    for row in range(0, dst_h):
+    for row in range(0, int(dst_h)):
         origin_row = min(int(scale_y*row), YSize-1)
-        for col in range(0, dst_w):
+        for col in range(0, int(dst_w)):
             origin_col = min(int(scale_x * col), XSize - 1)
             altitude = dataarr[origin_row][origin_col]
             z = zExtend * 0.5 - origin_row * pixel_y
@@ -55,8 +58,8 @@ def approximate_terrain_with_mesh(rasterfile, dist_obj_file, xExtend=-1, zExtend
             vstr = "v " + str(x) + " " + str(y) + " " + str(z) + "\n"
             f.write(vstr)
 
-    for row in range(0, dst_h-1):
-        for col in range(0, dst_w-1):
+    for row in range(0, int(dst_h-1)):
+        for col in range(0, int(dst_w-1)):
             index_left_upper = dst_w*row+col+1
             index_right_upper = dst_w * row + col + 2
             index_left_down = dst_w * (1+row) + col + 1
@@ -86,7 +89,7 @@ def resize_img(dataarr,dst_w,dst_h,o_resolution_x, o_resolution_y):
     # return resized_img, adjusted_res_X, adjusted_res_X
     result = np.zeros((dst_h, dst_w))
     for i in range(0, dst_w):
-        print i
+        print(i)
         pre_coord_X = i* adjusted_res_X
         pre_int_pos_X = int(math.ceil(pre_coord_X / origin_res_X))
         pre_x_factor = (pre_int_pos_X * origin_res_X - pre_coord_X) / origin_res_X

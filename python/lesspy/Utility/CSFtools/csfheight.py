@@ -22,9 +22,9 @@ xyz = np.vstack((input_File.x, input_File.y, input_File.z)).transpose()
 ground_points = xyz[input_File.classification == 2]
 # Triangulation
 points_xy = [[x[0], x[1]] for x in ground_points]
-print len(points_xy)
-tri = Delaunay(points_xy)
-print len(tri.simplices)
+print(len(points_xy))
+tri =(Delaunay(points_xy))
+print(len(tri.simplices))
 
 import matplotlib.pyplot as plt
 plt.triplot(ground_points[:,0], ground_points[:,1], tri.simplices.copy())

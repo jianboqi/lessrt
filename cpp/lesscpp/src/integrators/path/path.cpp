@@ -119,8 +119,7 @@ public:
 			m_virtualPlane_vy = props.getString("vy","MAX");
 			m_virtualPlane_size_x = props.getFloat("sizex",100.0);
 			m_virtualPlane_size_y = props.getFloat("sizez", 100.0);
-		}
-		
+		}		
 	}
 
 	/// Unserialize from a binary data stream

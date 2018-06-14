@@ -13,7 +13,7 @@ def log(*args):
     outstr = ""
     for i in args:
         outstr += str(i)
-    print outstr
+    print(outstr)
     sys.stdout.flush()
 
 def sub_fun():
@@ -72,7 +72,7 @@ def getTreeLocAndHeight(chm_hdr_path,out_file, obj_list, subregion = 0, real_coo
             area_max = areas.max()
             # seg_size = args.seg_size  # 500000 points for each core, parallel
             # seg_num = int(math.ceil(area_max / float(seg_size)))
-            print area_max
+            print(area_max)
             # 每棵树用不用的数值标记
             for i in range(1, areas.max()):
                 if i % 1000 == 0:

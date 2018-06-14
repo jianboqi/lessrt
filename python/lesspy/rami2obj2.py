@@ -129,7 +129,7 @@ class Shoot:
                     matrix = matrix * Matrix44.from_z_rotation(azimuth_rotation_angle)
                     matrix = matrix * Matrix44.from_translation(translate_vector)
                     # applying rotation
-                    newNeedle_vertexes = map(lambda x: matrix * Vector3(x), self.prim_needle.vertexes)
+                    newNeedle_vertexes = list(map(lambda x: matrix * Vector3(x), self.prim_needle.vertexes))
                     self.vertexes += newNeedle_vertexes
         f.close()
         # generate twig
@@ -214,8 +214,8 @@ class PISYTree:
                 arr = line.replace("\n", "").replace("  "," ").split(" ")
                 if len(arr) > 10:
                     self.shoot_num += 1
-                    matrix = getTransMatrix(map(lambda x: float(x), arr[3:]))
-                    trans = map(lambda x: float(x), arr[-3:])
+                    matrix = getTransMatrix(list(map(lambda x: float(x), arr[3:])))
+                    trans = list(map(lambda x: float(x), arr[-3:]))
                     translate_vector = Vector3(trans)
                     matrix = matrix * Matrix44.from_translation(translate_vector)
                     new_shoot_vertexes = map(lambda x: matrix * Vector3(x), self.shoot.vertexes)
@@ -454,7 +454,7 @@ class Forest:
         f.close()
 
 if args.phase == "RAMI-IV" and args.sceneID == "HET07_JPS_SUM":
-    print args.phase, args.sceneID
+    print(args.phase, args.sceneID)
     distDir = args.distDir
     currdir = os.path.split(os.path.realpath(__file__))[0]
     template_folder = combine_file_path_multi(currdir, "template", "RAMI", "RAMI-IV", "HET07_JPS_SUM")
@@ -485,7 +485,7 @@ if args.phase == "RAMI-IV" and args.sceneID == "HET07_JPS_SUM":
     # f.to_position_file(tree_file)
 
     for i in range(5, 9):
-        print "PISY" + str(i)
+        print("PISY" + str(i))
         foliage_file = combine_file_path(template_folder,"PISY"+str(i)+"_foliage.dat")
         stem_file = combine_file_path(template_folder, "PISY"+str(i)+"_stem.dat")
         branch_file = combine_file_path(template_folder, "PISY"+str(i)+"_branches.dat")

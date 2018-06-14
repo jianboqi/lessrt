@@ -18,6 +18,15 @@ public class OpticalThermalProperty {
 		this.temperatureName = t;
 	}
 	
+	public OpticalThermalProperty(String o, String t, String colorStr){
+		this.opticalName = o;
+		this.temperatureName = t;
+		String pureColorStr = colorStr.substring(0, colorStr.length()-2);
+		String opcityStr = colorStr.substring(colorStr.length()-2);
+		int opcityInt = Integer.parseInt(opcityStr, 16);
+		this.componentColor = Color.web(pureColorStr, opcityInt/255.0);
+	}
+	
 	public OpticalThermalProperty(String o){
 		this.opticalName = o;
 	}

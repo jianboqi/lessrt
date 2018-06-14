@@ -1,8 +1,7 @@
 #coding:utf-8
 
 #主要运行的命令
-from projManager import newproj,\
-    new_sequencer, clear_input, save_proj_as
+from projManager import newproj, new_sequencer, clear_input, save_proj_as
 import os
 import json
 from SceneGenerate import SceneGenerate

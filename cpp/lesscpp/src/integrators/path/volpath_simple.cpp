@@ -18,6 +18,10 @@
 
 #include <mitsuba/render/scene.h>
 #include <mitsuba/core/statistics.h>
+#include <boost/filesystem/fstream.hpp>
+#include <fstream>
+#include <iomanip>
+//#define QI_DEBUG
 
 MTS_NAMESPACE_BEGIN
 
@@ -85,6 +89,46 @@ public:
 	SimpleVolumetricPathTracer(Stream *stream, InstanceManager *manager)
 	 : MonteCarloIntegrator(stream, manager) { }
 
+	bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
+		int sceneResID, int sensorResID, int samplerResID) {
+		Scheduler *sched = Scheduler::getInstance();
+		const Sensor *sensor = static_cast<Sensor *>(sched->getResource(sensorResID));
+		const Medium *medium = sensor->getMedium();
+		ref_vector<Emitter> emitters = scene->getEmitters();
+		for (std::size_t i = 0; i < emitters.size(); i++) {
+			if (emitters[i]->getClass()->getName() == "DirectionalEmitter") {
+
+				Spectrum transmitance(1.0);
+
+				if (medium) {
+					const Transform &trafo = emitters[i]->getWorldTransform()->eval(0);
+					Vector d = trafo(Vector(0, 0, 1));
+					Ray tempRay;
+					tempRay.o = Point(0, 0, 0);
+					tempRay.d = -d;
+					tempRay.mint = 0.0;
+					tempRay.maxt = std::numeric_limits<Float>::infinity();
+					transmitance = medium->evalTransmittance(tempRay, nullptr);
+				}
+				
+				DirectSamplingRecord dSampling;
+				dSampling.ref = Point(0, 0, 0);
+				Point2 p2;
+				Spectrum normalIrradiance = emitters[i]->sampleDirect(dSampling, p2);
+				Spectrum directSolarIrradiance = transmitance * normalIrradiance;
+				fs::path lessfile = scene->getDestinationFile().parent_path();
+				lessfile /= "less.txt";
+				std::ofstream out(lessfile.string());
+				out << "BOA Direct sun irradiance (w/m2/um): ";
+				for (int i = 0; i < SPECTRUM_SAMPLES; i++) {
+					out << std::setw(20)<< directSolarIrradiance[i] << "\t";
+				}
+				out << endl;
+			}
+		}
+		return true;
+	}
+
 	Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
 		/* Some aliases and local variables */
 		const Scene *scene = rRec.scene;
@@ -99,6 +143,13 @@ public:
 		   intersection has already been provided). */
 		rRec.rayIntersect(ray);
 		Spectrum throughput(1.0f);
+
+#ifdef QI_DEBUG
+		cout << "***************start*******************" << endl;
+		cout << its.toString() << endl;
+		cout << "its.t " << its.t << endl;
+#endif // QI_DEBUG
+
 
 		if (m_maxDepth == 1)
 			rRec.type &= RadianceQueryRecord::EEmittedRadiance;
@@ -117,9 +168,11 @@ public:
 				/* Sample the integral
 				   \int_x^y tau(x, x') [ \sigma_s \int_{S^2} \rho(\omega,\omega') L(x,\omega') d\omega' ] dx'
 				*/
-				const PhaseFunction *phase = rRec.medium->getPhaseFunction();
-
+			//	const PhaseFunction *phase = rRec.medium->getPhaseFunction();
+				const PhaseFunction *phase = mRec.getSampledPhaseFunction();
+				//sampling the in-scattering
 				throughput *= mRec.sigmaS * mRec.transmittance / mRec.pdfSuccess;
+
 
 				/* ==================================================================== */
 				/*                     Direct illumination sampling                     */
@@ -133,6 +186,7 @@ public:
 					Spectrum value = scene->sampleAttenuatedEmitterDirect(
 							dRec, rRec.medium, maxInteractions,
 							rRec.nextSample2D(), rRec.sampler);
+					//cout << "value: " << value.toString()<< endl;
 
 					if (!value.isZero())
 						Li += throughput * value * phase->eval(
@@ -166,8 +220,10 @@ public:
 					Account for this and multiply by the proper per-color-channel transmittance.
 				*/
 
-				if (rRec.medium)
+				if (rRec.medium) {
 					throughput *= mRec.transmittance / mRec.pdfFailure;
+				}
+					
 
 				if (!its.isValid()) {
 					/* If no intersection could be found, possibly return

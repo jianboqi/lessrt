@@ -1,5 +1,6 @@
 package less.gui.helper;
 
+import java.awt.Checkbox;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,6 +32,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -487,7 +489,7 @@ public class ProjectManager {
 			virtualPlanePane = new AnchorPane();
 			virtualPlanePane.setPrefHeight(60);
 			this.mwController.sensorVbox.getChildren().add(this.mwController.sensorVbox.getChildren().size()-1, virtualPlanePane);
-			Label labelCenter = new Label("Center:");
+			Label labelCenter = new Label("Center[XY]:");
 			AnchorPane.setTopAnchor(labelCenter, 10.0);
 			AnchorPane.setLeftAnchor(labelCenter, 5.0);
 			virtualPlanePane.getChildren().add(labelCenter);
@@ -513,14 +515,14 @@ public class ProjectManager {
 			AnchorPane.setLeftAnchor(ypos, 340.0);
 			virtualPlanePane.getChildren().add(ypos);
 			
-			Label labelZ = new Label("Z:");
-			AnchorPane.setTopAnchor(labelZ, 10.0);
+			Label labelZ = new Label("Z[0~Z]:");
+			AnchorPane.setTopAnchor(labelZ, 50.0);
 			AnchorPane.setLeftAnchor(labelZ, 450.0);
 			virtualPlanePane.getChildren().add(labelZ);
 			
 			zpos = new TextField();
 			zpos.setPrefWidth(70);
-			AnchorPane.setTopAnchor(zpos, 5.0);
+			AnchorPane.setTopAnchor(zpos, 45.0);
 			AnchorPane.setLeftAnchor(zpos, 510.0);
 			virtualPlanePane.getChildren().add(zpos);
 			
@@ -914,6 +916,58 @@ public class ProjectManager {
 		AnchorPane.setLeftAnchor(mwController.illumResTextField, 150.0);
 		AnchorPane.setRightAnchor(mwController.illumResTextField, 20.0);
 		AnchorPane.setTopAnchor(illumResolution, 5.0);
+		
+		//products
+		Label productsLabel = new Label("Products:");
+		mwController.ptConfigPanel.getChildren().add(productsLabel);
+		AnchorPane.setLeftAnchor(productsLabel, 0.0);
+		AnchorPane.setTopAnchor(productsLabel, 45.0);
+		mwController.productBRFCheckbox = new CheckBox("BRF");
+		mwController.productUpDownRadiationCheckbox = new CheckBox("Up/Downwelling Radiation");
+		mwController.ptConfigPanel.getChildren().add(mwController.productBRFCheckbox);
+		mwController.ptConfigPanel.getChildren().add(mwController.productUpDownRadiationCheckbox);
+		AnchorPane.setLeftAnchor(mwController.productBRFCheckbox, 150.0);
+		AnchorPane.setLeftAnchor(mwController.productUpDownRadiationCheckbox, 220.0);
+		AnchorPane.setTopAnchor(mwController.productBRFCheckbox, 45.0);
+		AnchorPane.setTopAnchor(mwController.productUpDownRadiationCheckbox, 45.0);
+		
+		mwController.productBRFCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+		    @Override
+		    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		        if(newValue) {
+		        	//number of directions
+		    		mwController.numOfDirectionLabel = new Label("Number of Directions:");
+		    		mwController.ptConfigPanel.getChildren().add(mwController.numOfDirectionLabel);
+		    		AnchorPane.setLeftAnchor(mwController.numOfDirectionLabel, 0.0);
+		    		AnchorPane.setTopAnchor(mwController.numOfDirectionLabel, 85.0);
+		    		mwController.numOfDirectionTextField = new TextField();
+		    		mwController.ptConfigPanel.getChildren().add(mwController.numOfDirectionTextField);
+		    		mwController.numOfDirectionTextField.setText("150");
+		    		AnchorPane.setLeftAnchor(mwController.numOfDirectionTextField, 150.0);
+		    		AnchorPane.setRightAnchor(mwController.numOfDirectionTextField, 20.0);
+		    		AnchorPane.setTopAnchor(mwController.numOfDirectionTextField, 80.0);
+		        	
+		        	mwController.virtualLabel = new Label("Virutal Directions:");
+		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualLabel);
+		    		AnchorPane.setLeftAnchor(mwController.virtualLabel, 0.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualLabel, 125.0);
+		    		mwController.virtualDirTextField = new TextField();
+		    		mwController.virtualDirTextField.setPromptText("zenith:azimuth;zentih:azimuth or zenith1,zenith2;azimuth1,azimuth2");
+		    		mwController.ptConfigPanel.getChildren().add(mwController.virtualDirTextField);
+		    		AnchorPane.setLeftAnchor(mwController.virtualDirTextField, 150.0);
+		    		AnchorPane.setRightAnchor(mwController.virtualDirTextField, 20.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, 120.0);		    		
+		    		
+		        }else {
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualLabel);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDirTextField);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.numOfDirectionLabel);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.numOfDirectionTextField);
+		        }
+		    }
+		});
+		mwController.productBRFCheckbox.setSelected(true);
+		
 	}
 	
 	private void createFisheEyeConfigPanel(){
@@ -925,12 +979,13 @@ public class ProjectManager {
 		mwController.cfConfigPanel.getChildren().add(mwController.cfFovTextField);
 		AnchorPane.setLeftAnchor(mwController.cfFovTextField, 150.0);
 		AnchorPane.setRightAnchor(mwController.cfFovTextField, 20.0);
-		AnchorPane.setTopAnchor(fov, 5.0);
+		AnchorPane.setTopAnchor(mwController.cfFovTextField, 10.0);
+		AnchorPane.setTopAnchor(fov, 15.0);
 		//projection type
 		Label proj_type = new Label("Fisheye Projection: ");
 		mwController.cfConfigPanel.getChildren().add(proj_type);
 		AnchorPane.setLeftAnchor(proj_type, 0.0);
-		AnchorPane.setTopAnchor(proj_type, 45.0);
+		AnchorPane.setTopAnchor(proj_type, 50.0);
 		
 		ObservableList<String> options = 
 			    FXCollections.observableArrayList(
@@ -944,7 +999,7 @@ public class ProjectManager {
 		mwController.cfConfigPanel.getChildren().add(mwController.combobox);
 		AnchorPane.setLeftAnchor(mwController.combobox, 150.0);
 		AnchorPane.setRightAnchor(mwController.combobox, 20.0);
-		AnchorPane.setTopAnchor(mwController.combobox, 40.0);
+		AnchorPane.setTopAnchor(mwController.combobox, 50.0);
 	}
 
 	//sensor
@@ -975,6 +1030,9 @@ public class ProjectManager {
 					mwController.obsVbox.getChildren().add(mwController.obsOrthographicPane);
 					mwController.pixelUnitLabel.setText("Samples [m-2]:");
 					mwController.sensorVbox.getChildren().remove(mwController.ptConfigPanel);
+					mwController.virtualPlaneCheckbox.setSelected(false);
+					handlePlaneCheckbox();
+					mwController.virtualPlaneCheckbox.setDisable(false);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PER)){
@@ -986,6 +1044,9 @@ public class ProjectManager {
 					mwController.obsVbox.getChildren().add(mwController.obsPerspectivePane);
 					mwController.pixelUnitLabel.setText("Samples [/pixel]:");
 					mwController.sensorVbox.getChildren().remove(mwController.ptConfigPanel);
+					mwController.virtualPlaneCheckbox.setSelected(false);
+					handlePlaneCheckbox();
+					mwController.virtualPlaneCheckbox.setDisable(true);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_CF)){
@@ -999,7 +1060,9 @@ public class ProjectManager {
 					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
 					mwController.obsVbox.getChildren().add(mwController.obsPerspectivePane);
 					//mwController.pixelUnitLabel.setText("Samples [/pixel]:");
-					
+					mwController.virtualPlaneCheckbox.setSelected(false);
+					handlePlaneCheckbox();
+					mwController.virtualPlaneCheckbox.setDisable(true);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PT)){
@@ -1009,6 +1072,10 @@ public class ProjectManager {
 					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
 					mwController.obsVbox.getChildren().remove(mwController.obsOrthographicPane);
 					mwController.sensorVbox.getChildren().add(mwController.ptConfigPanel);
+					//diable virtual plane
+					mwController.virtualPlaneCheckbox.setSelected(false);
+					handlePlaneCheckbox();
+					mwController.virtualPlaneCheckbox.setDisable(false);
 					VBox.setMargin(mwController.ptConfigPanel, new Insets(15,0,0,0));
 					mwController.reDrawAll();
 				}

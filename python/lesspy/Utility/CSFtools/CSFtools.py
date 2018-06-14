@@ -16,7 +16,7 @@ class CSFtools:
 
     def parse_params(self, params):
         if len(params)%2 != 0:
-            print "Parameter number is not correct."
+            print("Parameter number is not correct.")
         cmdstr = ""
         for i in range(0, len(params),2):
             param_name = params[i]

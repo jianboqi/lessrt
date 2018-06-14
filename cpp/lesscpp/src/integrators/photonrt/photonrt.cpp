@@ -23,6 +23,9 @@ public:
 		m_granularity = props.getSize("granularity", 200000);
 
 		m_sunRayResolution = props.getFloat("sunRayResolution", 0.05);
+		m_hasBRFProducts = props.getBoolean("BRFProduct", false);
+		m_hasUpDownProducts = props.getBoolean("UpDownProduct", false);
+		m_numberOfDirections = props.getInteger("NumberOfDirections", 150);
 
 		/* Rely on hitting the sensor via ray tracing? */
 		m_bruteForce = props.getBoolean("bruteForce", false);
@@ -40,6 +43,9 @@ public:
 		m_rrDepth = stream->readInt();
 		m_granularity = stream->readSize();
 		m_bruteForce = stream->readBool();
+		m_hasBRFProducts = stream->readBool();
+		m_hasUpDownProducts = stream->readBool();
+		m_numberOfDirections = stream->readInt();
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -48,6 +54,9 @@ public:
 		stream->writeInt(m_rrDepth);
 		stream->writeSize(m_granularity);
 		stream->writeBool(m_bruteForce);
+		stream->writeBool(m_hasBRFProducts);
+		stream->writeBool(m_hasUpDownProducts);
+		stream->writeInt(m_numberOfDirections);
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
@@ -100,7 +109,8 @@ public:
 
 		ref<ParallelProcess> process = new CapturePhotonProcess(
 			job, queue, m_sampleCount, m_granularity,
-			maxPtracerDepth, m_maxDepth, m_rrDepth, m_bruteForce);
+			maxPtracerDepth, m_maxDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts,
+			m_hasUpDownProducts, m_numberOfDirections);
 		process->bindResource("scene", sceneResID);
 		process->bindResource("sensor", sensorResID);
 		process->bindResource("sampler", samplerResID);
@@ -131,6 +141,10 @@ protected:
 	size_t m_sampleCount, m_granularity;
 	bool m_bruteForce;
 	Float m_sunRayResolution;// for each subcell, there is one ray.
+
+	bool m_hasBRFProducts;
+	bool m_hasUpDownProducts;
+	int m_numberOfDirections;
 };
 
 MTS_IMPLEMENT_CLASS_S(PhotonRtTracer, false, Integrator)

@@ -642,7 +642,6 @@ Spectrum Scene::evalTransmittance(const Point &p1, bool p1OnSurface, const Point
 		if (medium)
 			transmittance *= medium->evalTransmittance(
 				Ray(ray, 0, std::min(its.t, remaining)), sampler);
-
 		if (!surface || transmittance.isZero())
 			break;
 
@@ -861,7 +860,6 @@ Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord &dRec,
 	size_t index = m_emitterPDF.sampleReuse(sample.x, emPdf);
 	const Emitter *emitter = m_emitters[index].get();
 	Spectrum value = emitter->sampleDirect(dRec, sample);
-
 	if (dRec.pdf != 0) {
 		value *= evalTransmittance(dRec.ref, false,
 			dRec.p, emitter->isOnSurface(), dRec.time, medium,

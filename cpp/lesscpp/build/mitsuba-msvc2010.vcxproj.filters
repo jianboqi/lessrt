@@ -971,6 +971,12 @@
     <ClCompile Include="..\src\sensors\hemispherical_fisheye.cpp">
       <Filter>Source Files\sensors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\emitters\sunsphere.cpp">
+      <Filter>Source Files\emitters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\medium\planeparallel.cpp">
+      <Filter>Source Files\medium</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup Label="Header Files">
     <ClInclude Include="..\src\converter\converter.h">
@@ -1554,6 +1560,12 @@
     </ClInclude>
     <ClInclude Include="..\include\mitsuba\render\photonproc.h">
       <Filter>Header Files\mitsuba\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\integrators\photonrt\photonRTUtils.h">
+      <Filter>Source Files\integrators\photonrt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\integrators\photonrt\DirectionalBRF.h">
+      <Filter>Source Files\integrators\photonrt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

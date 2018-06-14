@@ -13,6 +13,9 @@
 #include<typeinfo>
 #include<iostream>
 #include<cassert>
+#if defined(__WINDOWS__)
+#include <codecvt>
+#endif
 #include<zlib.h>
 #include<map>
 //#include <tchar.h>
@@ -66,7 +69,17 @@ namespace cnpy {
 
     template<typename T> void npy_save(std::string fname, const T* data, const unsigned int* shape, const unsigned int ndims, std::string mode = "w") {
         FILE* fp = NULL;
-        if(mode == "a") fp = fopen(fname.c_str(),"r+b");
+		if (mode == "a") {
+#if defined(__WINDOWS__)
+			//convert narrow bytes (fname) to widestring and using _wfopen
+			//to handle path with Chinese character
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+			std::wstring wideStr = conv.from_bytes(fname);
+			fp = _wfopen(wideStr.c_str(), L"r+b");
+#else
+			fp = fopen(fname.c_str(), "r+b");
+#endif   
+		}
         if(fp) {
             //file exists. we need to append to it. read the header, modify the array size
             unsigned int word_size, tmp_dims;
@@ -101,9 +114,17 @@ namespace cnpy {
         }
         else {
 			std::vector<char> header = create_npy_header(data, shape, ndims);
-            fp = fopen(fname.c_str(),"wb");
-            fwrite(&header[0],sizeof(char),header.size(),fp);
 
+#if defined(__WINDOWS__)
+			//convert narrow bytes (fname) to widestring and using _wfopen
+			//to handle path with Chinese character
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+			std::wstring wideStr = conv.from_bytes(fname);
+			fp = _wfopen(wideStr.c_str(), L"wb");
+#else
+			fp = fopen(fname.c_str(), "wb");
+#endif            
+            fwrite(&header[0],sizeof(char),header.size(),fp);
         }
 
         unsigned int nels = 1;
@@ -124,7 +145,17 @@ namespace cnpy {
         unsigned int global_header_offset = 0;
         std::vector<char> global_header;
 
-        if(mode == "a") fp = fopen(zipname.c_str(),"r+b");
+		if (mode == "a") {
+#if defined(__WINDOWS__)
+			//convert narrow bytes (fname) to widestring and using _wfopen
+			//to handle path with Chinese character
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+			std::wstring wideStr = conv.from_bytes(fname);
+			fp = _wfopen(wideStr.c_str(), L"r+b");
+#else
+			fp = fopen(fname.c_str(), "r+b");
+#endif  
+		}
 
         if(fp) {
             //zip file exists. we need to add a new npy file to it.
@@ -142,7 +173,16 @@ namespace cnpy {
             fseek(fp,global_header_offset,SEEK_SET);
         }
         else {
-            fp = fopen(zipname.c_str(),"wb");
+#if defined(__WINDOWS__)
+			//convert narrow bytes (fname) to widestring and using _wfopen
+			//to handle path with Chinese character
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+			std::wstring wideStr = conv.from_bytes(zipname);
+			fp = _wfopen(wideStr.c_str(), L"wb");
+#else
+			fp = fopen(zipname.c_str(), "wb");
+#endif  
+
         }
 
         std::vector<char> npy_header = create_npy_header(data,shape,ndims);

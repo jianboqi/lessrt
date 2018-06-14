@@ -37,7 +37,7 @@ def transmittance2lai_simple(arr):
 def sub_fun_EC_lai(_delta_xyz, _classification, _output_ground_echo, _output_vegetation_echo, _seg_index, _num_h, _resolution, _seg_size):
     lower = _seg_index * _seg_size
     upper = min((_seg_index + 1) * _seg_size, len(_delta_xyz))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     for i in range(lower, upper):
         row = int(_delta_xyz[i][1] / _resolution)
         col = int(_delta_xyz[i][0] / _resolution)
@@ -49,7 +49,7 @@ def sub_fun_EC_lai(_delta_xyz, _classification, _output_ground_echo, _output_veg
 def sub_fun_UEI_lai(_delta_xyz, _classification, _intensity, _output_ground_echo, _output_vegetation_echo, _seg_index, _num_h, _resolution, _seg_size):
     lower = _seg_index * _seg_size
     upper = min((_seg_index + 1) * _seg_size, len(_delta_xyz))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     for i in range(lower, upper):
         row = int(_delta_xyz[i][1] / _resolution)
         col = int(_delta_xyz[i][0] / _resolution)
@@ -61,7 +61,7 @@ def sub_fun_UEI_lai(_delta_xyz, _classification, _intensity, _output_ground_echo
 def sub_fun_CEI_lai(_delta_xyz, _classification, _intensity, _scanning_angle, _avgHeight, _output_ground_echo, _output_vegetation_echo, _seg_index, _num_h, _resolution, _seg_size):
     lower = _seg_index * _seg_size
     upper = min((_seg_index + 1) * _seg_size, len(_delta_xyz))
-    print "Processing from: ", lower, " to ", upper
+    print("Processing from: ", lower, " to ", upper)
     for i in range(lower, upper):
         row = int(_delta_xyz[i][1] / _resolution)
         col = int(_delta_xyz[i][0] / _resolution)
@@ -93,17 +93,17 @@ if __name__ == "__main__":
     method = args.method
     if method == "CEI":
         if args.avgFlightHeight is None:
-            print "Please input the average flight height."
+            print("Please input the average flight height.")
             import sys
             sys.exit(0)
         if args.originlas is None:
-            print "Please input the original las file."
+            print("Please input the original las file.")
             import sys
             sys.exit(0)
 
     start = time.clock()
-    print "Method:", method
-    print "Reading data..."
+    print("Method:", method)
+    print("Reading data...")
     # read point cloud
     inFile = laspy.file.File(input_las_file, mode='r')
     # x y z of each point
@@ -116,10 +116,10 @@ if __name__ == "__main__":
     classification = inFile.classification
     geoTransform = (inFile.x.min(), resolution, 0, inFile.y.max(), 0, -resolution)
     point_number = len(xyz_total)
-    print "Total points:", point_number
+    print("Total points:", point_number)
 
     min_x, min_y, width, height, num_w, num_h = compute_bounding_box(inFile, resolution)
-    print "LAI product size: ", "Width: ", num_w, " Height: ", num_h
+    print("LAI product size: ", "Width: ", num_w, " Height: ", num_h)
     # height value are no need to offset
     delta_xyz = xyz_total - np.array([min_x, min_y, 0])
     # prepare for parallel computing
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     saveToHdr(LAI, lai_out_file, geoTransform)
     del output_ground_echo
     del output_vegetation_echo
-    print "Done."
+    print("Done.")
     try:
         import shutil
         shutil.rmtree(folder)
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         print("Failed to delete: " + folder)
 
     end = time.clock()
-    print "Time: ", "%.3fs" % (end - start)
+    print("Time: ", "%.3fs" % (end - start))
 
 
 

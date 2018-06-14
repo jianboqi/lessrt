@@ -62,9 +62,9 @@ public:
 		bool delta, const Intersection &its, const Medium *medium,
 		const Spectrum &weight);
 
-	virtual void handleSurfaceInteractionExt(int depth, int nullInteractions,
-		bool delta, const Intersection &its, Point &previousPoint, const Medium *medium,
-		const Spectrum &weight);
+	//virtual void handleSurfaceInteractionExt(int depth, int nullInteractions,
+	//	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+	//	const Spectrum &weight);
 
 	virtual void handleMediumInteraction(int depth, int nullInteractions,
 		bool delta, const MediumSamplingRecord &mRec, const Medium *medium,
@@ -84,8 +84,6 @@ protected:
 	int m_maxDepth;
 	int m_rrDepth;
 	bool m_emissionEvents;
-	Vector2 m_subSceneUpperLeft;
-	Vector2i m_filmSize;
 };
 
 MTS_NAMESPACE_END

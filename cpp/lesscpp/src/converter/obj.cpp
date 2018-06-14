@@ -24,6 +24,9 @@
 #include <mitsuba/core/version.h>
 #include <mitsuba/render/scene.h>
 #include <boost/filesystem/fstream.hpp>
+#if defined(__WINDOWS__)
+#include <codecvt>
+#endif
 #include "converter.h"
 
 std::set<std::string> availableTextures;
@@ -154,7 +157,15 @@ void GeometryConverter::convertOBJ(const fs::path &inputFile,
 	const fs::path &textureDirectory,
 	const fs::path &meshesDirectory) {
 
+#if defined(__WINDOWS__)
+	//convert narrow bytes (fname) to widestring and using _wfopen
+	//to handle path with Chinese character
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+	std::wstring wideStr = conv.from_bytes(inputFile.string());
+	fs::ifstream is(wideStr);
+#else
 	fs::ifstream is(inputFile);
+#endif   
 	if (is.bad() || is.fail())
 		SLog(EError, "Could not open OBJ file '%s'!", inputFile.string().c_str());
 
@@ -202,6 +213,15 @@ void GeometryConverter::convertOBJ(const fs::path &inputFile,
 			std::string filename = mesh->getName() + std::string(".serialized");
 			SLog(EInfo, "Saving \"%s\"", filename.c_str());
 			ref<FileStream> stream = new FileStream(meshesDirectory / filename, FileStream::ETruncReadWrite);
+//#if defined(__WINDOWS__)
+//			//convert narrow bytes (fname) to widestring and using _wfopen
+//			//to handle path with Chinese character
+//			std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+//			std::wstring wideStr = conv.from_bytes((meshesDirectory / filename).string());
+//			stream = new FileStream(wideStr, FileStream::ETruncReadWrite);
+//#endif
+
+			
 			stream->setByteOrder(Stream::ELittleEndian);
 			mesh->serialize(stream);
 			stream->close();

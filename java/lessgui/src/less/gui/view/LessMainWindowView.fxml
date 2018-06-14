@@ -40,7 +40,7 @@
 <?import javafx.scene.shape.Polygon?>
 <?import javafx.scene.shape.Rectangle?>
 
-<BorderPane prefHeight="1000.0" prefWidth="1350.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LessMainWindowController">   
+<BorderPane prefHeight="1000.0" prefWidth="1350.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LessMainWindowController">   
    <top>
       <VBox BorderPane.alignment="CENTER">
          <children>
@@ -244,7 +244,7 @@
                                  <children>
                                     <ScrollPane fitToWidth="true" layoutX="10.399999618530273" layoutY="10.399999618530273" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <content>
-                                          <VBox fx:id="sensorVbox" prefHeight="561.0" prefWidth="624.0">
+                                          <VBox fx:id="sensorVbox" prefHeight="664.0" prefWidth="634.0">
                                              <children>
                                                 <AnchorPane prefHeight="367.0" prefWidth="624.0">
                                                    <children>
@@ -285,7 +285,7 @@
                                                       <TextField fx:id="sensorNoDataValueField" layoutX="140.0" layoutY="336.0" prefHeight="35.0" prefWidth="292.0" text="-1.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
                                                    </children>
                                                 </AnchorPane>
-                                                <AnchorPane fx:id="orthographicPane" prefHeight="138.0" prefWidth="671.0">
+                                                <AnchorPane fx:id="orthographicPane" prefHeight="137.0" prefWidth="624.0">
                                                    <VBox.margin>
                                                       <Insets top="15.0" />
                                                    </VBox.margin>
@@ -325,15 +325,17 @@
                                  <children>
                                     <VBox fx:id="obsVbox" layoutX="134.0" layoutY="108.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <children>
-                                          <AnchorPane fx:id="obsOrthographicPane" prefHeight="66.0" prefWidth="341.0">
+                                          <AnchorPane fx:id="obsOrthographicPane" prefHeight="143.0" prefWidth="636.0">
                                              <children>
                                                 <Label layoutX="14.0" layoutY="14.0" text="View Zenith [°]:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                 <Label layoutX="7.0" layoutY="33.0" text="View Azimuth [°]:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
                                                 <TextField fx:id="obsZenithField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="1.0" />
                                                 <TextField fx:id="obsAzimuthField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="180" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="45.0" />
+                                                <Label layoutY="100.0" text="Sensor Height [m]:" AnchorPane.leftAnchor="0.0" />
+                                                <TextField fx:id="obsAGLField" layoutX="150.0" layoutY="91.0" prefHeight="35.0" prefWidth="181.0" text="3000" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="40.0" />
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="obsPerspectivePane" prefHeight="132.0" prefWidth="636.0">
+                                          <AnchorPane fx:id="obsPerspectivePane" prefHeight="164.0" prefWidth="636.0">
                                              <children>
                                                 <Label layoutX="14.0" layoutY="14.0" text="Camera Position:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
                                                 <Label layoutX="7.0" layoutY="33.0" text="Target:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="50.0" />
@@ -350,7 +352,9 @@
                                                 <Label layoutX="305.0" layoutY="51.0" text="Y" />
                                                 <Label layoutX="446.0" layoutY="51.0" text="Z" />
                                                 <Label layoutY="100.0" text="Relative Height:" />
-                                                <CheckBox fx:id="CameraPosRelativeHeightCheckbox" layoutX="167.0" layoutY="100.0" mnemonicParsing="false" />
+                                                <CheckBox fx:id="CameraPosRelativeHeightCheckbox" layoutX="167.0" layoutY="100.0" mnemonicParsing="false" AnchorPane.leftAnchor="167.0" />
+                                                <Label layoutX="3.0" layoutY="130.0" text="Show Camera Position:" AnchorPane.leftAnchor="0.0" />
+                                                <CheckBox fx:id="showCameraPosCheckbox" layoutX="164.0" layoutY="130.0" mnemonicParsing="false" onAction="#showCameraPos" selected="true" AnchorPane.leftAnchor="167.0" />
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="10.0" />
@@ -361,7 +365,7 @@
                                  </children></AnchorPane>
                           </content>
                         </TitledPane>
-                        <TitledPane animated="false" text="Illumination">
+                        <TitledPane animated="false" text="Illumination &amp; Atmosphere">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -377,20 +381,25 @@
                                                 <Button layoutX="414.0" layoutY="121.0" mnemonicParsing="false" onAction="#OpenSunPosCalculator" text="Sun Postion Calculator" AnchorPane.rightAnchor="20.0" />
                                              </children>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="orthographicPane111" prefHeight="150.0" prefWidth="558.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
+                                          <AnchorPane fx:id="skyPane" prefHeight="150.0" prefWidth="558.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
                                              <children>
                                                 <Label layoutX="14.0" layoutY="14.0" text="Type:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
-                                                <Label layoutX="7.0" layoutY="33.0" text="Percentage:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
-                                                <TextField fx:id="atsPercentageField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
                                                 <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sky " />
                                                 <ComboBox fx:id="atsTypeCombobox" layoutX="151.0" layoutY="25.0" prefWidth="150.0" value="SKY_TO_TOTAL" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0">
       	                                          <items>
       	                                              <FXCollections fx:factory="observableArrayList">
       	                                                 <String fx:value="SKY_TO_TOTAL" />
+      	                                                 <String fx:value="ATMOSPHERE" />
       	                                              </FXCollections>
       	                                           </items>
                                                 </ComboBox>
-                                                <Label layoutX="158.0" layoutY="115.0" text="Note: it should match with spectral bands" textFill="#8a8888" AnchorPane.leftAnchor="150.0" />
+                                                <AnchorPane fx:id="SkyTotalPane" layoutX="10.0" layoutY="68.0" prefHeight="75.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                                                   <children>
+                                                      <Label layoutX="153.0" layoutY="52.0" text="Note: it should match with spectral bands" textFill="#8a8888" />
+                                                      <TextField fx:id="atsPercentageField" layoutX="155.0" layoutY="14.0" prefHeight="35.0" prefWidth="451.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
+                                                      <Label layoutX="14.0" layoutY="22.0" text="Percentage:" AnchorPane.leftAnchor="6.0" />
+                                                   </children>
+                                                </AnchorPane>
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="20.0" />
@@ -407,7 +416,7 @@
                                                 <Label layoutX="7.0" layoutY="33.0" text="Sky Spectrum:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
                                                 <TextField fx:id="SolarSpectrumSunTextField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="1.32,1.06" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
                                                 <TextField fx:id="SolarSpectrumSkyTextField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
-                                                <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun " />
+                                                <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun &amp; Sky" />
                                                 <Label fx:id="unitLabel" layoutX="152.0" layoutY="1.0" text="W/(m^2·nm)" textFill="#797878" />
                                              </children>
                                              <VBox.margin>
@@ -428,15 +437,15 @@
                                           <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                                        </columnResizePolicy>
                                     </TableView>
-                                    <Button layoutX="451.0" layoutY="16.0" mnemonicParsing="false" onAction="#addOptical" prefHeight="20.0" prefWidth="60.0" text="Add" AnchorPane.leftAnchor="445.0" />
+                                    <Button layoutX="451.0" layoutY="16.0" mnemonicParsing="false" onAction="#addOptical" prefHeight="20.0" prefWidth="60.0" text="Add" AnchorPane.leftAnchor="445.0" AnchorPane.topAnchor="7.0" />
                                     <TextField fx:id="opticalNameField" layoutX="14.0" layoutY="17.0" prefHeight="35.0" prefWidth="88.0" promptText="Name" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalRefFrantField" layoutX="127.6" layoutY="30.6" prefHeight="35.0" prefWidth="98.0" promptText="Ref (Front)" AnchorPane.leftAnchor="105.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalRefBackField" layoutX="229.0" layoutY="16.0" prefHeight="35.0" prefWidth="103.0" promptText="Ref (Back)" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalTransField" layoutX="390.6" layoutY="58.6" prefHeight="35.0" prefWidth="98.0" promptText="Transmittance" AnchorPane.leftAnchor="330.0" AnchorPane.topAnchor="3.0" />
-                                    <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="511.0" />
+                                    <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="511.0" AnchorPane.topAnchor="7.0" />
                                     <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="Choose from database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
                                     <Button layoutX="307.0" layoutY="354.0" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="240.0" />
-                                    <Button layoutX="593.0" layoutY="16.0" mnemonicParsing="false" onAction="#copyOptical" prefHeight="35.0" prefWidth="68.0" text="Copy" />
+                                    <Button layoutX="588.0" layoutY="27.4" mnemonicParsing="false" onAction="#copyOptical" prefHeight="28.0" prefWidth="56.0" text="Copy" AnchorPane.topAnchor="7.0" />
                                  </children>
                               </AnchorPane>
                           </content>

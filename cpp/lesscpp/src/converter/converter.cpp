@@ -39,6 +39,9 @@
 #include <boost/algorithm/string.hpp>
 #include <sys/stat.h>
 #include <sys/types.h>
+#if defined(__WINDOWS__)
+#include <codecvt>
+#endif
 #include <set>
 
 XERCES_CPP_NAMESPACE_USE
@@ -119,7 +122,15 @@ void GeometryConverter::convert(const fs::path &inputFile,
 	if (m_packGeometry) {
 		m_geometryFileName = outputDirectory / sceneName;
 		m_geometryFileName.replace_extension(".serialized");
+#if defined(__WINDOWS__)
+		//convert narrow bytes (fname) to widestring and using _wfopen
+		//to handle path with Chinese character
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+		std::wstring wideStr = conv.from_bytes(m_geometryFileName.string());
+		m_geometryFile = new FileStream(wideStr, FileStream::ETruncReadWrite);
+#else
 		m_geometryFile = new FileStream(m_geometryFileName, FileStream::ETruncReadWrite);
+#endif
 		m_geometryFile->setByteOrder(Stream::ELittleEndian);
 	}
 
@@ -289,7 +300,15 @@ void GeometryConverter::convert(const fs::path &inputFile,
 		delete serializer;
 		parser->release();
 	} else {
+#if defined(__WINDOWS__)
+	//convert narrow bytes (fname) to widestring and using _wfopen
+	//to handle path with Chinese character
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+	std::wstring wideStr = conv.from_bytes(outputFile.string());
+	fs::ofstream ofile(wideStr);
+#else
 		fs::ofstream ofile(outputFile);
+#endif
 		if (ofile.fail())
 			SLog(EError, "Could not write to \"%s\"!", outputFile.string().c_str());
 		ofile << os.str();

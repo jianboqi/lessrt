@@ -16,7 +16,7 @@ def log(*args):
     outstr = ""
     for i in args:
         outstr += str(i)
-    print outstr
+    print(outstr)
     sys.stdout.flush()
 
 

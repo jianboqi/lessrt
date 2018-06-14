@@ -52,9 +52,9 @@ if sys.platform == 'win32':
 		if '.dll' in plugin.__str__():
 			installTargets += env.Install(os.path.join(distDir, 'plugins'), plugin)
 
-	compilerType = 'vc' + env['MSVC_VERSION'].replace('.', '')
+	compilerType = 'vc141'
 	archType = 'x64' if 'WIN64' in env['CXXFLAGS'] else 'i386'
-	dllprefix = '#dependencies/lib/%s_%s' % (archType, compilerType[:-1])
+	dllprefix = '#dependencies/lib'
 
 	install(distDir, ['converter/mtsimport.exe'])
 	sdkDir = os.path.join(distDir, "sdk")
@@ -71,21 +71,17 @@ if sys.platform == 'win32':
 			[ ('#' + os.path.join(includeDir, fname)) for fname in entry[2] ])
 	for ver in hasPython:
 		installAs(os.path.join(distDir, 'python/'+ver+'/mitsuba.pyd'), 'libpython/mitsuba_python' + ver + '.dll')
-	install(distDir, ['Iex.dll', 'Half.dll','IlmThread.dll', 'Imath.dll','IlmImf.dll','zlib.dll',
-		'libpng16.dll',	'jpeg62.dll', 'xerces-c_3_1.dll', 'libfftw-3.3.dll'],
-		prefix=dllprefix)
+	install(distDir, ['Iex.dll', 'Half.dll','IlmThread.dll', 'Imath.dll','IlmImf.dll','zlib1.dll',
+                'libpng16.dll', 'jpeg.dll', 'xerces-c_3_1.dll', 'glew32mx.dll', 'libfftw3-3.dll'],
+                prefix=dllprefix)
 	#install(distDir, ['libcollada14dom24.dll'], dllprefix)
 	# for boostlib in ['python27', 'python32', 'python33', 'python34', 'system', 'filesystem', 'chrono', 'thread']:
-	for boostlib in ['python27', 'system', 'filesystem', 'chrono', 'thread']:
-		install(distDir, ['boost_%s-%s-mt-1_53.dll' % (boostlib, compilerType)], dllprefix)
+	for boostlib in ['python','python3', 'system', 'filesystem', 'chrono', 'thread']:
+		install(distDir, ['boost_%s-%s-mt-1_65_1.dll' % (boostlib, compilerType)], dllprefix)
 
 	if 'WIN64' in env['CXXFLAGS']:
-		if compilerType == 'vc120':
-			installTargets += env.Install(distDir, '#dependencies/bin/vcredist_2013_x64.exe')
-		else:
-			installTargets += env.Install(distDir, '#dependencies/bin/vcredist_2010_sp1_x64.exe')
-	else:
-		installTargets += env.Install(distDir, '#dependencies/bin/vcredist_2010_sp1_x86.exe')
+		if compilerType == 'vc141':
+			installTargets += env.Install(distDir, '#dependencies/lib/VC_redist_2017.x64.exe')
 
 	if 'REDIST_PATH' in env:
 		install(distDir, ['libmmd.dll', 'libiomp5md.dll', 'svml_dispmd.dll'], prefix = env['REDIST_PATH'])

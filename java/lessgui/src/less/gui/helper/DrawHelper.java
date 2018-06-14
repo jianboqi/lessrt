@@ -189,26 +189,29 @@ public class DrawHelper {
 	 * Draw the range of sensor print according to the zenith, azimuth of sensor
 	 */
 	public void drawOrthgraphicCameraAndSensor(){
+		
+		String sceneX = this.mwController.sceneXSizeField.getText();
+		String sceneY = this.mwController.sceneYSizeField.getText();
+		double scenew = Double.parseDouble(sceneX.replaceAll(",", ""));
+		double sceneh = Double.parseDouble(sceneY.replaceAll(",", ""));
+		double width = this.mwController.canvas.getWidth();
+		double height = this.mwController.canvas.getHeight();
+		double scale_pixel_real = width/scenew; //pixels per meter
+		
 		if(this.mwController.comboBoxSensorType.getSelectionModel().getSelectedItem().equals(Const.LESS_SENSOR_TYPE_ORTH)){
 			String xExtent = this.mwController.sensorXExtentField.getText();
 			String yExtent = this.mwController.sensorYExtentField.getText();
-			String sceneX = this.mwController.sceneXSizeField.getText();
-			String sceneY = this.mwController.sceneYSizeField.getText();
+			
 			String viewAzimuth = this.mwController.obsAzimuthField.getText();
 			String viewZenith = this.mwController.obsZenithField.getText();
 			if(xExtent.equals("") || yExtent.equals("") || sceneX.equals("") || sceneY.equals("")||
 					viewAzimuth.equals("") || viewZenith.equals("")){
 				return;
 			}
-			double width = this.mwController.canvas.getWidth();
-			double height = this.mwController.canvas.getHeight();
 			double sensorXExtent = Double.parseDouble(xExtent.replaceAll(",", ""));
 			double sensorYExtent = Double.parseDouble(yExtent.replaceAll(",", ""));
-			double scenew = Double.parseDouble(sceneX.replaceAll(",", ""));
-			double sceneh = Double.parseDouble(sceneY.replaceAll(",", ""));
 			double viewZenithAngle = Double.parseDouble(viewZenith.replaceAll(",", ""))/180.0*Math.PI;
 			double viewAzimuthAngle = Double.parseDouble(viewAzimuth.replaceAll(",", ""))/180.0*Math.PI;
-			double scale_pixel_real = width/scenew; //pixels per meter
 			GraphicsContext gc = this.mwController.canvas.getGraphicsContext2D();
 			if(scenew<sensorXExtent || sceneh < sensorYExtent){
 				this.mwController.mapInfoLabel.setText("Attention: Sensor ranges exceed the actual scene.");
@@ -217,7 +220,6 @@ public class DrawHelper {
 			}
 			//along front: height direction
 			double sensor_height_projected_range = sensorYExtent/Math.cos(viewZenithAngle);
-			
 			double sensorPixelWidth = sensorXExtent*scale_pixel_real;
 			double sensorPixelHeight = sensor_height_projected_range*scale_pixel_real;
 			double x = 0.5*width - 0.5*sensorPixelWidth;
@@ -230,6 +232,28 @@ public class DrawHelper {
 			gc.strokeRect(x, y, sensorPixelWidth, sensorPixelHeight);
 			gc.setLineWidth(1);
 			gc.setTransform(new Affine());
+		}
+		//draw the position of the fisheye and perspective camera
+		if(this.mwController.comboBoxSensorType.getSelectionModel().getSelectedItem().equals(Const.LESS_SENSOR_TYPE_PER) ||
+				this.mwController.comboBoxSensorType.getSelectionModel().getSelectedItem().equals(Const.LESS_SENSOR_TYPE_CF)){
+			if(this.mwController.showCameraPosCheckbox.isSelected()) {
+				String sensorXPos = this.mwController.pers_o_x_field.getText();
+				String sensorYPos = this.mwController.pers_o_y_field.getText();
+				if(sensorXPos.equals("") || sensorXPos.equals("")) return;
+				
+				double sensorX = Double.parseDouble(sensorXPos.replaceAll(",", ""));
+				double sensorY = Double.parseDouble(sensorYPos.replaceAll(",", ""));
+				GraphicsContext gc = this.mwController.canvas.getGraphicsContext2D();
+				gc.setStroke(Color.BLUE);
+				gc.setLineWidth(3);
+				double cross_size = 10;
+				double pos_x = sensorX*scale_pixel_real;
+				double pos_y = sensorY*scale_pixel_real;
+				gc.strokeLine(pos_x-0.5*cross_size,pos_y,pos_x+0.5*cross_size,pos_y);
+				gc.strokeLine(pos_x,pos_y-0.5*cross_size,pos_x,pos_y+0.5*cross_size);
+//				gc.strokeRect(sensorX*scale_pixel_real-1.5, sensorY*scale_pixel_real-1.5, 3, 3);
+				gc.setLineWidth(1);
+			}
 		}
 	}
 	

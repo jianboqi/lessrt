@@ -5,11 +5,11 @@ import argparse
 import socket
 from Constant import current_rt_program, main_scene_xml_file
 from session import session
-print "Python", platform.python_version()
+print("Python", platform.python_version())
 
 currdir = os.path.split(os.path.realpath(__file__))[0]
 sys.path.append(os.path.join(currdir,"Utility","CSFtools"))
-sys.path.append(os.path.join(currdir,"bin","rt",current_rt_program,"python","2.7"))
+sys.path.append(os.path.join(currdir,"bin","rt",current_rt_program,"python","3.6"))
 os.environ['PATH'] = os.path.join(currdir, "bin","rt",current_rt_program)+ os.pathsep + os.environ['PATH']
 
 from mitsuba.core import Vector, Point, Ray, Thread
@@ -36,7 +36,7 @@ class LESS:
     # get the scene object
     def getScene(self):
         if(project_dir == "null"):
-            print "No simulation."
+            print("No simulation.")
             return
 
         fileResolver = Thread.getThread().getFileResolver()
@@ -46,7 +46,7 @@ class LESS:
         fileResolver.appendPath(str(scenepath))
         main_xml = str(os.path.join(scenepath, main_scene_xml_file))
         if not os.path.exists(main_xml):
-            print "Simulation not generated."
+            print("Simulation not generated.")
             return
         scene = SceneHandler.loadScene(main_xml)
         scene.configure()
@@ -121,7 +121,7 @@ class LESSGUI:
 
     def placeInstance(self,xyz):
         xyzstr = "instance_"+str(xyz[0])+"_"+str(xyz[1])+"_"+str(xyz[2])+"\n"
-        self.sock.sendall(xyzstr)
+        self.sock.sendall(xyzstr.encode('utf-8'))
 #
 
 # if __name__ == "__main__":

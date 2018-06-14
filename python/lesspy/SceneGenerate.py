@@ -6,8 +6,9 @@ from SceneParser import *
 from Loger import log
 from Utils import convert_obj_2_serialized, check_if_string_is_zero_and_comma, ensureDirs
 currdir = os.path.split(os.path.realpath(__file__))[0]
-sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/2.7/')
+sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/3.6/')
 os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + '/' + os.pathsep + os.environ['PATH']
+import codecs
 
 class SceneGenerate:
 
@@ -16,7 +17,7 @@ class SceneGenerate:
         f = open(config_file_path, 'r')
         cfg = json.load(f)
         #band num
-        SKYLs = cfg["illumination"]["atmosphere"]["percentage"].split(",")
+        SKYLs = cfg["sensor"]["bands"].split(",")
         bandnum = len(SKYLs)
 
         # write band number information to dist
@@ -36,7 +37,7 @@ class SceneGenerate:
         cfgFile.close()
 
         # write num.cfg and range.cfg to .less/
-        curr_dir = os.getcwdu()
+        curr_dir = os.getcwd()
         lessfolder = os.path.join(curr_dir, ".less")
         ensureDirs(lessfolder)
         numCFGpath = os.path.join(lessfolder, "num.cfg")
@@ -202,7 +203,7 @@ class SceneGenerate:
         cfg = json.load(f)
         tree_pos = combine_file_path(session.get_input_dir(),cfg["scene"]["forest"]["tree_pos_file"])
         if cfg["scene"]["forest"]["tree_pos_file"] == "" or (not os.path.exists(tree_pos)):
-            print "INFO: No tree positions defined."
+            print("INFO: No tree positions defined.")
             return
 
         #total line
@@ -239,7 +240,9 @@ class SceneGenerate:
         if cfg["scene"]["forest"]["objects_file"] == "" or (not os.path.exists(objects_file_path)):
             log("INFO: No objects defined.")
             return
-        objf = open(combine_file_path(session.get_scenefile_path(), obj_file_prifix + object_scene_file), 'w')
+
+        # objf = open(os.path.join(session.get_scenefile_path(), obj_file_prifix + object_scene_file), 'w')
+        objf = codecs.open(os.path.join(session.get_scenefile_path(), obj_file_prifix + object_scene_file), "w", "utf-8-sig")
         objdoc = minidom.Document()
         objroot = objdoc.createElement("scene")
         objdoc.appendChild(objroot)
@@ -256,7 +259,7 @@ class SceneGenerate:
                 object_name = arr[0]
                 if object_name not in hidden_objects:
                     object_optical.append(arr)
-                    for i in range(1, len(arr),3):
+                    for i in range(1, len(arr),4):
                         opticalSet.add(arr[i+1]) # add all spectral properties to set
 
         opticalSet = list(opticalSet)
@@ -323,7 +326,7 @@ class SceneGenerate:
             shapenode.setAttribute("id", objectName)
             shapenode.setAttribute("type", "shapegroup")
 
-            for j in range(1, len(rowdata),3):
+            for j in range(1, len(rowdata),4):
                 compnentName = rowdata[j]
                 opticalName = rowdata[j+1]
                 temperatureName = rowdata[j+2]
@@ -333,8 +336,11 @@ class SceneGenerate:
                 strnode = objdoc.createElement("string")
                 subshapnode.appendChild(strnode)
                 strnode.setAttribute("name", "filename")
+                # import chardet
                 # convert to serizlized
-                objfile = combine_file_path(session.get_input_dir(), compnentName)
+                # the string reading from object.txt, which is produced by Java, is in gbk encoding
+                # objfile = os.path.join(session.get_input_dir(), compnentName.encode("gbk").decode("utf-8"))
+                objfile = os.path.join(session.get_input_dir(), compnentName)
                 convert_obj_2_serialized(objfile, session.get_scenefile_path())
                 strnode.setAttribute("value", os.path.splitext(compnentName)[0] + ".serialized")
                 refnode = objdoc.createElement("ref")
@@ -381,7 +387,8 @@ class SceneGenerate:
         if cfg["scene"]["forest"]["tree_pos_file"] == "" or (not os.path.exists(tree_pos)):
             return
         # 保存场景中树的位置 forest*.xml
-        f = open(combine_file_path(session.get_scenefile_path(),forest_file_name),'w')
+        # f = open(os.path.join(session.get_scenefile_path(),forest_file_name),'w')
+        f = codecs.open(os.path.join(session.get_scenefile_path(),forest_file_name), "w", "utf-8-sig")
         doc = minidom.Document()
         root = doc.createElement("scene")
         doc.appendChild(root)
@@ -399,7 +406,7 @@ class SceneGenerate:
         for line in fobj:
             arr = line.split(":")
             objName = arr[0]
-            arr = map(lambda x:float(x), arr[1].split(" "))
+            arr = list(map(lambda x:float(x), arr[1].split(" ")))
             bound_dict[objName] = [arr[3]-arr[0],arr[4]-arr[1],arr[5]-arr[2]]
 
         scenepath = session.get_scenefile_path()

@@ -231,7 +231,7 @@ class PISYTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -243,7 +243,7 @@ class PISYTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -327,7 +327,7 @@ class BirchLeaf:
         for line in f:
             if line.startswith("triangle") and line_index > 20:
                 arr = line.replace("\n" , "").strip().replace("   ", " ").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.leaf_vertexes.append([arr[0], arr[1], arr[2]])
                 self.leaf_vertexes.append([arr[3], arr[4], arr[5]])
                 self.leaf_vertexes.append([arr[6], arr[7], arr[8]])
@@ -355,10 +355,10 @@ class BirchTree:
                 self.leaf_num += 1
                 arr = line.replace("\n", "").replace("  ", " ").split(" ")
                 matrix = getTransMatrix(map(lambda x: float(x), arr[3:]))
-                trans = map(lambda x: float(x), arr[-3:])
+                trans = list(map(lambda x: float(x), arr[-3:]))
                 translate_vector = Vector3(trans)
                 matrix = matrix * Matrix44.from_translation(translate_vector)
-                self.leaves_vertex += map(lambda x: matrix * Vector3(x), self.leaf.leaf_vertexes)
+                self.leaves_vertex += list(map(lambda x: matrix * Vector3(x), self.leaf.leaf_vertexes))
             line_index += 1
         f.close()
 
@@ -368,7 +368,7 @@ class BirchTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -380,7 +380,7 @@ class BirchTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])

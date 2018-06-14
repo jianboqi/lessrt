@@ -181,6 +181,7 @@ public class DrawElement {
 	}
 	
 	public static Xform drawObj(String filepath){
+		
 		ObjModelImporter objImporter = new ObjModelImporter();
 		try {
 		    objImporter.read(filepath);            

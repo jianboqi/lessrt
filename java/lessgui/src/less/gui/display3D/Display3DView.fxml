@@ -3,26 +3,32 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.display3D.Display3DController">
+<BorderPane prefHeight="564.0" prefWidth="677.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.display3D.Display3DController">
    <center>
-      <SplitPane dividerPositions="0.5635451505016722" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <SplitPane dividerPositions="0.5" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
-          <AnchorPane fx:id="subscenePane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
-          <AnchorPane fx:id="configAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="300.0">
+          <AnchorPane fx:id="subscenePane" minHeight="0.0" minWidth="0.0" prefHeight="543.0" prefWidth="405.0" />
+          <AnchorPane fx:id="configAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="528.0" prefWidth="286.0">
                <children>
                   <CheckBox fx:id="AxisCheck" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" onAction="#onShowAxes" selected="true" text="Show Axes" />
                   <CheckBox fx:id="GridCheck" layoutX="14.0" layoutY="65.0" mnemonicParsing="false" onAction="#onShowGrid" selected="true" text="Show Grids" />
                   <CheckBox fx:id="SunRayCheck" layoutX="14.0" layoutY="102.0" mnemonicParsing="false" onAction="#onShowSunRay" selected="true" text="Show Sun Ray" />
                   <CheckBox fx:id="CameraVolCheck" layoutX="14.0" layoutY="141.0" mnemonicParsing="false" onAction="#onShowCameraVolume" text="Show Camera Volume" />
-                  <ColorPicker fx:id="backgroundColorPicker" layoutX="14.0" layoutY="220.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
-                  <Label layoutX="12.0" layoutY="191.0" text="Background Color:" />
-                  <ColorPicker fx:id="cameraVolColorPicker" layoutX="15.0" layoutY="298.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
-                  <Label layoutX="13.0" layoutY="269.0" text="Camera Volume Color:" />
-               </children></AnchorPane>
+                  <ColorPicker fx:id="backgroundColorPicker" layoutX="16.0" layoutY="306.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
+                  <Label layoutX="14.0" layoutY="277.0" text="Background Color:" />
+                  <ColorPicker fx:id="cameraVolColorPicker" layoutX="17.0" layoutY="384.0" prefHeight="35.0" prefWidth="167.0" promptText="Background" />
+                  <Label layoutX="15.0" layoutY="355.0" text="Camera Volume Color:" />
+                  <RadioButton fx:id="FullDetailRadioBtn" layoutX="16.0" layoutY="244.0" mnemonicParsing="false" text="Full Details" />
+                  <Label layoutX="16.0" layoutY="217.0" text="Mode:" />
+                  <RadioButton fx:id="BoundingBoxRadioBtn" layoutX="139.0" layoutY="244.0" mnemonicParsing="false" text="Bounding Box" />
+                  <CheckBox fx:id="ShowObjectCheck" layoutX="14.0" layoutY="180.0" mnemonicParsing="false" onAction="#onShowObjects" selected="true" text="Show Objects" />
+               </children>
+            </AnchorPane>
         </items>
       </SplitPane>
    </center>

@@ -26,7 +26,7 @@ def createLandcoverMap(landcoverRasterFile,out_exr_file, opticalFile, opticalTab
     for line in f:
         arr = line.split(" ")
         tmp = opticalTable[arr[1].replace("\n","")].split(";")[0].split(",")
-        optical = map(lambda x: float(x), tmp)
+        optical = list(map(lambda x: float(x), tmp))
         typeDict[int(arr[0])] = optical
     import gdal
     dataset = gdal.Open(landcoverRasterFile)
@@ -75,7 +75,7 @@ def createLandcoverMap_trans(landcoverRasterFile,out_exr_file, opticalFile, opti
     for line in f:
         arr = line.split(" ")
         tmp = opticalTable[arr[1].replace("\n","")].split(";")[2].split(",")
-        optical = map(lambda x: float(x), tmp)
+        optical = list(map(lambda x: float(x), tmp))
         typeDict[int(arr[0])] = optical
     import gdal
     dataset = gdal.Open(landcoverRasterFile)
@@ -239,7 +239,7 @@ def create_envmap_fun(input, output):
         if len(arr[2:]) != band_num:
             log("band number does not equal.")
             sys.exit(0)
-        band_data.append(map(lambda x: float(x), arr[2:]))
+        band_data.append(list(map(lambda x: float(x), arr[2:])))
     # band_data = map(list, zip(*band_data))  # [[band1_p1,band1_p2,...],[band2_p1,band2_p2,...]]
     wavelengths = np.linspace(band_start, band_end, band_num + 1)
 

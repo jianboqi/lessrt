@@ -125,7 +125,6 @@ Spectrum Sensor::sampleRayDifferential(RayDifferential &ray,
 		Float timeSample) const {
 	Spectrum result = sampleRay(ray, samplePosition,
 		apertureSample, timeSample);
-
 	/* Sample a ray for X+1 */
 	Ray tempRay;
 	sampleRay(tempRay, samplePosition + Vector2(1, 0),

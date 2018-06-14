@@ -29,4 +29,4 @@ for i in range(0,len(points_list),4):
 	s134 = math.sqrt(np.dot(cross134,cross134))/float(2.0)
 	singleArea = s123+s134
 	totalsum = totalsum + singleArea
-print totalsum
+print(totalsum)

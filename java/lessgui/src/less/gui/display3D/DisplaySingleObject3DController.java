@@ -348,27 +348,29 @@ public class DisplaySingleObject3DController {
 			instanceForm = DrawElement.ConvertMeshList2xform(objMeshes,compColorList);
 			instanceForm.setTranslateX(0);
 			instanceForm.setTranslateZ(0);
-				instanceForm.setTranslateY(0);
+			instanceForm.setTranslateY(0);
 			Platform.runLater(() ->world.getChildren().add(instanceForm));
 			}			
 		}
 	
-	public void changeMeshColor(){
-		ObservableList<String> componentList = this.objectDefineController.mwController.objectsAndCompomentsMap.get(choosedObjName);
-		ArrayList<Mesh> objMeshes = DrawElement.getMeshlistFromObjList(componentList, this.objectDefineController.mwController.projManager.getParameterDirPath());
-		ArrayList<Color> compColorList = new ArrayList<Color>();
-		for(int i=0;i<componentList.size();i++){
-			compColorList.add(this.objectDefineController.mwController.opticalcomponentMap.get(choosedObjName+"_"+componentList.get(i)).getComponentColor());
+	public void changeMeshColor(){		
+		if(instanceForm !=null) {
+			ObservableList<String> componentList = this.objectDefineController.mwController.objectsAndCompomentsMap.get(choosedObjName);
+			ArrayList<Mesh> objMeshes = DrawElement.getMeshlistFromObjList(componentList, this.objectDefineController.mwController.projManager.getParameterDirPath());
+			ArrayList<Color> compColorList = new ArrayList<Color>();
+			for(int i=0;i<componentList.size();i++){
+				compColorList.add(this.objectDefineController.mwController.opticalcomponentMap.get(choosedObjName+"_"+componentList.get(i)).getComponentColor());
+			}
+			for(int i=0;i<instanceForm.getChildren().size();i++){
+				MeshView child_mesh = (MeshView)instanceForm.getChildren().get(i);
+				final PhongMaterial material = new PhongMaterial();
+				material.setDiffuseColor(compColorList.get(i));
+				material.setSpecularColor(compColorList.get(i));
+				material.setSpecularPower(Double.POSITIVE_INFINITY);
+				child_mesh.setMaterial(material);
+			}
 		}
 		
-		for(int i=0;i<instanceForm.getChildren().size();i++){
-			MeshView child_mesh = (MeshView)instanceForm.getChildren().get(i);
-			final PhongMaterial material = new PhongMaterial();
-			material.setDiffuseColor(compColorList.get(i));
-			material.setSpecularColor(compColorList.get(i));
-			material.setSpecularPower(Double.POSITIVE_INFINITY);
-			child_mesh.setMaterial(material);
-		}
 	}
 		
 }

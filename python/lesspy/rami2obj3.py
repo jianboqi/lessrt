@@ -129,7 +129,7 @@ class Shoot:
                     matrix = matrix * Matrix44.from_z_rotation(azimuth_rotation_angle)
                     matrix = matrix * Matrix44.from_translation(translate_vector)
                     # applying rotation
-                    newNeedle_vertexes = map(lambda x: matrix * Vector3(x), self.prim_needle.vertexes)
+                    newNeedle_vertexes = list(map(lambda x: matrix * Vector3(x), self.prim_needle.vertexes))
                     self.vertexes += newNeedle_vertexes
         f.close()
         # generate twig
@@ -214,13 +214,13 @@ class PISYTree:
                 arr = line.replace("\n", "").replace("  "," ").split(" ")
                 if len(arr) > 10:
                     self.shoot_num += 1
-                    matrix = getTransMatrix(map(lambda x: float(x), arr[3:]))
-                    trans = map(lambda x: float(x), arr[-3:])
+                    matrix = getTransMatrix(list(map(lambda x: float(x), arr[3:])))
+                    trans = list(map(lambda x: float(x), arr[-3:]))
                     translate_vector = Vector3(trans)
                     matrix = matrix * Matrix44.from_translation(translate_vector)
-                    new_shoot_vertexes = map(lambda x: matrix * Vector3(x), self.shoot.vertexes)
+                    new_shoot_vertexes = list(map(lambda x: matrix * Vector3(x), self.shoot.vertexes))
                     self.leaf_vertexes += new_shoot_vertexes
-                    new_twig_vertexes = map(lambda x: matrix * Vector3(x), self.shoot.twig_vertexes)
+                    new_twig_vertexes = list(map(lambda x: matrix * Vector3(x), self.shoot.twig_vertexes))
                     self.twig_vertexes += new_twig_vertexes
         f.close()
 
@@ -230,7 +230,7 @@ class PISYTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -242,7 +242,7 @@ class PISYTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -326,7 +326,7 @@ class BirchLeaf:
         for line in f:
             if line.startswith("triangle") and line_index > 20:
                 arr = line.replace("\n" , "").strip().replace("   ", " ").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.leaf_vertexes.append([arr[0], arr[1], arr[2]])
                 self.leaf_vertexes.append([arr[3], arr[4], arr[5]])
                 self.leaf_vertexes.append([arr[6], arr[7], arr[8]])
@@ -354,7 +354,7 @@ class BirchTree:
                 self.leaf_num += 1
                 arr = line.replace("\n", "").replace("  ", " ").split(" ")
                 matrix = getTransMatrix(map(lambda x: float(x), arr[3:]))
-                trans = map(lambda x: float(x), arr[-3:])
+                trans = list(map(lambda x: float(x), arr[-3:]))
                 translate_vector = Vector3(trans)
                 matrix = matrix * Matrix44.from_translation(translate_vector)
                 self.leaves_vertex += map(lambda x: matrix * Vector3(x), self.leaf.leaf_vertexes)
@@ -367,7 +367,7 @@ class BirchTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -379,7 +379,7 @@ class BirchTree:
         for line in f:
             if line.startswith("triangle") and line_index > 10:
                 arr = line.replace("\n", "").split(" ")
-                arr = map(lambda x: float(x), arr[1:])
+                arr = list(map(lambda x: float(x), arr[1:]))
                 self.branch_vertexes.append([arr[0], arr[1], arr[2]])
                 self.branch_vertexes.append([arr[3], arr[4], arr[5]])
                 self.branch_vertexes.append([arr[6], arr[7], arr[8]])
@@ -436,7 +436,7 @@ class Forest:
                     if line.startswith("object") and line_num > 10:
                         line_arr = line.replace("\n", "").split(" ")
                         rotation_arr.append(float(line_arr[6]))
-                        translate_arr.append(map(lambda x: float(x), line_arr[-3:]))
+                        translate_arr.append(list(map(lambda x: float(x), line_arr[-3:])))
                     line_num += 1
                 self.forest_data[tree_id] = [translate_arr,rotation_arr]
                 f.close()
@@ -454,7 +454,7 @@ class Forest:
         f.close()
 
 if args.phase == "RAMI-IV" and args.sceneID == "HET07_JPS_SUM":
-    print args.phase, args.sceneID
+    print(args.phase, args.sceneID)
     distDir = args.distDir
     currdir = os.path.split(os.path.realpath(__file__))[0]
     template_folder = combine_file_path_multi(currdir, "template", "RAMI", "RAMI-IV", "HET07_JPS_SUM")
@@ -485,7 +485,7 @@ if args.phase == "RAMI-IV" and args.sceneID == "HET07_JPS_SUM":
     # f.to_position_file(tree_file)
 
     for i in range(9, 11):
-        print "PISY" + str(i)
+        print("PISY" + str(i))
         foliage_file = combine_file_path(template_folder,"PISY"+str(i)+"_foliage.dat")
         stem_file = combine_file_path(template_folder, "PISY"+str(i)+"_stem.dat")
         branch_file = combine_file_path(template_folder, "PISY"+str(i)+"_branches.dat")

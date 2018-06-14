@@ -56,7 +56,7 @@ public class Const {
 	
 	// LESS Mode
 	public static String LESS_MODE= "development";
-	public static String LESS_VERSION = "V1.7";
+	public static String LESS_VERSION = "V1.8";
 	
 	public static boolean LESS_OUT_ALL = false;
 	
@@ -104,5 +104,10 @@ public class Const {
 	
 	//LAI
 	public static String LESS_LAI_OUTPUT_FILE = "LAI.txt";
+	
+	
+	//atmosphere
+	public static String LESS_ATS_TYPE_SKY = "SKY_TO_TOTAL";
+	public static String LESS_ATS_TYPE_ATS = "ATMOSPHERE";
 	
 }

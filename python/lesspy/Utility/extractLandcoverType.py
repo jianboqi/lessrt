@@ -10,7 +10,7 @@ def extractLandcover(inputfile):
     types = np.unique(arr)
     typestr = ""
     for i in types:
-        print "LandCoverTypes:" + str(i)
+        print("LandCoverTypes:" + str(i))
 
 
 
