@@ -7,7 +7,6 @@ import platform
 
 colladaEnv = mainEnv.Clone()
 converter_objects += [
-	# colladaEnv.StaticObject('collada.cpp'),
 	colladaEnv.StaticObject('obj.cpp'),
 	colladaEnv.StaticObject('converter.cpp')
 ]
