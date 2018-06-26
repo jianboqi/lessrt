@@ -12,12 +12,11 @@ if renderEnv.has_key('XERCESLIB'):
 librender = renderEnv.SharedLibrary('mitsuba-render', ['basicshader.cpp',
 	'bsdf.cpp', 'film.cpp', 'integrator.cpp', 'emitter.cpp', 'sensor.cpp',
 	'skdtree.cpp', 'medium.cpp', 'renderjob.cpp', 'imageproc.cpp',
-	'rectwu.cpp', 'renderproc.cpp', 'imageblock.cpp', 'particleproc.cpp',
+	'rectwu.cpp', 'renderproc.cpp', 'imageblock.cpp',
 	'renderqueue.cpp', 'scene.cpp',  'subsurface.cpp', 'texture.cpp',
 	'shape.cpp', 'trimesh.cpp', 'sampler.cpp', 'util.cpp', 'irrcache.cpp',
-	'testcase.cpp', 'photonmap.cpp', 'gatherproc.cpp', 'volume.cpp',
-	'vpl.cpp', 'shader.cpp', 'scenehandler.cpp', 'intersection.cpp',
-	'common.cpp', 'phase.cpp', 'noise.cpp', 'photon.cpp','photonproc.cpp'
+	'testcase.cpp',  'volume.cpp','shader.cpp', 'scenehandler.cpp', 'intersection.cpp',
+	'common.cpp', 'phase.cpp', 'noise.cpp','photonproc.cpp'
 ])
 
 if sys.platform == "darwin":

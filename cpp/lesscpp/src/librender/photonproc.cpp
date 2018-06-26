@@ -106,7 +106,7 @@ void PhotonTracer::handleMediumInteraction(int depth, int nullInteractions,
 	bool delta, const MediumSamplingRecord &mRec, const Medium *medium,
 	const Vector &wi, const Spectrum &weight) { }
 
-//MTS_IMPLEMENT_CLASS(RangeWorkUnit, false, WorkUnit) //在Particleproc.cpp中已经实现了，所以此处不需要重复定义了
+MTS_IMPLEMENT_CLASS(RangeWorkUnit, false, WorkUnit) //在Particleproc.cpp中已经实现了，所以此处不需要重复定义了-> 2018.6: 已删除particleparoc.cpp 因此需要定义
 MTS_IMPLEMENT_CLASS(PhotonProcess, true, ParallelProcess)
 MTS_IMPLEMENT_CLASS(PhotonTracer, true, WorkProcessor)
 
