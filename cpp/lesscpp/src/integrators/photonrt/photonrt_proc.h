@@ -166,6 +166,8 @@ private:
 
 	AABB m_virtualBounds;
 
+	int m_repetitiveSceneNum;
+
 	bool m_hasBRFProducts;
 	bool m_hasUpDownProducts;
 	string m_virtualDirections;

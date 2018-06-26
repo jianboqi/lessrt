@@ -108,9 +108,9 @@ public class LessMainWindowController {
 	
 	//terrain
 	@FXML
-	private AnchorPane terrFilePane;
+	public AnchorPane terrFilePane;
 	@FXML
-	private VBox terrainVbox;
+	public VBox terrainVbox;
 	@FXML
 	private Button selectTerrBtn;
 	@FXML
@@ -124,6 +124,8 @@ public class LessMainWindowController {
 	@FXML
 	public ComboBox<String> terrainOpticalCombox;
 	@FXML
+	public ComboBox<String> terrainBRDFTypeCombox;
+	@FXML
 	public ObservableList<String> terrainOpticalData;
 	@FXML
 	public CheckBox landcoverCheckbox;
@@ -135,6 +137,25 @@ public class LessMainWindowController {
 	public AnchorPane terrainOpticalAnchorPane;
 	
 	public Map<String, String> landcoverTypesOpticalMap;
+	
+	public Label albedoLabel;
+	public Label c1Label;
+	public Label c2Label;
+	public Label c3Label;
+	public Label c4Label;
+	public Label h1Label;
+	public Label h2Label;
+	
+	public Label soilspectHelp;
+	
+	public TextField albedoTextField;
+	public TextField c1TextField;
+	public TextField c2TextField;
+	public TextField c3TextField;
+	public TextField c4TextField;
+	public TextField h1TextField;
+	public TextField h2TextField;
+	
 	
 	//forest
 	@FXML
@@ -240,6 +261,8 @@ public class LessMainWindowController {
 	public ToggleGroup ImageFormatRadioroup;
 	@FXML
 	public TextField sensorNoDataValueField;
+	@FXML
+	public TextField sensorRepetitiveSceneTextField;
 	
 	
 	//observation and illumination
@@ -387,7 +410,7 @@ public class LessMainWindowController {
 		this.drawSunAndView();
 		this.drawOrthographicSensor();
 		this.inputValidation();
-        this.AddDEMType_Listener();
+        this.initalTerrainModule();
         this.addAtmsphereType_Listener();
         this.initSensor();
         this.initSunAndIlluminationView();
@@ -714,35 +737,10 @@ public class LessMainWindowController {
 	}
 	
 	/**
-	 * 
+	 * init terrain
 	 */
-	private void AddDEMType_Listener(){
-		terrainVbox.getChildren().remove(terrFilePane);
-		comboBoxDEMType.valueProperty().addListener(new ChangeListener<String>() {
-			@Override 
-			public void changed(ObservableValue ov, String oldVal, String newVal) {
-				if(newVal.equals(Const.LESS_TERRAIN_PLANE)){
-					sceneXSizeField.setDisable(false);
-					sceneYSizeField.setDisable(false);
-					terrainVbox.getChildren().remove(terrFilePane);
-				}
-				if (newVal.equals(Const.LESS_TERRAIN_MESH)){
-					sceneXSizeField.setDisable(true);
-					sceneYSizeField.setDisable(true);
-					if (!terrainVbox.getChildren().contains(terrFilePane)){
-						terrainVbox.getChildren().add(1, terrFilePane);
-					}
-				}
-				if(newVal.equals(Const.LESS_TERRAIN_RASTER)){
-					//show the selection for image
-					sceneXSizeField.setDisable(false);
-					sceneYSizeField.setDisable(false);
-					if (!terrainVbox.getChildren().contains(terrFilePane)){
-						terrainVbox.getChildren().add(1, terrFilePane);
-					}
-				}
-		    } 
-		});
+	private void initalTerrainModule() {
+		this.projManager.initTerrainModule();
 	}
 	
 	private void addAtmsphereType_Listener() {

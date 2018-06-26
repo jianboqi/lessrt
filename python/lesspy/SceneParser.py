@@ -41,12 +41,62 @@ class SceneParser:
             print("Camera is outside of the scene, do not use relative height")
             return 0
 
+    #get boundingSphereAccording object boundbox
+    def getBoundingSphereInfoStatic(self, instanceFileName, main_scene_xml_file_prifix,xScale,zScale):
+        currdir = os.path.split(os.path.realpath(__file__))[0]
+        sys.path.append(os.path.join(currdir,"bin","rt",current_rt_program,"python","3.6"))
+        os.environ['PATH'] = os.path.join(currdir,"bin","rt",current_rt_program) + os.pathsep + os.environ['PATH']
+        from mitsuba.core import AABB,Point
 
-    def getBoundingSperheInfo(self, main_scene_xml_file_prifix):
+        # read object bounding box
+        objBoundboxFilePath = os.path.join(session.get_input_dir(),obj_bounding_box_file)
+        f = open(objBoundboxFilePath)
+        objBoundDics = dict()
+        for line in f:
+            arr = line.split(":")
+            objName = arr[0]
+            arr = list(map(lambda x:float(x), arr[1].split()))
+            aabb = AABB()
+            aabb.reset()
+            for i in range(0, len(arr), 6):
+                minx, miny,minz,maxx,maxy,maxz = arr[i:i+6]
+                subAABB = AABB(Point(minx, miny,minz), Point(maxx,maxy,maxz))
+                aabb.expandBy(subAABB)
+            objBoundDics[objName] = aabb
+        f.close()
+
+        totalAABB = self.getTerrainBoundingAABB(main_scene_xml_file_prifix)
+
+        # get bounding box of the whole scene
+        instanceFilePth = os.path.join(session.get_input_dir(), instanceFileName)
+        f = open(instanceFilePth)
+        for line in f:
+            arr = line.split()
+            objName = arr[0]
+
+            x = float(arr[1])
+            y = float(arr[2])
+            z = float(arr[3])
+            treeX = 0.5 * xScale - x
+            treeZ = 0.5 * zScale - y
+
+            insPoint = [treeX, z, treeZ]
+            aabb = AABB(objBoundDics[objName])
+            aabb.min = Point(insPoint[0]+aabb.min[0],insPoint[1]+aabb.min[1],insPoint[2]+aabb.min[2])
+            aabb.max = Point(insPoint[0] + aabb.max[0], insPoint[1] + aabb.max[1], insPoint[2] + aabb.max[2])
+            totalAABB.expandBy(aabb)
+
+        f.close()
+        bSphere = totalAABB.getBSphere()
+        radius = bSphere.radius
+        targetx, targety, targetz = bSphere.center[0], bSphere.center[1], bSphere.center[2]
+        self.BoundingInfomation = [radius, targetx, targety, targetz, totalAABB.max.y]
+
+    def getTerrainBoundingAABB(self, main_scene_xml_file_prifix):
         # get bounding sphere
         currdir = os.path.split(os.path.realpath(__file__))[0]
-        sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/2.7/')
-        os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + os.pathsep + os.environ['PATH']
+        sys.path.append(os.path.join(currdir, "bin", "rt", current_rt_program, "python", "3.6"))
+        os.environ['PATH'] = os.path.join(currdir, "bin", "rt", current_rt_program) + os.pathsep + os.environ['PATH']
         import mitsuba
         from mitsuba.core import Vector, Point, Ray, Thread
         from mitsuba.render import SceneHandler
@@ -64,10 +114,7 @@ class SceneParser:
         scene = SceneHandler.loadScene(fileResolver.resolve(filepath))
         scene.configure()
         scene.initialize()
-        bsphere = scene.getKDTree().getAABB().getBSphere()
-        radius = bsphere.radius
-        targetx, targety, targetz = bsphere.center[0], bsphere.center[1], bsphere.center[2]
-        self.BoundingInfomation = [radius, targetx, targety, targetz]
+        return scene.getKDTree().getAABB()
 
     # 解析配置文件，并生成LESS能用的xml文件格式
     # 运行batch模式时，加上一个前缀main_scene_xml_file_prifix，使得生成的文件名不同
@@ -88,16 +135,6 @@ class SceneParser:
             floatNode.setAttribute("name", "sunRayResolution")
             floatNode.setAttribute("value", str(cfg["sensor"]["PhotonTracing"]["sunRayResolution"]))
             integratorNode.appendChild(floatNode)
-
-            xExtendNode = doc.createElement("float")
-            integratorNode.appendChild(xExtendNode)
-            xExtendNode.setAttribute("name", "subSceneXSize")
-            xExtendNode.setAttribute("value", str(cfg["scene"]["terrain"]["extent_width"]))
-
-            yExtendNode = doc.createElement("float")
-            integratorNode.appendChild(yExtendNode)
-            yExtendNode.setAttribute("name", "subSceneZSize")
-            yExtendNode.setAttribute("value", str(cfg["scene"]["terrain"]["extent_height"]))
 
             boolNode = doc.createElement("boolean")
             integratorNode.appendChild(boolNode)
@@ -124,10 +161,20 @@ class SceneParser:
             intNode.setAttribute("value",str(cfg["sensor"]["PhotonTracing"]["NumberOfDirections"]))
 
         else:
-            integratorNode.setAttribute("type", "volpath_simple")
+            integratorNode.setAttribute("type", "path")
         rootNode.appendChild(integratorNode)
 
         # integrator
+        # scene dimension
+        xExtendNode = doc.createElement("float")
+        integratorNode.appendChild(xExtendNode)
+        xExtendNode.setAttribute("name", "subSceneXSize")
+        xExtendNode.setAttribute("value", str(cfg["scene"]["terrain"]["extent_width"]))
+
+        yExtendNode = doc.createElement("float")
+        integratorNode.appendChild(yExtendNode)
+        yExtendNode.setAttribute("name", "subSceneZSize")
+        yExtendNode.setAttribute("value", str(cfg["scene"]["terrain"]["extent_height"]))
 
         boolNode = doc.createElement("boolean")
         integratorNode.appendChild(boolNode)
@@ -151,6 +198,11 @@ class SceneParser:
         floatNode.setAttribute("name", "NoDataValue")
         floatNode.setAttribute("value", str(cfg["sensor"]["NoDataValue"]))
         integratorNode.appendChild(floatNode)
+
+        intNode = doc.createElement("integer")
+        integratorNode.appendChild(intNode)
+        intNode.setAttribute("name","RepetitiveScene")
+        intNode.setAttribute("value",str(cfg["sensor"]["RepetitiveScene"]))
 
         if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
             # generate atmosphere xml file
@@ -250,15 +302,31 @@ class SceneParser:
             phi = -(phi_degree - 90) / 180.0 * np.pi
 
             if "virtualPlane" in cfg["sensor"]:
+
+                if len(self.BoundingInfomation) == 0:
+                    self.getBoundingSphereInfoStatic(cfg["scene"]["forest"]["tree_pos_file"],
+                                                     main_scene_xml_file_prifix,cfg["scene"]["terrain"]["extent_width"],
+                                                     cfg["scene"]["terrain"]["extent_height"])
+
                 rx = float(cfg["sensor"]["virtualPlane"]["sizex"])*0.5
                 ry = float(cfg["sensor"]["virtualPlane"]["sizey"])*0.5
                 r = math.sqrt(rx*rx+ry*ry)
                 region_x, region_y = r, r
+
+                scene_width = cfg["scene"]["terrain"]["extent_width"]
+                scene_height = cfg["scene"]["terrain"]["extent_height"]
+
+                target_x = scene_width * 0.5 - float(cfg["sensor"]["virtualPlane"]["vx"])
+                target_y = self.BoundingInfomation[4]
+                target_z = scene_height * 0.5 - float(cfg["sensor"]["virtualPlane"]["vy"])
+
             else:
                 if cfg["sensor"]["orthographic"]["cover_whole_scene"]:
                     # 计算场景的最小包围球
                     if len(self.BoundingInfomation) == 0:
-                        self.getBoundingSperheInfo(main_scene_xml_file_prifix)
+                        self.getBoundingSphereInfoStatic(cfg["scene"]["forest"]["tree_pos_file"],main_scene_xml_file_prifix,
+                                                         cfg["scene"]["terrain"]["extent_width"],
+                                                     cfg["scene"]["terrain"]["extent_height"])
                     if theta == 0 and (phi_degree == 0 or phi_degree == 90 or
                                            phi_degree == 180 or phi_degree == 270):
                         region_x = region_width
@@ -266,6 +334,10 @@ class SceneParser:
                     else:
                         region_x = self.BoundingInfomation[0]
                         region_y = self.BoundingInfomation[0]
+
+                        target_x = self.BoundingInfomation[1]
+                        target_y = self.BoundingInfomation[2]
+                        target_z = self.BoundingInfomation[3]
                 else:
                     region_x = region_width
                     region_y = region_height
@@ -279,12 +351,10 @@ class SceneParser:
             floatNode.setAttribute("name", "aspect")
             floatNode.setAttribute("value", str(region_x / region_y))
 
-            x = -cfg["observation"]["obs_R"] * np.sin(theta) * np.cos(phi)
-            z = cfg["observation"]["obs_R"] * np.sin(theta) * np.sin(phi)
-            y = cfg["observation"]["obs_R"] * np.cos(theta)
-            target_x = 0
-            target_y = 0
-            target_z = 0
+            x = -cfg["observation"]["obs_R"] * np.sin(theta) * np.cos(phi) + target_x
+            z = cfg["observation"]["obs_R"] * np.sin(theta) * np.sin(phi) + target_z
+            y = cfg["observation"]["obs_R"] * np.cos(theta) + target_y
+
 
         # perspective 设置视场角
         if cfg["sensor"]["sensor_type"] == "perspective":
@@ -482,6 +552,7 @@ class SceneParser:
             skyls = list(map(lambda x:float(x), SKYL.split(",")))
             if (not "sun_spectrum" in cfg["illumination"]["sun"])  and (not "sky_spectrum" in cfg["illumination"]["atmosphere"]):
                 sun_irr, sky_irr = sun_irradiance_db.read_toa_with_bandwidth_SKYLs( cfg["sensor"]["bands"],skyls)
+                sky_irr = list(map(lambda x:x*math.cos(theta),sky_irr))
             else:
                 sun_irr = list(map(lambda x:float(x), cfg["illumination"]["sun"]["sun_spectrum"].split(",")))
                 sky_irr = list(map(lambda x: float(x), cfg["illumination"]["atmosphere"]["sky_spectrum"].split(",")))

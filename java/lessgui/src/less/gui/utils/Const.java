@@ -27,6 +27,8 @@ public class Const {
 	public static String LESS_TERRAIN_PLANE = "PLANE";
 	public static String LESS_TERRAIN_RASTER = "RASTER";
 	public static String LESS_TERRAIN_LANDCOVER_FILE = "landcover.txt";
+	public static String LESS_TERRAIN_BRDF_LAMBERTIAN = "Lambertian";
+	public static String LESS_TERRAIN_BRDF_SOILSPECT = "Soilspect";
 	
 	public static String LESS_SENSOR_TYPE_ORTH = "orthographic";
 	public static String LESS_SENSOR_TYPE_PER = "perspective";

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.gson.JsonObject;
+import com.sun.jmx.remote.internal.ServerNotifForwarder;
 
 import javafx.scene.control.Toggle;
 import less.gui.helper.PyLauncher;
@@ -114,6 +115,7 @@ public class ControlJsonWrapper {
 	    }
 	    sensor.put("thermal_radiation", this.mwcontroller.ThermalCheckbox.isSelected());
 	    sensor.put("NoDataValue", Double.parseDouble(this.mwcontroller.sensorNoDataValueField.getText()));
+	    sensor.put("RepetitiveScene", Integer.parseInt(this.mwcontroller.sensorRepetitiveSceneTextField.getText()));
 	    
 	    sensor.put("sensor_type", sensorType);
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH) || sensorType.equals(Const.LESS_SENSOR_TYPE_PT)){
@@ -193,12 +195,26 @@ public class ControlJsonWrapper {
 	    	terrain.put("terr_file",this.mwcontroller.terrFileField.getText());
 	    }
 	    
-	    String selectedOptical = this.mwcontroller.terrainOpticalCombox.getSelectionModel().getSelectedItem();
-	    if (selectedOptical == null){
-	    	terrain.put("optical", Const.LESS_DEFAULT_OPTICAL2);
-	    }else{
-	    	terrain.put("optical", selectedOptical);
-	    }
+	    String selectedBRDFMode = this.mwcontroller.terrainBRDFTypeCombox.getSelectionModel().getSelectedItem();
+	    terrain.put("terrBRDFType", selectedBRDFMode);
+	    if(selectedBRDFMode.equals(Const.LESS_TERRAIN_BRDF_LAMBERTIAN)) {
+	    	String selectedOptical = this.mwcontroller.terrainOpticalCombox.getSelectionModel().getSelectedItem();
+		    if (selectedOptical == null){
+		    	terrain.put("optical", Const.LESS_DEFAULT_OPTICAL2);
+		    }else{
+		    	terrain.put("optical", selectedOptical);
+		    }
+	    }else if (selectedBRDFMode.equals(Const.LESS_TERRAIN_BRDF_SOILSPECT)) {
+			JSONObject soilspect  = new JSONObject();
+			soilspect.put("albedo", this.mwcontroller.albedoTextField.getText());
+			soilspect.put("c1", this.mwcontroller.c1TextField.getText());
+			soilspect.put("c2", this.mwcontroller.c2TextField.getText());
+			soilspect.put("c3", this.mwcontroller.c3TextField.getText());
+			soilspect.put("c4", this.mwcontroller.c4TextField.getText());
+			soilspect.put("h1", this.mwcontroller.h1TextField.getText());
+			soilspect.put("h2", this.mwcontroller.h2TextField.getText());
+			terrain.put("soilSpectParams", soilspect);
+		}
 	    
 	    if(this.mwcontroller.ThermalCheckbox.isSelected()){
 	    	terrain.put("temperature", this.mwcontroller.projManager.comboBoxTerrainTemper.getSelectionModel().getSelectedItem());
@@ -297,6 +313,9 @@ public class ControlJsonWrapper {
 		this.mwcontroller.ThermalCheckbox.setSelected(sensor.getBoolean("thermal_radiation"));
 		if(sensor.has("NoDataValue")){
 			this.mwcontroller.sensorNoDataValueField.setText(sensor.getDouble("NoDataValue")+"");
+		}
+		if(sensor.has("RepetitiveScene")) {
+			this.mwcontroller.sensorRepetitiveSceneTextField.setText(sensor.getInt("RepetitiveScene")+"");
 		}
 		this.mwcontroller.sensorWidthField.setText(sensor.getInt("image_width")+"");
 		this.mwcontroller.sensorHeightField.setText(sensor.getInt("image_height")+"");
@@ -430,7 +449,27 @@ public class ControlJsonWrapper {
 				terrain.getString("terrain_type").equals(Const.LESS_TERRAIN_RASTER)){
 			this.mwcontroller.terrFileField.setText(terrain.getString("terr_file"));
 		}
-		this.mwcontroller.terrainOpticalCombox.getSelectionModel().select(terrain.getString("optical"));
+		
+		if(terrain.has("terrBRDFType")) {
+			String terrBRDFType = terrain.getString("terrBRDFType");
+			this.mwcontroller.terrainBRDFTypeCombox.getSelectionModel().select(terrBRDFType);
+			if(terrBRDFType.equals(Const.LESS_TERRAIN_BRDF_LAMBERTIAN)) {
+				this.mwcontroller.terrainOpticalCombox.getSelectionModel().select(terrain.getString("optical"));
+			}
+			else if(terrBRDFType.equals(Const.LESS_TERRAIN_BRDF_SOILSPECT)){
+				JSONObject soilspect = terrain.getJSONObject("soilSpectParams");
+				this.mwcontroller.albedoTextField.setText(soilspect.getString("albedo"));
+				this.mwcontroller.c1TextField.setText(soilspect.getString("c1"));
+				this.mwcontroller.c2TextField.setText(soilspect.getString("c2"));
+				this.mwcontroller.c3TextField.setText(soilspect.getString("c3"));
+				this.mwcontroller.c4TextField.setText(soilspect.getString("c4"));
+				this.mwcontroller.h1TextField.setText(soilspect.getString("h1"));
+				this.mwcontroller.h2TextField.setText(soilspect.getString("h2"));
+			}
+		}else {
+			this.mwcontroller.terrainOpticalCombox.getSelectionModel().select(terrain.getString("optical"));
+		}
+		
 		if(terrain.has("landcover")){
 			this.mwcontroller.landcoverCheckbox.setSelected(true);
 			this.mwcontroller.projManager.handleLandcoverCheckbox();//create listview control

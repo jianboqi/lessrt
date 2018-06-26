@@ -22,6 +22,9 @@ public class TreePosGenerateController {
 	@FXML
 	private ComboBox<String> disTypeComboBox;
 	
+	@FXML
+	private TextField objectHeightPosTextField;
+	
 	private LessMainWindowController mwController;
 	
 	private Stage parentStage;
@@ -67,6 +70,8 @@ public class TreePosGenerateController {
 		double xExtent = Double.parseDouble(this.mwController.sceneXSizeField.getText().trim().replaceAll(",", ""));
 		double yExtent = Double.parseDouble(this.mwController.sceneYSizeField.getText().trim().replaceAll(",", ""));
 		
+		double objectHeight = Double.parseDouble(this.objectHeightPosTextField.getText().trim().replaceAll(",", ""));
+		
 		if(this.disTypeComboBox.getSelectionModel().getSelectedItem().equals(Const.LESS_TREE_POS_DIS_POISSON)){
 			int objNum = this.mwController.objectsList.size();
 			if(objNum == 0){
@@ -92,7 +97,7 @@ public class TreePosGenerateController {
 //			}	
 			
 			PoissonThread poissonThread = new PoissonThread();
-			poissonThread.prepare(this.mwController.outputConsole,minDist,xExtent,yExtent,objNum,this.mwController);
+			poissonThread.prepare(this.mwController.outputConsole,minDist,xExtent,yExtent,objNum,this.mwController,objectHeight);
 			RunningStatusThread runningStatusThread = new RunningStatusThread(poissonThread, this.mwController.outputConsole, this.mwController.runBtn);
 			runningStatusThread.setMainController(this.mwController);
 			runningStatusThread.start();

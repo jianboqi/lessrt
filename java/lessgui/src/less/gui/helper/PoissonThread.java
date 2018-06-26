@@ -19,6 +19,7 @@ public class PoissonThread extends Thread{
 	private double xExtent;
 	private double yExtent;
 	public int objNum;
+	public double objectHeight;
 	public LessMainWindowController mwController;
 	List<Vector2DDouble> pointList;
 	
@@ -29,7 +30,7 @@ public class PoissonThread extends Thread{
 	}
 	
 	public void prepare(OutputConsole bdConsole,double minDist,double xExtent,double yExtent,int objNum,
-			LessMainWindowController mwController){
+			LessMainWindowController mwController, double objectHeight){
 		this.bdConsole = bdConsole;
 		this.bdConsole.setNormalMode();
 		this.minDist = minDist;
@@ -37,6 +38,7 @@ public class PoissonThread extends Thread{
 		this.yExtent = yExtent;
 		this.objNum = objNum;
 		this.mwController = mwController;
+		this.objectHeight = objectHeight;
 	}
 	
 	public void run(){
@@ -109,7 +111,7 @@ public class PoissonThread extends Thread{
 		for(int i=0;i<pointList.size();i++){
 			int randomNum = ThreadLocalRandom.current().nextInt(0, objNum);
 			Vector2DDouble vec = pointList.get(i);
-			this.mwController.objectAndPositionMap.get(selectedObjs.get(randomNum)).add(new PositionXY(vec.x+"", vec.y+""));
+			this.mwController.objectAndPositionMap.get(selectedObjs.get(randomNum)).add(new PositionXY(vec.x+"", vec.y+"",objectHeight+""));
 		}
 //		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.mwController.objectAndPositionMap.entrySet()){
 //			entry.getValue().addListener(this.mwController.tree_pos_change_listener);

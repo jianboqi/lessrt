@@ -113,132 +113,142 @@ public:
 		: MonteCarloIntegrator(props) {
 		m_NoDataValue = props.getFloat("NoDataValue", -1.0);
 		m_virtualPlane = props.getBoolean("SceneVirtualPlane", false);
+		m_repetitiveSceneNum = props.getInteger("RepetitiveScene", 15);
 		if (m_virtualPlane) {
 			m_virtualPlane_vx = props.getFloat("vx",0.0);
 			m_virtualPlane_vz = props.getFloat("vz",0.0);
-			m_virtualPlane_vy = props.getString("vy","MAX");
+			m_strVirtualPlane_vy = props.getString("vy","MAX");
 			m_virtualPlane_size_x = props.getFloat("sizex",100.0);
-			m_virtualPlane_size_y = props.getFloat("sizez", 100.0);
-		}		
+			m_virtualPlane_size_z = props.getFloat("sizez", 100.0);
+		}
+
+		m_sceneXSize = props.getFloat("subSceneXSize", 100.0);
+		m_sceneZSize = props.getFloat("subSceneZSize", 100.0);
+	}
+
+	void serialize(Stream *stream, InstanceManager *manager) const {
+		MonteCarloIntegrator::serialize(stream, manager);
+		stream->writeDouble(m_NoDataValue);
+		stream->writeBool(m_virtualPlane);
+		stream->writeDouble(m_virtualPlane_vx);
+		stream->writeString(m_strVirtualPlane_vy);
+		stream->writeDouble(m_virtualPlane_vz);
+		stream->writeDouble(m_virtualPlane_size_x);
+		stream->writeDouble(m_virtualPlane_size_z);
+		stream->writeInt(m_repetitiveSceneNum);
 	}
 
 	/// Unserialize from a binary data stream
 	MIPathTracer(Stream *stream, InstanceManager *manager)
-		: MonteCarloIntegrator(stream, manager) { }
+		: MonteCarloIntegrator(stream, manager) {
+		m_NoDataValue = stream->readDouble();
+		m_virtualPlane = stream->readBool();
+		m_virtualPlane_vx = stream->readDouble();
+		m_strVirtualPlane_vy = stream->readString();
+		m_virtualPlane_vz = stream->readDouble();
+		m_virtualPlane_size_x = stream->readDouble();
+		m_virtualPlane_size_z = stream->readDouble();
+		m_repetitiveSceneNum = stream->readInt();
+	}
 
-#if 0
-	Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
-		/* Some aliases and local variables */
-		const Scene *scene = rRec.scene;
-		Intersection &its = rRec.its;
-		RayDifferential ray(r);
-		Spectrum Li(0.0f);
-		bool scattered = false;
+	bool preprocess(const Scene *scene, RenderQueue *queue,
+		const RenderJob *job, int sceneResID, int sensorResID,
+		int samplerResID) {
+		AABB scene_bound = scene->getKDTree()->getAABB();
 
-		//jianboqi:
-		//handle virtual plane
-		if (m_virtualPlane)
-		{
-			AABB scene_bound = scene->getKDTree()->getAABB();
-			double bound_max = scene_bound.max.y;
-			if (m_virtualPlane_vy == "MAX" || m_virtualPlane_vy == "TOP") {
-				double value = atof(m_virtualPlane_vy.c_str());
-				bound_max = value;
-			}
+		double sceneMaxY = scene_bound.max.y;
+		double sceneMinY = scene_bound.min.y;
+		double x_min = -0.5*m_sceneXSize;
+		double x_max = 0.5*m_sceneXSize;
+		double z_min = -0.5*m_sceneZSize;
+		double z_max = 0.5*m_sceneZSize;
+		m_sceneBounds = AABB(Point(x_min, sceneMinY, z_min), Point(x_max, sceneMaxY, z_max));
 
-			double x_min = m_virtualPlane_vx - 0.5*m_virtualPlane_size_x;
-			double x_max = m_virtualPlane_vx + 0.5*m_virtualPlane_size_x;
-			double z_min = m_virtualPlane_vz - 0.5*m_virtualPlane_size_y;
-			double z_max = m_virtualPlane_vz + 0.5*m_virtualPlane_size_y;
-
-			double H = r.o[1] - bound_max;
-			if (H > 0)
-			{
-				double a = r.d.x;
-				double b = r.d.y;
-				double c = r.d.z;
-				Point its_p = r.o + Point(-a / b*H, -H, -c / b*H);
-				if (!(its_p.x >= x_min && its_p.x <= x_max
-					&& its_p.z >= z_min && its_p.z <= z_max
-					))
-				{
-					return Spectrum(m_NoDataValue);
-				}
-			}
-			else
-			{
-				return Spectrum(m_NoDataValue);
-			}
+		if (m_virtualPlane) {
+			m_virtualBounds = AABB(Point(m_virtualPlane_vx - 0.5*m_virtualPlane_size_x, sceneMinY, m_virtualPlane_vz - 0.5*m_virtualPlane_size_z),
+				Point(m_virtualPlane_vx + 0.5*m_virtualPlane_size_x, sceneMaxY, m_virtualPlane_vz + 0.5*m_virtualPlane_size_z));
 		}
+		else {
+			m_virtualBounds = m_sceneBounds;
+		}
+		return true;
+	}
 
-
-		/* Perform the first ray intersection (or ignore if the
-		intersection has already been provided). */
-		rRec.rayIntersect(ray);
-		ray.mint = Epsilon;
-
-		Spectrum throughput(1.0f);
-		Float eta = 1.0f;
-
-			//当光线没有与场景相交时，返回nodata
-			if (!its.isValid()) {
-				/* If no intersection could be found, potentially return
-				radiance from a environment luminaire if it exists */
-				//如果隐藏了emiter，则返回-1. 只有多波段模式才启用。
-				if (m_hideEmitters)
-				{
-					Li = Spectrum(m_NoDataValue);
-					//break;
-				}
-			}
-
-			const BSDF *bsdf = its.getBSDF(ray);
-
-			/* ==================================================================== */
-			/*                     Direct illumination sampling                     */
-			/* ==================================================================== */
-
-			/* Estimate the direct illumination if this is requested */
-			DirectSamplingRecord dRec(its);
-
-			if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
-				(bsdf->getType() & BSDF::ESmooth)) {
-				Spectrum value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
-				if (!value.isZero()) {
-					const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
-
-					/* Allocate a record for querying the BSDF */
-					BSDFSamplingRecord bRec(its, its.toLocal(dRec.d), ERadiance);
-
-					/* Evaluate BSDF * cos(theta) */
-					const Spectrum bsdfVal = bsdf->eval(bRec);
-					/* Prevent light leaks due to the use of shading normals */
-					if (!bsdfVal.isZero()) {
-						/* Calculate prob. of having generated that direction
-						using BSDF sampling */
-						Float bsdfPdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)
-							? bsdf->pdf(bRec) : 0;
-
-						/* Weight using the power heuristic */
-						Float weight = miWeight(dRec.pdf, bsdfPdf);
-						Li += throughput * value * bsdfVal * weight;
+	//test occlusion for sun direct rays given reference point p and direction d
+	Spectrum repetitiveOcclude(Spectrum value, Point p, Vector d, const Scene* scene)const {
+		Ray occludeRay = Ray(p, d, 0);
+		for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
+			Float tNear, tFar;
+			int exitFace;
+			Vector boundExtend = m_sceneBounds.getExtents();
+			m_sceneBounds.rayIntersectExt(occludeRay, tNear, tFar, exitFace);
+			Point its_p = occludeRay.o + tFar * occludeRay.d;
+			if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+				//offset the ray
+				if (exitFace == 0) {
+					if (occludeRay.d.x > 0) {
+						occludeRay.o = its_p + Vector(-boundExtend.x, 0, 0);
+					}
+					else {
+						occludeRay.o = its_p + Vector(boundExtend.x, 0, 0);
 					}
 				}
-				else {
-				//	cout << "zerorr:" << endl;
+				else if (exitFace == 2) {
+					if (occludeRay.d.z > 0) {
+						occludeRay.o = its_p + Vector(0, 0, -boundExtend.z);
+					}
+					else {
+						occludeRay.o = its_p + Vector(0, 0, boundExtend.z);
+					}
 				}
+				//	cout << "new Pos: " << ray.toString() << endl;
+				if (scene->rayIntersect(occludeRay))
+					return Spectrum(0.0);
 			}
 			else {
-				cout << "type" << endl;
+				break;
 			}
-
-		/* Store statistics */
-		avgPathLength.incrementBase();
-		avgPathLength += rRec.depth;
-
-		return Li;
+		}
+		return value;
 	}
-#endif
+
+	void rayRepetitive(RayDifferential &ray, Intersection &its, const Scene *scene) const{
+			if (!its.isValid()) {
+				for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
+					Float tNear, tFar;
+					int exitFace;
+					Vector boundExtend = m_sceneBounds.getExtents();
+					m_sceneBounds.rayIntersectExt(ray, tNear, tFar, exitFace);
+					Point its_p = ray.o + tFar * ray.d;
+					if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+						//offset the ray
+						if (exitFace == 0) {
+							if (ray.d.x > 0) {
+								ray.o = its_p + Vector(-boundExtend.x, 0, 0);
+							}
+							else {
+								ray.o = its_p + Vector(boundExtend.x, 0, 0);
+							}
+						}
+						else if (exitFace == 2) {
+							if (ray.d.z > 0) {
+								ray.o = its_p + Vector(0, 0, -boundExtend.z);
+							}
+							else {
+								ray.o = its_p + Vector(0, 0, boundExtend.z);
+							}
+						}
+						//	cout << "new Pos: " << ray.toString() << endl;
+						scene->rayIntersect(ray, its);
+						if (its.t < std::numeric_limits<Float>::infinity())
+							break;
+					}
+					else {
+						break;
+					}
+				}
+			}
+	}
 
 	Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
 		/* Some aliases and local variables */
@@ -251,28 +261,21 @@ public:
 		//jianboqi:
 		//handle virtual plane
 		if (m_virtualPlane)
-		{
-			AABB scene_bound = scene->getKDTree()->getAABB();
-			double bound_max = scene_bound.max.y;
-			if (m_virtualPlane_vy == "MAX" || m_virtualPlane_vy == "TOP") {
-				double value = atof(m_virtualPlane_vy.c_str());
-				bound_max = value;
-			}
-			
+		{			
 			double x_min = m_virtualPlane_vx - 0.5*m_virtualPlane_size_x;
 			double x_max = m_virtualPlane_vx + 0.5*m_virtualPlane_size_x;
-			double z_min = m_virtualPlane_vz - 0.5*m_virtualPlane_size_y;
-			double z_max = m_virtualPlane_vz + 0.5*m_virtualPlane_size_y;
+			double z_min = m_virtualPlane_vz - 0.5*m_virtualPlane_size_z;
+			double z_max = m_virtualPlane_vz + 0.5*m_virtualPlane_size_z;
 
-			double H = r.o[1] - bound_max;
+			double H = r.o[1] - m_virtualBounds.max.y;
 			if (H > 0)
 			{
 				double a = r.d.x;
 				double b = r.d.y;
 				double c = r.d.z;
 				Point its_p = r.o + Point(-a / b*H, -H, -c / b*H);
-				if (!(its_p.x >= x_min && its_p.x <= x_max
-					&& its_p.z >= z_min && its_p.z <= z_max
+				if (!(its_p.x > x_min && its_p.x < x_max
+					&& its_p.z > z_min && its_p.z < z_max
 					))
 				{
 					return Spectrum(m_NoDataValue);
@@ -283,17 +286,18 @@ public:
 				return Spectrum(m_NoDataValue);
 			}
 		}
-		
 
 		/* Perform the first ray intersection (or ignore if the
 		   intersection has already been provided). */
 		rRec.rayIntersect(ray);
 		ray.mint = Epsilon;
+		rayRepetitive(ray, its, scene);
 
 		Spectrum throughput(1.0f);
 		Float eta = 1.0f;
 
 		while (rRec.depth <= m_maxDepth || m_maxDepth < 0) {
+
 			if (!its.isValid()) {
 				/* If no intersection could be found, potentially return
 				   radiance from a environment luminaire if it exists */
@@ -341,6 +345,12 @@ public:
 			if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
 				(bsdf->getType() & BSDF::ESmooth)) {
 				Spectrum value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+				//determine repetitive of sample sun rays
+				if (!value.isZero()) {
+					value = repetitiveOcclude(value, its.p, dRec.d, scene);
+				}
+
+
 				if (!value.isZero()) {
 					const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
 
@@ -390,7 +400,9 @@ public:
 
 			/* Trace a ray in this direction */
 			ray = Ray(its.p, wo, ray.time);
-			if (scene->rayIntersect(ray, its)) {
+			scene->rayIntersect(ray, its);
+			rayRepetitive(ray, its, scene);
+			if (its.isValid()) {
 				/* Intersected something - check if it was a luminaire */
 				if (its.isEmitter()) {
 					value = its.Le(-ray.d);
@@ -466,10 +478,6 @@ public:
 		return pdfA / (pdfA + pdfB);
 	}
 
-	void serialize(Stream *stream, InstanceManager *manager) const {
-		MonteCarloIntegrator::serialize(stream, manager);
-	}
-
 	std::string toString() const {
 		std::ostringstream oss;
 		oss << "MIPathTracer[" << endl
@@ -484,11 +492,20 @@ public:
 protected:
 	double m_NoDataValue;
 	bool m_virtualPlane;
-	Float m_virtualPlane_vx;
-	std::string m_virtualPlane_vy;
-	Float m_virtualPlane_vz;
-	Float m_virtualPlane_size_x;
-	Float m_virtualPlane_size_y;
+	double m_virtualPlane_vx;
+	std::string m_strVirtualPlane_vy;
+	//double m_virtualPlane_vy;
+	double m_virtualPlane_vz;
+	double m_virtualPlane_size_x;
+	double m_virtualPlane_size_z;
+
+	double m_sceneXSize;
+	double m_sceneZSize;
+
+	int m_repetitiveSceneNum;
+
+	AABB m_sceneBounds;
+	AABB m_virtualBounds;
 };
 
 MTS_IMPLEMENT_CLASS_S(MIPathTracer, false, MonteCarloIntegrator)

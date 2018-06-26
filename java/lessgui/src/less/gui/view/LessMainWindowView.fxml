@@ -282,7 +282,9 @@
                                                       <CheckBox fx:id="ThermalCheckbox" layoutX="150.0" layoutY="307.0" mnemonicParsing="false" onAction="#handleThermalRadiationCheckbox" prefWidth="0.0" />
                                                       <Label layoutX="2.0" layoutY="307.0" text="Thermal Radiation:" />
                                                       <Label layoutX="3.0" layoutY="343.0" text="NoData Value:" />
-                                                      <TextField fx:id="sensorNoDataValueField" layoutX="140.0" layoutY="336.0" prefHeight="35.0" prefWidth="292.0" text="-1.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
+                                                      <TextField fx:id="sensorNoDataValueField" layoutX="140.0" layoutY="336.0" prefHeight="35.0" prefWidth="94.0" text="-1.0" AnchorPane.leftAnchor="150.0" />
+                                                      <Label layoutX="276.0" layoutY="345.0" text="Repetitive scene:" />
+                                                      <TextField fx:id="sensorRepetitiveSceneTextField" layoutX="388.0" layoutY="338.0" prefHeight="28.0" prefWidth="83.0" text="10" />
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane fx:id="orthographicPane" prefHeight="137.0" prefWidth="624.0">
@@ -487,10 +489,19 @@
                                                 <Insets top="10.0" />
                                              </VBox.margin>
                                           </AnchorPane>
-                                          <AnchorPane fx:id="terrainOpticalAnchorPane" prefHeight="38.0" prefWidth="671.0">
+                                          <AnchorPane fx:id="terrainOpticalAnchorPane" prefHeight="109.0" prefWidth="636.0">
                                              <children>
-                                                <Label layoutX="57.0" layoutY="6.0" text="Optical Property:" AnchorPane.leftAnchor="0.0" />
-                                                <ComboBox fx:id="terrainOpticalCombox" layoutX="147.0" prefHeight="35.0" prefWidth="224.0" AnchorPane.leftAnchor="150.0" />
+                                                <Label layoutY="61.0" text="Optical Property:" AnchorPane.leftAnchor="0.0" />
+                                                <ComboBox fx:id="terrainOpticalCombox" layoutX="110.0" layoutY="52.0" prefHeight="35.0" prefWidth="224.0" AnchorPane.leftAnchor="110.0" />
+                                                <Label layoutY="16.0" text="BRDF Type:" AnchorPane.leftAnchor="0.0" />
+                                                <ComboBox fx:id="terrainBRDFTypeCombox" layoutX="110.0" layoutY="8.0" prefHeight="35.0" prefWidth="224.0" value="Lambertian" AnchorPane.leftAnchor="110.0">
+                                                	<items>
+                                                            <FXCollections fx:factory="observableArrayList">
+                                                               <String fx:value="Lambertian" />
+                                                               <String fx:value="Soilspect" />
+                                                            </FXCollections>
+                                                         </items>
+                                                </ComboBox>
                                              </children>
                                              <VBox.margin>
                                                 <Insets top="10.0" />

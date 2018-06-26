@@ -1083,6 +1083,126 @@ public class ProjectManager {
 		});
 	}
 	
+	
+	public  void initTerrainModule() {
+		this.mwController.terrainVbox.getChildren().remove(this.mwController.terrFilePane);
+		this.mwController.comboBoxDEMType.valueProperty().addListener(new ChangeListener<String>() {
+			@Override 
+			public void changed(ObservableValue ov, String oldVal, String newVal) {
+				if(newVal.equals(Const.LESS_TERRAIN_PLANE)){
+					mwController.sceneXSizeField.setDisable(false);
+					mwController.sceneYSizeField.setDisable(false);
+					mwController.terrainVbox.getChildren().remove(mwController.terrFilePane);
+				}
+				if (newVal.equals(Const.LESS_TERRAIN_MESH)){
+					mwController.sceneXSizeField.setDisable(true);
+					mwController.sceneYSizeField.setDisable(true);
+					if (!mwController.terrainVbox.getChildren().contains(mwController.terrFilePane)){
+						mwController.terrainVbox.getChildren().add(1, mwController.terrFilePane);
+					}
+				}
+				if(newVal.equals(Const.LESS_TERRAIN_RASTER)){
+					//show the selection for image
+					mwController.sceneXSizeField.setDisable(false);
+					mwController.sceneYSizeField.setDisable(false);
+					if (!mwController.terrainVbox.getChildren().contains(mwController.terrFilePane)){
+						mwController.terrainVbox.getChildren().add(1, mwController.terrFilePane);
+					}
+				}
+		    } 
+		});
+		
+		//brdf
+		this.mwController.terrainBRDFTypeCombox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override 
+			public void changed(ObservableValue ov, String oldVal, String newVal) {
+				if(newVal.equals(Const.LESS_TERRAIN_BRDF_SOILSPECT)){
+					mwController.terrainOpticalCombox.getSelectionModel().clearSelection();
+					mwController.terrainOpticalCombox.setDisable(true);
+					mwController.albedoLabel = new Label("\u03C9:");
+					mwController.c1Label = new Label("c1:");
+					mwController.c2Label = new Label("c2:");
+					mwController.c3Label = new Label("c3:");
+					mwController.c4Label = new Label("c4:");
+					mwController.h1Label = new Label("h1:");
+					mwController.h2Label = new Label("h2:");
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.albedoLabel);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c2Label);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c3Label);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c4Label);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.h1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.h2Label);
+					AnchorPane.setTopAnchor(mwController.albedoLabel, 110.0);
+					AnchorPane.setTopAnchor(mwController.c1Label, 150.0);
+					AnchorPane.setTopAnchor(mwController.c2Label, 190.0);
+					AnchorPane.setTopAnchor(mwController.c3Label, 230.0);
+					AnchorPane.setTopAnchor(mwController.c4Label, 270.0);
+					AnchorPane.setTopAnchor(mwController.h1Label, 310.0);
+					AnchorPane.setTopAnchor(mwController.h2Label, 350.0);
+					
+					mwController.albedoTextField = new TextField("0.537");
+					mwController.c1TextField = new TextField("1.492");
+					mwController.c2TextField = new TextField("0.56");
+					mwController.c3TextField = new TextField("0.238");
+					mwController.c4TextField = new TextField("-0.06");
+					mwController.h1TextField = new TextField("1");
+					mwController.h2TextField = new TextField("0.114");
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.albedoTextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c2TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c3TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.c4TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.h1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.h2TextField);
+					AnchorPane.setTopAnchor(mwController.albedoTextField, 105.0);
+					AnchorPane.setTopAnchor(mwController.c1TextField, 145.0);
+					AnchorPane.setTopAnchor(mwController.c2TextField, 185.0);
+					AnchorPane.setTopAnchor(mwController.c3TextField, 225.0);
+					AnchorPane.setTopAnchor(mwController.c4TextField, 265.0);
+					AnchorPane.setTopAnchor(mwController.h1TextField, 305.0);
+					AnchorPane.setTopAnchor(mwController.h2TextField, 345.0);
+					AnchorPane.setLeftAnchor(mwController.albedoTextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.c1TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.c2TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.c3TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.c4TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.h1TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.h2TextField, 110.0);
+					
+					mwController.soilspectHelp = new Label("(\u03C9"+"1,"+"\u03C9"+"2,...[Number of Bands])");
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.soilspectHelp);
+					AnchorPane.setLeftAnchor(mwController.soilspectHelp, 300.0);
+					AnchorPane.setTopAnchor(mwController.soilspectHelp, 110.0);
+					
+				}
+				if (newVal.equals(Const.LESS_TERRAIN_BRDF_LAMBERTIAN)){
+					mwController.terrainOpticalCombox.getSelectionModel().select(0);;
+					mwController.terrainOpticalCombox.setDisable(false);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.albedoLabel);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c2Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c3Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c4Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h2Label);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.albedoTextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c2TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c3TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c4TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h2TextField);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.soilspectHelp);
+				}
+		    } 
+		});
+		
+	}
+	
 	//python interpreter
 	public void choosePyInterpreter(){
 		FileChooser fileChooser = new FileChooser();

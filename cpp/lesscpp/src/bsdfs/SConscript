@@ -11,4 +11,6 @@ plugins += env.SharedLibrary('mixturebsdf', ['mixturebsdf.cpp'])
 plugins += env.SharedLibrary('difftrans', ['difftrans.cpp'])
 plugins += env.SharedLibrary('null', ['null.cpp'])
 
+plugins += env.SharedLibrary('soilspect', ['soilspect.cpp'])
+
 Export('plugins')

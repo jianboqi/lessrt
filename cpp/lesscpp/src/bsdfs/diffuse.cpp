@@ -86,7 +86,6 @@ public:
 	SmoothDiffuse(Stream *stream, InstanceManager *manager)
 		: BSDF(stream, manager) {
 		m_reflectance = static_cast<Texture *>(manager->getInstance(stream));
-
 		configure();
 	}
 
@@ -99,7 +98,6 @@ public:
 			m_components.push_back(EDiffuseReflection | EFrontSide
 				| (m_reflectance->isConstant() ? 0 : ESpatiallyVarying));
 			m_usesRayDifferentials = m_reflectance->usesRayDifferentials();
-
 		BSDF::configure();
 	}
 

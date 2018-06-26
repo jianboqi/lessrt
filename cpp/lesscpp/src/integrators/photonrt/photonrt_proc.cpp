@@ -72,6 +72,8 @@ void CapturePhotonWorker::prepare() {
 		m_scene->getIntegrator()->getProperties().getFloat("subSceneZSize", 100)*0.5);
 	m_filmSize = m_sensor->getFilm()->getSize();
 
+	m_repetitiveSceneNum = integratorProps.getInteger("RepetitiveScene", 15);
+
 	//首先获取sceneBounds
 	Vector2 sceneSize = Vector2(integratorProps.getFloat("subSceneXSize", scene_bound.getExtents().x),
 		integratorProps.getFloat("subSceneZSize", scene_bound.getExtents().z));
@@ -192,7 +194,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 				if (true) {//using repititive
 					if (its.t == std::numeric_limits<Float>::infinity()) {
 						//maximum iteration = 5
-						for (int iteration = 0; iteration < 15; iteration++) {
+						for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
 							Float tNear, tFar;
 							int exitFace;
 							Vector boundExtend = m_sceneBounds.getExtents();
@@ -364,17 +366,6 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 						m_workResult->m_dirBRFWorkResult->put(zenithAngle, AzimuthAngle, weight);
 					}
 				}
-				//virtual plane
-				//if (ray.o.x >= m_sceneBounds.min.x && ray.o.x <= m_sceneBounds.max.x
-				//	&& ray.o.z >= m_sceneBounds.min.z && ray.o.z <= m_sceneBounds.max.z
-				//	)
-				//{
-				//	//determine the zentih and azimuth angle according to ray direction
-				//	double zenithAngle = math::safe_acos(ray.d.y);
-				//	double AzimuthAngle = 0.5*PHRT_M_PI - atan2(ray.d.z, -ray.d.x);
-				//	if (AzimuthAngle < 0) AzimuthAngle += 2 * PHRT_M_PI;
-				//	m_workResult->m_dirBRFWorkResult->put(zenithAngle, AzimuthAngle, weight);
-				//}
 			}
 		}
 		else { //handling virtual directions
@@ -390,7 +381,7 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 				bool isDirectionOccuded = false;
 				//for repetitive scene
 				if (!m_scene->rayIntersect(occludeRay)) {
-					for (int iter = 0; iter < 15; iter++) {
+					for (int iter = 0; iter < m_repetitiveSceneNum; iter++) {
 						Float tNear, tFar;
 						int exitFace;
 						Vector boundExtend = m_sceneBounds.getExtents();

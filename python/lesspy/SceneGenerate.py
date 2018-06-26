@@ -134,7 +134,10 @@ class SceneGenerate:
             scaleNode.setAttribute("z", str(cfg["scene"]["terrain"]["extent_height"] / 2.0))
         bsdf = doc.createElement("bsdf")
         demNode.appendChild(bsdf)
-        bsdf.setAttribute("type", "diffuse")
+        if cfg["scene"]["terrain"]["terrBRDFType"] == "Soilspect":
+            bsdf.setAttribute("type","soilspect")
+        elif cfg["scene"]["terrain"]["terrBRDFType"] == "Lambertian":
+            bsdf.setAttribute("type", "diffuse")
 
         # for thermal
         if cfg["sensor"]["thermal_radiation"]:
@@ -151,16 +154,46 @@ class SceneGenerate:
 
 
         if "landcover" not in cfg["scene"]["terrain"]:
-            reflectancenode = doc.createElement("spectrum")
-            bsdf.appendChild(reflectancenode)
-            reflectancenode.setAttribute("name", "reflectance")
-            factor = cfg["scene"]["terrain"]["optical_scale"]
-            defined_optical_name = cfg["scene"]["terrain"]["optical"]
-            optical_name_or_list = cfg["scene"]["optical_properties"][defined_optical_name]
-            if optical_name_or_list == "":
-                log("No optical property of ground detected.")
-                sys.exit(0)
-            reflectancenode.setAttribute("value", optical_name_or_list.split(";")[0])
+            if cfg["scene"]["terrain"]["terrBRDFType"] == "Lambertian":
+                reflectancenode = doc.createElement("spectrum")
+                bsdf.appendChild(reflectancenode)
+                reflectancenode.setAttribute("name", "reflectance")
+                factor = cfg["scene"]["terrain"]["optical_scale"]
+                defined_optical_name = cfg["scene"]["terrain"]["optical"]
+                optical_name_or_list = cfg["scene"]["optical_properties"][defined_optical_name]
+                if optical_name_or_list == "":
+                    log("No optical property of ground detected.")
+                    sys.exit(0)
+                reflectancenode.setAttribute("value", optical_name_or_list.split(";")[0])
+            elif cfg["scene"]["terrain"]["terrBRDFType"] == "Soilspect":
+                spec  = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "albedo")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["albedo"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "c1")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["c1"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "c2")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["c2"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "c3")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["c3"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "c4")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["c4"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "h1")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["h1"])
+                spec = doc.createElement("spectrum")
+                bsdf.appendChild(spec)
+                spec.setAttribute("name", "h2")
+                spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["h2"])
         else:
             textureNode = doc.createElement("texture")
             bsdf.appendChild(textureNode)
@@ -181,11 +214,11 @@ class SceneGenerate:
                                os.path.join(session.get_input_dir(), "landcover.txt"),
                                cfg["scene"]["optical_properties"],
                                len(cfg["sensor"]["bands"].split(",")))
-            createLandcoverMap_trans(os.path.join(session.get_input_dir(), imported_landcover_raster_name),
-                               os.path.join(session.get_scenefile_path(), "landtrans.exr"),
-                               os.path.join(session.get_input_dir(), "landcover.txt"),
-                               cfg["scene"]["optical_properties"],
-                               len(cfg["sensor"]["bands"].split(",")))
+            # createLandcoverMap_trans(os.path.join(session.get_input_dir(), imported_landcover_raster_name),
+            #                    os.path.join(session.get_scenefile_path(), "landtrans.exr"),
+            #                    os.path.join(session.get_input_dir(), "landcover.txt"),
+            #                    cfg["scene"]["optical_properties"],
+            #                    len(cfg["sensor"]["bands"].split(",")))
 
 
 
