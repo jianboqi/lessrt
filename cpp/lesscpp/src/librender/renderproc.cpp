@@ -146,6 +146,10 @@ void BlockedRenderProcess::processResult(const WorkResult *result, bool cancelle
 	m_progress->update(++m_resultCount);
 	lock.unlock();
 	m_queue->signalWorkEnd(m_parent, block, cancelled);
+
+	//if (m_resultCount == m_numBlocksTotal) {
+	//	
+	//}
 }
 
 ParallelProcess::EStatus BlockedRenderProcess::generateWork(WorkUnit *unit, int worker) {

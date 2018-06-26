@@ -20,7 +20,7 @@ public:
 		the particle tracing task (default: 200K samples).
 		Should be high enough so that sending and accumulating
 		the partially exposed films is not the bottleneck. */
-		m_granularity = props.getSize("granularity", 200000);
+		m_granularity = props.getSize("granularity", 20000);
 
 		m_sunRayResolution = props.getFloat("sunRayResolution", 0.05);
 		m_hasBRFProducts = props.getBoolean("BRFProduct", false);
