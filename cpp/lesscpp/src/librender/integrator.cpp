@@ -43,13 +43,18 @@ void Integrator::configureSampler(const Scene *scene, Sampler *sampler) {
 const Integrator *Integrator::getSubIntegrator(int idx) const { return NULL; }
 
 SamplingIntegrator::SamplingIntegrator(const Properties &props)
- : Integrator(props) { }
+ : Integrator(props) {
+	m_hasFourComponentProduct = props.getBoolean("hasFourComponentProduct", false);
+}
 
 SamplingIntegrator::SamplingIntegrator(Stream *stream, InstanceManager *manager)
- : Integrator(stream, manager) { }
+ : Integrator(stream, manager) {
+	m_hasFourComponentProduct = stream->readBool();
+}
 
 void SamplingIntegrator::serialize(Stream *stream, InstanceManager *manager) const {
 	Integrator::serialize(stream, manager);
+	stream->writeBool(m_hasFourComponentProduct);
 }
 
 Spectrum SamplingIntegrator::E(const Scene *scene, const Intersection &its,
@@ -110,7 +115,7 @@ bool SamplingIntegrator::render(Scene *scene,
 
 	/* This is a sampling-based integrator - parallelize */
 	ref<ParallelProcess> proc = new BlockedRenderProcess(job,
-		queue, scene->getBlockSize());
+		queue, scene->getBlockSize(), m_hasFourComponentProduct);
 	int integratorResID = sched->registerResource(this);
 	proc->bindResource("integrator", integratorResID);
 	proc->bindResource("scene", sceneResID);
@@ -138,7 +143,7 @@ void SamplingIntegrator::wakeup(ConfigurableObject *parent,
 }
 
 void SamplingIntegrator::renderBlock(const Scene *scene,
-		const Sensor *sensor, Sampler *sampler, ImageBlock *block,
+		const Sensor *sensor, Sampler *sampler, MultipleImageBlock *multiImageblock,
 		const bool &stop, const std::vector< TPoint2<uint8_t> > &points) const {
 
 	Float diffScaleFactor = 1.0f /
@@ -152,7 +157,8 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 	Float timeSample = 0.5f;
 	RayDifferential sensorRay;
 
-	block->clear();
+	//block->clear();
+	multiImageblock->clear();
 
 	uint32_t queryType = RadianceQueryRecord::ESensorRay;
 
@@ -160,12 +166,18 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 		queryType &= ~RadianceQueryRecord::EOpacity;
 
 	for (size_t i = 0; i<points.size(); ++i) {
-		Point2i offset = Point2i(points[i]) + Vector2i(block->getOffset());
+		Point2i offset = Point2i(points[i]) + Vector2i(multiImageblock->getMainImageBlock()->getOffset());
 		if (stop)
 			break;
 
 		sampler->generate(offset);
-
+		std::vector<int> fourcomps;
+		if (m_hasFourComponentProduct) {
+			fourcomps.push_back(0);
+			fourcomps.push_back(0);
+			fourcomps.push_back(0);
+			fourcomps.push_back(0);
+		}
 		for (size_t j = 0; j<sampler->getSampleCount(); j++) {
 			rRec.newQuery(queryType, sensor->getMedium());
 			Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
@@ -182,8 +194,15 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			sensorRay.scaleDifferential(diffScaleFactor);
 
 			spec *= Li(sensorRay, rRec);
-			block->put(samplePos, spec, rRec.alpha);
+			multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
+			if (m_hasFourComponentProduct) {
+				fourcomps[rRec.extra - 1]++;
+			}
 			sampler->advance();
+		}
+		if (m_hasFourComponentProduct) {
+			int maxPos = std::distance(fourcomps.begin(), std::max_element(fourcomps.begin(), fourcomps.end()));
+			multiImageblock->getFourComponentImageBlock()->put_no_filter(Point2i(points[i]), Spectrum((double)(maxPos +1)), rRec.alpha);
 		}
 	}
 }

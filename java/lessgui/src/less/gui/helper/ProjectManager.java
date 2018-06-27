@@ -1001,13 +1001,36 @@ public class ProjectManager {
 		AnchorPane.setRightAnchor(mwController.combobox, 20.0);
 		AnchorPane.setTopAnchor(mwController.combobox, 50.0);
 	}
+	
+	public void addComponents2OrthPane() {
+		Label productsLabel = new Label("Products:");
+		this.mwController.orthographicPane.getChildren().add(productsLabel);
+		AnchorPane.setLeftAnchor(productsLabel, 0.0);
+		AnchorPane.setTopAnchor(productsLabel, 150.0);
+		this.mwController.orthfourCompsCheckbox = new CheckBox("Four Components Product");
+		this.mwController.orthographicPane.getChildren().add(this.mwController.orthfourCompsCheckbox);
+		AnchorPane.setLeftAnchor(this.mwController.orthfourCompsCheckbox, 150.0);
+		AnchorPane.setTopAnchor(this.mwController.orthfourCompsCheckbox, 150.0);
+	}
+	
+	public void addComponents2PerPane() {
+		Label productsLabel = new Label("Products:");
+		this.mwController.perspectivePane.getChildren().add(productsLabel);
+		AnchorPane.setLeftAnchor(productsLabel, 0.0);
+		AnchorPane.setTopAnchor(productsLabel, 100.0);
+		this.mwController.perfourCompsCheckbox = new CheckBox("Four Components Product");
+		this.mwController.perspectivePane.getChildren().add(this.mwController.perfourCompsCheckbox);
+		AnchorPane.setLeftAnchor(this.mwController.perfourCompsCheckbox, 150.0);
+		AnchorPane.setTopAnchor(this.mwController.perfourCompsCheckbox, 100.0);
+	}
 
 	//sensor
 	public void initSensor(){
 		
 		createPhotonTracingConfigPanel();
 		createFisheEyeConfigPanel();
-					
+		addComponents2OrthPane();
+		addComponents2PerPane();
 		//init radio button for rgb and spectrum
 		this.mwController.ImageFormatRadioroup = new ToggleGroup();
 		this.mwController.spectrumRadio.setToggleGroup(this.mwController.ImageFormatRadioroup);

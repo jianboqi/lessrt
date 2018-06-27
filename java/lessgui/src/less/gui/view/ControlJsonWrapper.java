@@ -118,6 +118,11 @@ public class ControlJsonWrapper {
 	    sensor.put("RepetitiveScene", Integer.parseInt(this.mwcontroller.sensorRepetitiveSceneTextField.getText()));
 	    
 	    sensor.put("sensor_type", sensorType);
+	    
+	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH)) {
+	    	sensor.put("hasFourComponentProduct", this.mwcontroller.orthfourCompsCheckbox.isSelected());
+	    }
+	    
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_ORTH) || sensorType.equals(Const.LESS_SENSOR_TYPE_PT)){
 	    	JSONObject orthographic = new JSONObject();
 		    orthographic.put("sample_per_square_meter", Integer.parseInt(this.mwcontroller.sensorSampleField.getText().replaceAll(",", "")));
@@ -133,6 +138,7 @@ public class ControlJsonWrapper {
 	    	perspective.put("fovAxis", "diagonal");
 	    	perspective.put("sample_per_square_meter", Integer.parseInt(this.mwcontroller.sensorSampleField.getText().replaceAll(",", "")));
 	    	sensor.put("perspective", perspective);
+	    	sensor.put("hasFourComponentProduct", this.mwcontroller.perfourCompsCheckbox.isSelected());
 	    }
 	    
 	    if(sensorType.equals(Const.LESS_SENSOR_TYPE_CF)){
@@ -330,6 +336,11 @@ public class ControlJsonWrapper {
 			this.mwcontroller.sensorYExtentField.setText(camera.getDouble("sub_region_height")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
 			this.mwcontroller.virtualPlaneCheckbox.setDisable(false);
+			
+			if(sensor.has("hasFourComponentProduct"))
+				this.mwcontroller.orthfourCompsCheckbox.setSelected(sensor.getBoolean("hasFourComponentProduct"));
+			else
+				this.mwcontroller.orthfourCompsCheckbox.setSelected(false);
 		}
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_PER)){
@@ -338,6 +349,11 @@ public class ControlJsonWrapper {
 			this.mwcontroller.yfovField.setText(camera.getDouble("fovy")+"");
 			this.mwcontroller.sensorSampleField.setText(camera.getInt("sample_per_square_meter")+"");
 			this.mwcontroller.virtualPlaneCheckbox.setDisable(true);
+			
+			if(sensor.has("hasFourComponentProduct"))
+				this.mwcontroller.perfourCompsCheckbox.setSelected(sensor.getBoolean("hasFourComponentProduct"));
+			else
+				this.mwcontroller.perfourCompsCheckbox.setSelected(false);
 		}
 		
 		if(sensor.getString("sensor_type").equals(Const.LESS_SENSOR_TYPE_CF)){

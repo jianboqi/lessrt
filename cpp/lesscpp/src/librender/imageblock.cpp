@@ -71,5 +71,34 @@ std::string ImageBlock::toString() const {
 	return oss.str();
 }
 
+
+void MultipleImageBlock::load(Stream *stream) {
+	m_hasFourComponentProduct = stream->readBool();
+	m_mainImageBlock->load(stream);
+	if(m_hasFourComponentProduct)
+		m_fourComponentImageBlock->load(stream);
+}
+
+void MultipleImageBlock::save(Stream *stream) const{
+	stream->writeBool(m_hasFourComponentProduct);
+	m_mainImageBlock->save(stream);
+	if (m_hasFourComponentProduct)
+		m_fourComponentImageBlock->save(stream);
+}
+
+std::string MultipleImageBlock::toString() const {
+	std::ostringstream oss;
+	oss << "MultipleImageBlock[" << endl
+		<< "  offset = " << m_mainImageBlock->getOffset().toString() << "," << endl
+		<< "  size = " << m_mainImageBlock->getSize().toString() << "," << endl
+		<< "  borderSize = " << m_mainImageBlock->getBorderSize() << endl
+		<< "]";
+	return oss.str();
+}
+
+MultipleImageBlock::~MultipleImageBlock() {
+}
+
 MTS_IMPLEMENT_CLASS(ImageBlock, false, WorkResult)
+MTS_IMPLEMENT_CLASS(MultipleImageBlock, false, WorkResult)
 MTS_NAMESPACE_END

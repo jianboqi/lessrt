@@ -72,6 +72,15 @@ def do_simulation_multi_spectral(cores):
             RasterHelper.saveToHdr_no_transform(data, out_file_no_extension, bandlist, output_format)
             os.remove(output_fileName)
     else:
+        out_file_no_extension = distFile + "_4Components"
+        output_fileName = distFile + "_4Components.npy"
+
+        if output_format not in ("npy", "NPY") and os.path.exists(output_fileName):
+            data = np.load(output_fileName)[:,:,0]
+            bandlist = []
+            RasterHelper.saveToHdr_no_transform(data, out_file_no_extension, bandlist, output_format)
+            os.remove(output_fileName)
+
         if output_format not in ("npy", "NPY") and os.path.exists(distFile + ".npy"):
             data = np.load(distFile + ".npy")
             bandlist = cfg["sensor"]["bands"].split(",")

@@ -601,7 +601,7 @@ ref<WorkProcessor> CapturePhotonProcess::createWorkProcessor() const {
 
 
 MTS_IMPLEMENT_CLASS(CapturePhotonProcess, false, PhotonProcess)
-MTS_IMPLEMENT_CLASS(CapturePhotonWorkResult, false, ImageBlock)
+MTS_IMPLEMENT_CLASS(CapturePhotonWorkResult, false, WorkResult)
 MTS_IMPLEMENT_CLASS_S(CapturePhotonWorker, false, PhotonTracer)
 
 MTS_NAMESPACE_END

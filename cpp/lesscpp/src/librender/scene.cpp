@@ -273,7 +273,7 @@ void Scene::configure() {
 	if (m_integrator == NULL) {
 		/* Create a direct integrator by default */
 		m_integrator = static_cast<Integrator *> (PluginManager::getInstance()->
-				createObject(MTS_CLASS(Integrator), Properties("direct")));
+				createObject(MTS_CLASS(Integrator), Properties("path")));
 		m_integrator->configure();
 	}
 

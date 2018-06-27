@@ -172,6 +172,56 @@ public:
 		return false;
 	}
 
+	//put accumulate, no filter
+	FINLINE bool put_no_filter(const Point2i &_pos, const Spectrum &spec, Float alpha) {
+		std::vector<Float> temp;
+		temp.resize(SPECTRUM_SAMPLES + 2);
+		for (int i = 0; i<SPECTRUM_SAMPLES; ++i)
+			temp[i] = spec[i];
+		temp[SPECTRUM_SAMPLES] = alpha;
+
+		temp[SPECTRUM_SAMPLES + 1] = 1.0f;
+		Float * value = temp.data();
+
+		const int channels = m_bitmap->getChannelCount();
+		for (int i = 0; i<channels; ++i) {
+			if (EXPECT_NOT_TAKEN((!std::isfinite(value[i])) && m_warn))
+				goto bad_sample;
+		}
+
+		{
+			const Vector2i &size = m_bitmap->getSize();
+
+			/* Convert to pixel coordinates within the image block */
+			/*const Point2i pos(
+			std::min(std::max(0,(int)std::floor(_pos.x - (m_offset.x))+1),size.x-1),
+			std::min(std::max(0,(int)std::floor(_pos.y - (m_offset.y))+1),size.y-1));*/
+			Float *dest = m_bitmap->getFloatData()
+				+ (_pos.y * (size_t)size.x + _pos.x) * channels;
+			for (int k = 0; k < channels; ++k)
+			{
+				*dest++ += value[k];
+			}
+		}
+
+
+		return true;
+	bad_sample:
+		{
+			std::ostringstream oss;
+			oss << "Invalid sample value : [";
+			for (int i = 0; i<channels; ++i) {
+				oss << value[i];
+				if (i + 1 < channels)
+					oss << ", ";
+			}
+			oss << "]";
+			Log(EWarn, "%s", oss.str().c_str());
+		}
+		return false;
+	}
+
+
 	/**
 	 * \brief Store a single sample inside the block
 	 *
@@ -185,7 +235,6 @@ public:
 	 */
 	FINLINE bool put(const Point2 &_pos, const Float *value) {
 		const int channels = m_bitmap->getChannelCount();
-
 		//check sample values  in RGB mode
  // spectral mode: only no need to check <0, because nodata is set to -1.
 /* Check if all sample values are valid */
@@ -288,6 +337,85 @@ protected:
 	Float *m_weightsX, *m_weightsY;
 	bool m_warn;
 };
+
+
+//Implement a multi-image workResults for storing multiple images at the same time
+//Author: Jianbo Qi
+//Date: 2018.7
+class MTS_EXPORT_RENDER MultipleImageBlock :public WorkResult {
+public:
+	MultipleImageBlock(Bitmap::EPixelFormat fmt, const Vector2i &size,bool hasFourComponentProduct,
+		const ReconstructionFilter *filter = NULL, int channels = -1, bool warn = true):m_hasFourComponentProduct(hasFourComponentProduct){
+
+		m_mainImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
+
+		if (m_hasFourComponentProduct) {
+			m_fourComponentImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
+		}
+	}
+
+	inline void clear() {
+		m_mainImageBlock->clear();
+		if (m_hasFourComponentProduct)
+			m_fourComponentImageBlock->clear();
+	}
+
+	inline void setOffset(const Point2i &offset) {
+		m_mainImageBlock->setOffset(offset);
+		if (m_hasFourComponentProduct)
+			m_fourComponentImageBlock->setOffset(offset);
+	}
+
+	/// Set the current block size
+	inline void setSize(const Vector2i &size) { 
+		m_mainImageBlock->setSize(size);
+		if (m_hasFourComponentProduct)
+			m_fourComponentImageBlock->setSize(size);
+	}
+
+	FINLINE bool putInMainImageBlock(const Point2 &pos, const Spectrum &spec, Float alpha) {
+		return m_mainImageBlock->put(pos, spec, alpha);
+	}
+
+	FINLINE bool putInFourComponentImageBlock(const Point2 &pos, const Spectrum &spec, Float alpha) {
+		return m_fourComponentImageBlock->put(pos, spec, alpha);
+	}
+
+	inline ImageBlock* getMainImageBlock(){
+		return m_mainImageBlock.get();
+	}
+
+	inline const ImageBlock* getMainImageBlock() const{
+		return m_mainImageBlock.get();
+	}
+
+	inline ImageBlock* getFourComponentImageBlock() {
+		return m_fourComponentImageBlock.get();
+	}
+
+	inline const ImageBlock* getFourComponentImageBlock() const {
+		return m_fourComponentImageBlock.get();
+	}
+	// ======================================================================
+	//! @{ \name Implementation of the WorkResult interface
+	// ======================================================================
+
+	void load(Stream *stream);
+	void save(Stream *stream) const;
+	std::string toString() const;
+
+	//! @}
+	// ======================================================================
+	MTS_DECLARE_CLASS()
+protected:
+	/// Virtual destructor
+	virtual ~MultipleImageBlock();
+protected:
+	ref<ImageBlock> m_mainImageBlock;
+	ref<ImageBlock> m_fourComponentImageBlock;
+	bool m_hasFourComponentProduct;
+};
+
 
 
 MTS_NAMESPACE_END

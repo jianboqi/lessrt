@@ -350,6 +350,25 @@ public:
 					value = repetitiveOcclude(value, its.p, dRec.d, scene);
 				}
 
+				//four component
+				if (m_hasFourComponentProduct && rRec.depth == 1) {
+					if (!value.isZero()) {//illuminated area
+						if (its.shape->getName() == "terrain") {//intersect with terrain
+							rRec.extra = 1; // illuminated soil
+						}
+						else {
+							rRec.extra = 2; // illuminated object (leaf)
+						}
+					}
+					else {//shaded area
+						if (its.shape->getName() == "terrain") {//intersect with terrain
+							rRec.extra = 3; // shaded soil
+						}
+						else {
+							rRec.extra = 4; // shaded object (leaf)
+						}
+					}
+				}
 
 				if (!value.isZero()) {
 					const Emitter *emitter = static_cast<const Emitter *>(dRec.object);

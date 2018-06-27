@@ -391,7 +391,7 @@ public:
 	 *    the user has requested that the program be stopped
 	 */
 	virtual void renderBlock(const Scene *scene, const Sensor *sensor,
-		Sampler *sampler, ImageBlock *block, const bool &stop,
+		Sampler *sampler, MultipleImageBlock *multiImageblock, const bool &stop,
 		const std::vector< TPoint2<uint8_t> > &points) const;
 
 	/**
@@ -433,6 +433,8 @@ protected:
 protected:
 	/// Used to temporarily cache a parallel process while it is in operation
 	ref<ParallelProcess> m_process;
+
+	bool m_hasFourComponentProduct;
 };
 
 /*

@@ -66,9 +66,10 @@ class SceneGenerate:
         doc.appendChild(root)
         root.setAttribute("version", "0.5.0")
 
+        demNode = doc.createElement("shape")
+        root.appendChild(demNode)
+        demNode.setAttribute("id","terrain")
         if cfg["scene"]["terrain"]["terrain_type"] == "RASTER":
-            demNode = doc.createElement("shape")
-            root.appendChild(demNode)
             demNode.setAttribute("type", "heightfield")
             boolNode = doc.createElement("boolean")
             demNode.appendChild(boolNode)
@@ -102,8 +103,7 @@ class SceneGenerate:
             scaleNode.setAttribute("z", str(cfg["scene"]["terrain"]["extent_height"]/2.0))
 
         if cfg["scene"]["terrain"]["terrain_type"] == "MESH":
-            demNode = doc.createElement("shape")
-            root.appendChild(demNode)
+
             demNode.setAttribute("type", "obj")
             strNode = doc.createElement("string")
             demNode.appendChild(strNode)
@@ -118,8 +118,7 @@ class SceneGenerate:
             facenormalNode.setAttribute("value","true")
 
         if cfg["scene"]["terrain"]["terrain_type"] == "PLANE":
-            demNode = doc.createElement("shape")
-            root.appendChild(demNode)
+
             demNode.setAttribute("type", "rectangle")
             transNode = doc.createElement("transform")
             demNode.appendChild(transNode)
@@ -454,6 +453,7 @@ class SceneGenerate:
         if(forest_prifix != ""):
             forest_prifix = forest_prifix[0:len(forest_prifix)-1] +"_0_"
         scene = SceneHandler.loadScene(fileResolver.resolve(str(forest_prifix+terr_scene_file)))
+        # scene = SceneHandler.loadScene(fileResolver.resolve(r"E:\Research\20-LESS\RealScene\SimProj\calLAI\Parameters\_scenefile\terrain1.xml"))
         scene.configure()
         scene.initialize()
         tf = open(tree_pos)

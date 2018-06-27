@@ -166,7 +166,7 @@ public:
 	}
 
 	void renderBlock(const Scene *scene, const Sensor *sensor,
-			Sampler *sampler, ImageBlock *block, const bool &stop,
+			Sampler *sampler, MultipleImageBlock *multiImageblock, const bool &stop,
 			const std::vector< TPoint2<uint8_t> > &points) const {
 		//typedef TSpectrum<Float> SpectrumAlphaWeight;
 
@@ -188,6 +188,7 @@ public:
 		int borderSize = sensor->getFilm()->getReconstructionFilter()->getBorderSize();
 
 		size_t sampleCount;
+		ImageBlock * block = multiImageblock->getMainImageBlock();
 		block->clear();
 
 		uint8_t* target = block->getBitmap()->getUInt8Data();

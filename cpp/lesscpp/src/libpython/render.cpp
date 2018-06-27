@@ -809,6 +809,11 @@ void export_render() {
 		.def("clone", &ImageBlock::clone, BP_RETURN_VALUE)
 		.def("copyTo", &ImageBlock::copyTo);
 
+	BP_CLASS(MultipleImageBlock, WorkResult, (bp::init<Bitmap::EPixelFormat, const Vector2i &, bool, bp::optional<const ReconstructionFilter *, int, bool> >()))
+		.def("clear", &MultipleImageBlock::clear)
+		.def("setOffset", &MultipleImageBlock::setOffset)
+		.def("setSize", &MultipleImageBlock::setSize);
+
 	BP_CLASS(RectangularWorkUnit, WorkUnit, bp::init<>())
 		.def("getOffset", &RectangularWorkUnit::getOffset, BP_RETURN_VALUE)
 		.def("setOffset", &RectangularWorkUnit::setOffset)

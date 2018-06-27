@@ -40,6 +40,7 @@ class PhotonTracer;
 class HemisphereSampler;
 class HWResource;
 class ImageBlock;
+class MultipleImageBlock;
 class Instanced;
 class Integrator;
 struct Intersection;

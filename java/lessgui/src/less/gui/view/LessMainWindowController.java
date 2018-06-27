@@ -230,6 +230,10 @@ public class LessMainWindowController {
 	@FXML
 	public TextField sensorYExtentField;
 	
+	public CheckBox orthfourCompsCheckbox;
+	public CheckBox perfourCompsCheckbox;
+	
+	
 	@FXML
 	public TextField obsAGLField;
 	

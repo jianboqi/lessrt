@@ -204,6 +204,12 @@ class SceneParser:
         intNode.setAttribute("name","RepetitiveScene")
         intNode.setAttribute("value",str(cfg["sensor"]["RepetitiveScene"]))
 
+        if "hasFourComponentProduct" in cfg["sensor"]:
+            booleanNode = doc.createElement("boolean")
+            integratorNode.appendChild(booleanNode)
+            booleanNode.setAttribute("name","hasFourComponentProduct")
+            booleanNode.setAttribute("value","true" if cfg["sensor"]["hasFourComponentProduct"] else "false")
+
         if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
             # generate atmosphere xml file
             generateAtsXmlNF(r"D:\DART\user_data\simulations\Hemisphere\skyView\output\atmosphereMaket.txt",

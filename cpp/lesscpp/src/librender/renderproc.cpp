@@ -20,15 +20,16 @@
 #include <mitsuba/core/sfcurve.h>
 #include <mitsuba/render/renderproc.h>
 #include <mitsuba/render/rectwu.h>
+#include <mitsuba/core/plugin.h>
 
 MTS_NAMESPACE_BEGIN
 
 class BlockRenderer : public WorkProcessor {
 public:
 	BlockRenderer(Bitmap::EPixelFormat pixelFormat, int channelCount, int blockSize,
-		int borderSize, bool warnInvalid) : m_pixelFormat(pixelFormat),
+		int borderSize, bool warnInvalid,bool hasFourComponentProduct) : m_pixelFormat(pixelFormat),
 		m_channelCount(channelCount), m_blockSize(blockSize),
-		m_borderSize(borderSize), m_warnInvalid(warnInvalid) { }
+		m_borderSize(borderSize), m_warnInvalid(warnInvalid), m_hasFourComponentProduct(hasFourComponentProduct){ }
 
 	BlockRenderer(Stream *stream, InstanceManager *manager) {
 		m_pixelFormat = (Bitmap::EPixelFormat) stream->readInt();
@@ -43,9 +44,13 @@ public:
 	}
 
 	ref<WorkResult> createWorkResult() const {
-		return new ImageBlock(m_pixelFormat,
+		/*return new ImageBlock(m_pixelFormat,
 			Vector2i(m_blockSize),
 			m_sensor->getFilm()->getReconstructionFilter(),
+			m_channelCount, m_warnInvalid);*/
+		return new MultipleImageBlock(m_pixelFormat,
+			Vector2i(m_blockSize), m_hasFourComponentProduct,//fourcomponents
+			m_sensor->getFilm()->getReconstructionFilter(), 
 			m_channelCount, m_warnInvalid);
 	}
 
@@ -68,17 +73,17 @@ public:
 	void process(const WorkUnit *workUnit, WorkResult *workResult,
 		const bool &stop) {
 		const RectangularWorkUnit *rect = static_cast<const RectangularWorkUnit *>(workUnit);
-		ImageBlock *block = static_cast<ImageBlock *>(workResult);
+		MultipleImageBlock *multipleImageBlock = static_cast<MultipleImageBlock *>(workResult);
 
 #ifdef MTS_DEBUG_FP
 		enableFPExceptions();
 #endif
 
-		block->setOffset(rect->getOffset());
-		block->setSize(rect->getSize());
+		multipleImageBlock->setOffset(rect->getOffset());
+		multipleImageBlock->setSize(rect->getSize());
 		m_hilbertCurve.initialize(TVector2<uint8_t>(rect->getSize()));
 		m_integrator->renderBlock(m_scene, m_sensor, m_sampler,
-			block, stop, m_hilbertCurve.getPoints());
+			multipleImageBlock, stop, m_hilbertCurve.getPoints());
 
 #ifdef MTS_DEBUG_FP
 		disableFPExceptions();
@@ -95,7 +100,7 @@ public:
 
 	ref<WorkProcessor> clone() const {
 		return new BlockRenderer(m_pixelFormat, m_channelCount,
-			m_blockSize, m_borderSize, m_warnInvalid);
+			m_blockSize, m_borderSize, m_warnInvalid,m_hasFourComponentProduct);
 	}
 
 	MTS_DECLARE_CLASS()
@@ -112,15 +117,19 @@ private:
 	int m_borderSize;
 	bool m_warnInvalid;
 	HilbertCurve2D<uint8_t> m_hilbertCurve;
+
+	bool m_hasFourComponentProduct;
 };
 
 BlockedRenderProcess::BlockedRenderProcess(const RenderJob *parent, RenderQueue *queue,
-		int blockSize) : m_queue(queue), m_parent(parent), m_resultCount(0), m_progress(NULL) {
+		int blockSize, bool hasFourComponentProduct) : m_queue(queue), m_parent(parent), m_resultCount(0), m_progress(NULL) {
 	m_blockSize = blockSize;
 	m_resultMutex = new Mutex();
 	m_pixelFormat = Bitmap::ESpectrumAlphaWeight;
 	m_channelCount = -1;
 	m_warnInvalid = true;
+
+	m_hasFourComponentProduct = hasFourComponentProduct;
 }
 
 BlockedRenderProcess::~BlockedRenderProcess() {
@@ -136,20 +145,27 @@ void BlockedRenderProcess::setPixelFormat(Bitmap::EPixelFormat pixelFormat, int 
 
 ref<WorkProcessor> BlockedRenderProcess::createWorkProcessor() const {
 	return new BlockRenderer(m_pixelFormat, m_channelCount,
-			m_blockSize, m_borderSize, m_warnInvalid);
+			m_blockSize, m_borderSize, m_warnInvalid, m_hasFourComponentProduct);
 }
 
 void BlockedRenderProcess::processResult(const WorkResult *result, bool cancelled) {
-	const ImageBlock *block = static_cast<const ImageBlock *>(result);
+	//const ImageBlock *block = static_cast<const ImageBlock *>(result);
+	const MultipleImageBlock *multipleImageBlock = static_cast<const MultipleImageBlock *>(result);
 	UniqueLock lock(m_resultMutex);
-	m_film->put(block);
+	m_film->put(multipleImageBlock->getMainImageBlock());
+
+	if (m_hasFourComponentProduct) {
+		m_fourComponentFilm->put(multipleImageBlock->getFourComponentImageBlock());
+	}
+
 	m_progress->update(++m_resultCount);
 	lock.unlock();
-	m_queue->signalWorkEnd(m_parent, block, cancelled);
+	m_queue->signalWorkEnd(m_parent, multipleImageBlock->getMainImageBlock(), cancelled);
 
-	//if (m_resultCount == m_numBlocksTotal) {
-	//	
-	//}
+	if (m_resultCount == m_numBlocksTotal) {
+		if(m_hasFourComponentProduct)
+			m_fourComponentFilm->develop(m_scene, 0);
+	}
 }
 
 ParallelProcess::EStatus BlockedRenderProcess::generateWork(WorkUnit *unit, int worker) {
@@ -160,6 +176,9 @@ ParallelProcess::EStatus BlockedRenderProcess::generateWork(WorkUnit *unit, int 
 }
 
 void BlockedRenderProcess::bindResource(const std::string &name, int id) {
+	if (name == "scene") {
+		m_scene = static_cast<Scene *>(Scheduler::getInstance()->getResource(id));
+	}
 	if (name == "sensor") {
 		m_film = static_cast<Sensor *>(Scheduler::getInstance()->getResource(id))->getFilm();
 		m_borderSize = m_film->getReconstructionFilter()->getBorderSize();
@@ -173,7 +192,19 @@ void BlockedRenderProcess::bindResource(const std::string &name, int id) {
 			size.x += 2 * m_borderSize;
 			size.y += 2 * m_borderSize;
 		}
+		if (m_hasFourComponentProduct) {
+			Properties filmProps("mfilm");
+			filmProps.setInteger("width", size.x);
+			filmProps.setInteger("height", size.y);
+			filmProps.setString("fileFormat", "numpy");
+			filmProps.setString("pixelFormat", "spectrum");
 
+			m_fourComponentFilm = static_cast<Film *>(PluginManager::getInstance()->createObject(
+				MTS_CLASS(Film), filmProps));
+			std::string fourCompFile_file = m_scene->getDestinationFile().string() + "_4Components";
+			m_fourComponentFilm->setDestinationFile(fourCompFile_file, m_scene->getBlockSize());
+		}
+		
 		if (m_blockSize < m_borderSize)
 			Log(EError, "The block size must be larger than the image reconstruction filter radius!");
 
