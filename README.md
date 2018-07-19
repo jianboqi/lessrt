@@ -12,6 +12,15 @@ LESS is a 3D radiative transfer model which can simulate large-scale spectral im
 * Upwelling and downwelling radiation simulation over rugged terrains with realistic trees
 * ...
 
+## Usage
+### Windows:
+
+Currently, a windows installer are provided: http://lessrt.org/download-less/
+
+### Linux
+
+All the components (GUI, Rdiative transfer core) have been sucessfully compiled under linux (ubuntu, centos),
+but the packaging into a simple installer is not finished. We are working on that.
 
 ## Todo
 
