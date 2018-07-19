@@ -99,14 +99,15 @@ public:
 
 		int maxPtracerDepth = m_maxDepth - 1;
 
-		if ((sensor->getType() & (Emitter::EDeltaDirection
-			| Emitter::EDeltaPosition)) == 0 && sensor->isOnSurface()) {
-			/* The sensor has a finite aperture and a non-degenerate
-			response function -- trace one more bounce, since we
-			can actually try to hit its aperture */
-			maxPtracerDepth++;
-		}
-
+		//always add 1
+		//if ((sensor->getType() & (Emitter::EDeltaDirection
+		//	| Emitter::EDeltaPosition)) == 0 && sensor->isOnSurface()) {
+		//	/* The sensor has a finite aperture and a non-degenerate
+		//	response function -- trace one more bounce, since we
+		//	can actually try to hit its aperture */
+		//	maxPtracerDepth++;
+		//}
+		maxPtracerDepth++;
 		ref<ParallelProcess> process = new CapturePhotonProcess(
 			job, queue, m_sampleCount, m_granularity,
 			maxPtracerDepth, m_maxDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts,

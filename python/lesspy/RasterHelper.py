@@ -7,6 +7,7 @@ import array, Imath
 import shutil
 import os
 from Loger import log
+from Utils import planck_invert
 
 class RasterHelper:
     @staticmethod
@@ -115,6 +116,30 @@ class RasterHelper:
             text = text + wstr
             f.write(text)
             f.close()
+
+
+    @staticmethod
+    def convertRadiance2BTimage(data, wlist):
+        wavelengths = []
+        for i in range(0, len(wlist)):
+            wavelengths.append(float(wlist[i].split(":")[0]))
+
+        dshape = data.shape
+
+        re = np.zeros(dshape)
+        if len(dshape) == 3: # multiple bands
+            rows, cols, depth = dshape
+            for i in range(0, dshape[2]):
+                banddata = data[:,:,i]
+                for r in range(rows):
+                    for c in range(cols):
+                        re[r][c][i] = planck_invert(banddata[r][c], wavelengths[i])
+        else:
+            rows, cols = dshape
+            for r in range(rows):
+                for c in range(cols):
+                    re[r][c] = planck_invert(data[r][c], wavelengths[0])
+        return re
 
 
     @staticmethod

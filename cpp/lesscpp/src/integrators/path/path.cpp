@@ -124,6 +124,8 @@ public:
 
 		m_sceneXSize = props.getFloat("subSceneXSize", 100.0);
 		m_sceneZSize = props.getFloat("subSceneZSize", 100.0);
+
+		m_isThermal = props.getBoolean("isThermal", false);
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -136,6 +138,7 @@ public:
 		stream->writeDouble(m_virtualPlane_size_x);
 		stream->writeDouble(m_virtualPlane_size_z);
 		stream->writeInt(m_repetitiveSceneNum);
+		stream->writeBool(m_isThermal);
 	}
 
 	/// Unserialize from a binary data stream
@@ -149,6 +152,7 @@ public:
 		m_virtualPlane_size_x = stream->readDouble();
 		m_virtualPlane_size_z = stream->readDouble();
 		m_repetitiveSceneNum = stream->readInt();
+		m_isThermal = stream->readBool();
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue,
@@ -175,7 +179,7 @@ public:
 	}
 
 	//test occlusion for sun direct rays given reference point p and direction d
-	Spectrum repetitiveOcclude(Spectrum value, Point p, Vector d, const Scene* scene)const {
+	Spectrum repetitiveOcclude(Spectrum value, Point p, Vector d, const Scene* scene, bool & isRepetitiveOcclude)const {
 		Ray occludeRay = Ray(p, d, 0);
 		for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
 			Float tNear, tFar;
@@ -202,8 +206,11 @@ public:
 					}
 				}
 				//	cout << "new Pos: " << ray.toString() << endl;
-				if (scene->rayIntersect(occludeRay))
+				if (scene->rayIntersect(occludeRay)) {
+					isRepetitiveOcclude = true;
 					return Spectrum(0.0);
+				}
+					
 			}
 			else {
 				break;
@@ -317,8 +324,26 @@ public:
 
 			/* Possibly include emitted radiance if requested */
 			if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance)
-				&& (!m_hideEmitters || scattered))
+				&& (!m_hideEmitters || scattered)) {
+				//For thermal direct emitted
+				if (its.shape->getEmitter()->getProperties().hasProperty("temperature") &&
+					its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
+					Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
+					//test occlusion. temperature will be different when shaded or not shaded
+					Ray occludeRay(its.p, -sunDirection, 0);
+					if (scene->rayIntersect(occludeRay)) {
+						its.shaded = true;
+					}
+					else {
+						// further determine for repetitive occlusion
+						bool isRepetitiveOccluded = false;
+						repetitiveOcclude(Spectrum(0.0), its.p, -sunDirection, scene, isRepetitiveOccluded);
+						its.shaded = isRepetitiveOccluded;
+					}
+				}
 				Li += throughput * its.Le(-ray.d);
+			}
+				
 
 			/* Include radiance from a subsurface scattering model if requested */
 			if (its.hasSubsurface() && (rRec.type & RadianceQueryRecord::ESubsurfaceRadiance))
@@ -344,10 +369,41 @@ public:
 
 			if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
 				(bsdf->getType() & BSDF::ESmooth)) {
-				Spectrum value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
-				//determine repetitive of sample sun rays
-				if (!value.isZero()) {
-					value = repetitiveOcclude(value, its.p, dRec.d, scene);
+				Spectrum value;
+				if (!m_isThermal) {
+					value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+					//determine repetitive of sample sun rays
+					if (!value.isZero()) {
+						bool tmp;
+						value = repetitiveOcclude(value, its.p, dRec.d, scene, tmp);
+					}
+				}
+				else {//thermal
+					//First, try to sample a point on a emitter
+					value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+					//if it is a planck emitter, try to decide its status of shade to assign different temperatures
+					if (!value.isZero()) {
+						const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
+						if (emitter->getProperties().hasProperty("temperature") && 
+							(emitter->getProperties().getFloat("deltaTemperature", 0) != 0)) {
+							//determined shaded or not
+							Vector sunDirection = emitter->getProperties().getVector("direction");
+							Ray occludeRay(dRec.p, -sunDirection, 0);
+							bool shaded = scene->rayIntersect(occludeRay);
+							if (!shaded) {
+								// further determine for repetitive occlusion
+								bool isRepetitiveOccluded = false;
+								repetitiveOcclude(Spectrum(0.0), dRec.p, -sunDirection, scene, isRepetitiveOccluded);
+								shaded = isRepetitiveOccluded;
+							}
+							value = emitter->getSpectrumAccordingToTemperature(dRec, shaded);
+						}
+						else { // when the sampled emitter is sky emitter, consider the repetitive
+							bool tmp;
+							value = repetitiveOcclude(value, its.p, dRec.d, scene, tmp);
+						}
+					}
+					
 				}
 
 				//four component
@@ -382,12 +438,10 @@ public:
 					/* Prevent light leaks due to the use of shading normals */
 					if (!bsdfVal.isZero() && (!m_strictNormals
 							|| dot(its.geoFrame.n, dRec.d) * Frame::cosTheta(bRec.wo) > 0)) {
-
 						/* Calculate prob. of having generated that direction
 						   using BSDF sampling */
 						Float bsdfPdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)
 							? bsdf->pdf(bRec) : 0;
-
 						/* Weight using the power heuristic */
 						Float weight = miWeight(dRec.pdf, bsdfPdf);
 						Li += throughput * value * bsdfVal * weight;
@@ -424,6 +478,21 @@ public:
 			if (its.isValid()) {
 				/* Intersected something - check if it was a luminaire */
 				if (its.isEmitter()) {
+					//For thermal direct emitted
+					if (its.shape->getEmitter()->getProperties().hasProperty("temperature") &&
+						its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
+						Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
+						//test occlusion. temperature will be different when shaded or not shaded
+						Ray occludeRay(its.p, -sunDirection, 0);
+						if (scene->rayIntersect(occludeRay)) {
+							its.shaded = true;
+						}
+						else {								// further determine for repetitive occlusion
+							bool isRepetitiveOccluded = false;
+							repetitiveOcclude(Spectrum(0.0), its.p, -sunDirection, scene, isRepetitiveOccluded);
+							its.shaded = isRepetitiveOccluded;
+						}
+					}
 					value = its.Le(-ray.d);
 					dRec.setQuery(ray, its);
 					hitEmitter = true;
@@ -470,7 +539,6 @@ public:
 			if (!its.isValid() || !(rRec.type & RadianceQueryRecord::EIndirectSurfaceRadiance))
 				break;
 			rRec.type = RadianceQueryRecord::ERadianceNoEmission;
-
 			if (rRec.depth++ >= m_rrDepth) {
 				/* Russian roulette: try to keep path weights equal to one,
 				   while accounting for the solid angle compression at refractive
@@ -525,6 +593,8 @@ protected:
 
 	AABB m_sceneBounds;
 	AABB m_virtualBounds;
+
+	bool m_isThermal;
 };
 
 MTS_IMPLEMENT_CLASS_S(MIPathTracer, false, MonteCarloIntegrator)

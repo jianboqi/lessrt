@@ -47,7 +47,8 @@ template <typename _PointType, typename _VectorType> struct TRay {
 	Scalar maxt;     ///< Maximum range for intersection tests
 	VectorType dRcp; ///< Componentwise reciprocals of the ray direction
 	Float time;  ///< Time value associated with this ray
-
+	//int extra; //extended member, to store addtional information for some cases when
+				//passing information by ray is needed.
 	/// Construct a new ray
 	inline TRay() : mint(Epsilon),
 		maxt(std::numeric_limits<Scalar>::infinity()), time(0) {

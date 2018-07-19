@@ -53,6 +53,21 @@ def planck_law_fun(temperature, wavelength):
     radiance = 2*hp*c*c/(math.pow(wavelength,5))*1.0/(down)
     return radiance*math.pow(10,-9)
 
+# convert radiance to brightness temperature according to wavelength
+#  radiance: w/m^2/sr/nm  wavelength: nm
+def planck_invert(radiance, wavelength):
+    if radiance <= 0:
+        return 0
+    kb = 1.38064852e-23  # Boltzmann constant
+    hp = 6.626070040e-34  # Planck constant
+    c = 299792458
+    wavelength *= math.pow(10, -9)
+    radiance *= math.pow(10, 9)
+    inside = 1+2*hp*c*c/(math.pow(wavelength,5)*radiance)
+    down = wavelength*kb*math.log(inside)
+    up = hp*c
+    return up/down
+
 # planck定律计算每个波段的radiance
 def emittion_spectral(temperature, lamdbda_list):
     delta = 1  # nm

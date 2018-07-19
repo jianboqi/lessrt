@@ -80,6 +80,9 @@ public class ControlJsonWrapper {
 	    JSONObject atmosphere = new JSONObject();
 	    // currently, only one choice
 	    atmosphere.put("ats_type", this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem());
+	    if(this.mwcontroller.ThermalCheckbox.isSelected()) {
+	    	atmosphere.put("AtsTemperature", this.mwcontroller.projManager.comboBoxSkyTemper.getSelectionModel().getSelectedItem());
+	    }
 	    if(this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem().equals(Const.LESS_ATS_TYPE_SKY)) {
 		    atmosphere.put("percentage", this.mwcontroller.atsPercentageField.getText());
 	    }else {
@@ -111,7 +114,9 @@ public class ControlJsonWrapper {
 	    if(this.mwcontroller.firstOrderCheckbox.isSelected()){
 	    	sensor.put("record_only_direct", 2);
 	    }else{
-	    	sensor.put("record_only_direct", -1);
+	    	//Due to the permutation of Halton QMC, the maximum number of interation is limited, we set it to 200
+	    	//https://mitsuba.wiki.fc2.com/wiki/Halton%20QMC%20sampler%20%28halton%29
+	    	sensor.put("record_only_direct", 200);
 	    }
 	    sensor.put("thermal_radiation", this.mwcontroller.ThermalCheckbox.isSelected());
 	    sensor.put("NoDataValue", Double.parseDouble(this.mwcontroller.sensorNoDataValueField.getText()));
@@ -156,6 +161,7 @@ public class ControlJsonWrapper {
 	    	if(mwcontroller.productBRFCheckbox.isSelected()) {
 	    		photontracing.put("virtualDirections", mwcontroller.virtualDirTextField.getText());
 	    		photontracing.put("NumberOfDirections",Integer.parseInt( mwcontroller.numOfDirectionTextField.getText()));
+	    		photontracing.put("virtualDetectorDirections", mwcontroller.virtualDetectorTextField.getText());
 	    	}
 	    	photontracing.put("UpDownProduct", mwcontroller.productUpDownRadiationCheckbox.isSelected());
 	    	sensor.put("PhotonTracing", photontracing);
@@ -275,43 +281,11 @@ public class ControlJsonWrapper {
 		}  
 		JSONObject data = new JSONObject(jsonTokener);
 		
-		//illumination
-		JSONObject illumination = data.getJSONObject("illumination");
-		JSONObject sun = illumination.getJSONObject("sun");
-		this.mwcontroller.sunZenithField.setText(sun.getDouble("sun_zenith")+"");
-		this.mwcontroller.sunAzimuthField.setText(sun.getDouble("sun_azimuth")+"");
-		JSONObject ats = illumination.getJSONObject("atmosphere");
-		String ats_type = ats.getString("ats_type");
-		this.mwcontroller.atsTypeCombobox.getSelectionModel().select(ats_type);
-		if(ats_type.equals(Const.LESS_ATS_TYPE_SKY)) {
-			this.mwcontroller.atsPercentageField.setText(ats.getString("percentage"));
-		}else {
-			
-		}
-		
-		//solar spectrum
-		if(ats.has("sky_spectrum")){
-			this.mwcontroller.SolarSpectrumCheckbox.setSelected(true);
-			this.mwcontroller.SolarSpectrumSkyTextField.setText(ats.getString("sky_spectrum"));
-		}
-			
-		if(sun.has("sun_spectrum")){
-			this.mwcontroller.SolarSpectrumCheckbox.setSelected(true);
-			this.mwcontroller.SolarSpectrumSunTextField.setText(sun.getString("sun_spectrum"));
-		}
-			
-		//sun calculator
-		
-	    if(illumination.getBoolean("sun_calculator")){
-	    	SunPos sunPos = new SunPos();
-	    	sunPos.fromJsonObject(illumination.getJSONObject("calculator_params"));
-	    	this.mwcontroller.projManager.sunpos = sunPos;
-	    }
 		
 		//sensor
 		JSONObject sensor = data.getJSONObject("sensor");
 		
-		if(sensor.getInt("record_only_direct") == -1){
+		if(sensor.getInt("record_only_direct") == -1 || sensor.getInt("record_only_direct") == 200){
 			this.mwcontroller.firstOrderCheckbox.setSelected(false);
 		}else{
 			this.mwcontroller.firstOrderCheckbox.setSelected(true);
@@ -373,6 +347,8 @@ public class ControlJsonWrapper {
 					this.mwcontroller.virtualDirTextField.setText(camera.getString("virtualDirections"));
 				if(camera.has("NumberOfDirections"))
 					this.mwcontroller.numOfDirectionTextField.setText(camera.getInt("NumberOfDirections")+"");
+				if(camera.has("virtualDetectorDirections"))
+					this.mwcontroller.virtualDetectorTextField.setText(camera.getString("virtualDetectorDirections"));
 			}
 			if(camera.has("UpDownProduct")) this.mwcontroller.productUpDownRadiationCheckbox.setSelected(camera.getBoolean("UpDownProduct"));
 			this.mwcontroller.virtualPlaneCheckbox.setDisable(false);
@@ -398,6 +374,61 @@ public class ControlJsonWrapper {
 	    }else {
 	    	this.mwcontroller.virtualPlaneCheckbox.setSelected(false);
 	    }
+				
+	    JSONObject scene = data.getJSONObject("scene");		
+	  //thermal
+		if(this.mwcontroller.ThermalCheckbox.isSelected()){
+			this.mwcontroller.projManager.handleThermalRadiationCheckbox();
+			JSONObject temperature_properties = scene.getJSONObject("temperature_properties");
+			Iterator<?> tkeys = temperature_properties.keys();
+			this.mwcontroller.projManager.temperatureList.clear();
+			this.mwcontroller.temperatureMap.clear();
+			while( tkeys.hasNext() ) {
+			    String key = (String)tkeys.next();
+			    String value = temperature_properties.getString(key);
+			    String [] vals = value.trim().split(";");
+			    this.mwcontroller.projManager.temperatureList.add(key);
+			    this.mwcontroller.temperatureMap.put(key, value);
+			}
+		}
+			    
+		//illumination
+		JSONObject illumination = data.getJSONObject("illumination");
+		JSONObject sun = illumination.getJSONObject("sun");
+		this.mwcontroller.sunZenithField.setText(sun.getDouble("sun_zenith")+"");
+		this.mwcontroller.sunAzimuthField.setText(sun.getDouble("sun_azimuth")+"");
+		JSONObject ats = illumination.getJSONObject("atmosphere");
+		String ats_type = ats.getString("ats_type");
+		this.mwcontroller.atsTypeCombobox.getSelectionModel().select(ats_type);
+
+		if(ats.has("AtsTemperature") && this.mwcontroller.ThermalCheckbox.isSelected()) {
+			this.mwcontroller.projManager.comboBoxSkyTemper.getSelectionModel().select(ats.getString("AtsTemperature"));
+		}
+		if(ats_type.equals(Const.LESS_ATS_TYPE_SKY)) {
+			this.mwcontroller.atsPercentageField.setText(ats.getString("percentage"));
+		}else {
+			
+		}
+		
+		//solar spectrum
+		if(ats.has("sky_spectrum")){
+			this.mwcontroller.SolarSpectrumCheckbox.setSelected(true);
+			this.mwcontroller.SolarSpectrumSkyTextField.setText(ats.getString("sky_spectrum"));
+		}
+			
+		if(sun.has("sun_spectrum")){
+			this.mwcontroller.SolarSpectrumCheckbox.setSelected(true);
+			this.mwcontroller.SolarSpectrumSunTextField.setText(sun.getString("sun_spectrum"));
+		}
+			
+		//sun calculator
+		
+	    if(illumination.getBoolean("sun_calculator")){
+	    	SunPos sunPos = new SunPos();
+	    	sunPos.fromJsonObject(illumination.getJSONObject("calculator_params"));
+	    	this.mwcontroller.projManager.sunpos = sunPos;
+	    }
+		
 		
 		
 		//observation
@@ -426,7 +457,7 @@ public class ControlJsonWrapper {
 		
 		
 		//scene
-		JSONObject scene = data.getJSONObject("scene");		
+		scene = data.getJSONObject("scene");		
 		//optical reading
 		JSONObject optical_properties = scene.getJSONObject("optical_properties");
 		Iterator<?> keys = optical_properties.keys();
@@ -440,21 +471,6 @@ public class ControlJsonWrapper {
 		    this.mwcontroller.terrainOpticalData.add(key);
 		}
 		
-		//thermal
-		if(this.mwcontroller.ThermalCheckbox.isSelected()){
-			this.mwcontroller.projManager.handleThermalRadiationCheckbox();
-			JSONObject temperature_properties = scene.getJSONObject("temperature_properties");
-			Iterator<?> tkeys = temperature_properties.keys();
-			this.mwcontroller.projManager.temperatureList.clear();
-			this.mwcontroller.temperatureMap.clear();
-			while( tkeys.hasNext() ) {
-			    String key = (String)tkeys.next();
-			    String value = temperature_properties.getString(key);
-			    String [] vals = value.trim().split(";");
-			    this.mwcontroller.projManager.temperatureList.add(key);
-			    this.mwcontroller.temperatureMap.put(key, value);
-			}
-		}
 		
 		//terrain
 		JSONObject terrain = scene.getJSONObject("terrain");

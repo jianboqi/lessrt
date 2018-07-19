@@ -97,7 +97,7 @@ public:
 		Spectrum h1 = m_h1->eval(bRec.its);
 		Spectrum h2 = m_h2->eval(bRec.its);
 
-		Spectrum reflectance = albedo / 4.0 / (Frame::cosTheta(bRec.wi) + Frame::cosTheta(bRec.wo));
+		Spectrum reflectance = Frame::cosTheta(bRec.wi) * albedo / 4.0 / (Frame::cosTheta(bRec.wi) + Frame::cosTheta(bRec.wo));
 		reflectance *= (Spectrum(1.0) + B(h1, h2, bRec))*P(c1, c2, c3, c4, bRec) + H(albedo, Frame::cosTheta(bRec.wi))*H(albedo, Frame::cosTheta(bRec.wo)) - Spectrum(1.0);
 		return reflectance;
 	}

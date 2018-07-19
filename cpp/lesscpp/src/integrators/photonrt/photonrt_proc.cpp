@@ -108,6 +108,46 @@ void CapturePhotonWorker::prepare() {
 	}
 }
 
+Spectrum CapturePhotonWorker::repetitiveOcclude(Spectrum value, Point p, Vector d, const Scene* scene, bool & isRepetitiveOcclude)const {
+	Ray occludeRay = Ray(p, d, 0);
+	for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
+		Float tNear, tFar;
+		int exitFace;
+		Vector boundExtend = m_sceneBounds.getExtents();
+		m_sceneBounds.rayIntersectExt(occludeRay, tNear, tFar, exitFace);
+		Point its_p = occludeRay.o + tFar * occludeRay.d;
+		if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+			//offset the ray
+			if (exitFace == 0) {
+				if (occludeRay.d.x > 0) {
+					occludeRay.o = its_p + Vector(-boundExtend.x, 0, 0);
+				}
+				else {
+					occludeRay.o = its_p + Vector(boundExtend.x, 0, 0);
+				}
+			}
+			else if (exitFace == 2) {
+				if (occludeRay.d.z > 0) {
+					occludeRay.o = its_p + Vector(0, 0, -boundExtend.z);
+				}
+				else {
+					occludeRay.o = its_p + Vector(0, 0, boundExtend.z);
+				}
+			}
+			//	cout << "new Pos: " << ray.toString() << endl;
+			if (scene->rayIntersect(occludeRay)) {
+				isRepetitiveOcclude = true;
+				return Spectrum(0.0);
+			}
+
+		}
+		else {
+			break;
+		}
+	}
+	return value;
+}
+
 void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResult,
 	const bool &stop) {
 	if ((!m_hasBRFProducts) && (!m_hasUpDownProducts)) {
@@ -142,6 +182,24 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		Ray ray;
 		power = m_scene->sampleEmitterRay(ray, emitter,
 			m_sampler->next2D(), m_sampler->next2D(), pRec.time);
+		//Determine emitted power with shded or sunlit temperature
+		//This of for simulating thrermal radiation, but it is not correct
+		//if (!power.isZero()) {
+		//	if (emitter->getProperties().hasProperty("temperature") &&
+		//		(emitter->getProperties().getFloat("deltaTemperature", 0) != 0)) {
+		//		//determined shaded or not
+		//		Vector sunDirection = emitter->getProperties().getVector("direction");
+		//		Ray occludeRay(ray.o, -sunDirection, 0);
+		//		bool shaded = m_scene->rayIntersect(occludeRay);
+		//		if (!shaded) {
+		//			// further determine for repetitive occlusion
+		//			bool isRepetitiveOccluded = false;
+		//			repetitiveOcclude(Spectrum(0.0), ray.o, -sunDirection, m_scene, isRepetitiveOccluded);
+		//			shaded = isRepetitiveOccluded;
+		//		}
+		//		power = emitter->getPowerAccordingToTemperature(ray.o, ray.extra, shaded);
+		//	}
+		//}
 		medium = emitter->getMedium();
 
 		//Each Photon has a type, which can be used for different purpose.
@@ -184,14 +242,12 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		int depth = 1, nullInteractions = 0;
 		bool delta = false;
 		Point previousPoint = Point(std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity());
-
 		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
 			m_scene->rayIntersect(ray, its);
 			
 			//如果需要计算BRF产品，且photon type正确，则计算
 			if (m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) {
-				if (true) {//using repititive
 					if (its.t == std::numeric_limits<Float>::infinity()) {
 						//maximum iteration = 5
 						for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
@@ -229,7 +285,6 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 						}
 					}//is infinity
 
-				}//using repetitive
 			}//hasBRFProducts
 
 			//如果最大穿越场景次数之后，还是没有交点，则放弃
@@ -283,13 +338,13 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 ref<WorkProcessor> CapturePhotonWorker::clone() const {
 	return new CapturePhotonWorker(m_maxDepth,
 		m_maxPathDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts, m_hasUpDownProducts, m_virtualDirections,
-		m_numberOfDirections);
+		m_numberOfDirections,m_virtualDetectorDirection);
 }
 
 ref<WorkResult> CapturePhotonWorker::createWorkResult() const {
 	const Film *film = m_sensor->getFilm();
 	return new CapturePhotonWorkResult(film->getCropSize(), m_rfilter.get(), m_hasBRFProducts, m_hasUpDownProducts, m_virtualDirections,
-		m_numberOfDirections);
+		m_numberOfDirections, m_virtualDetectorDirection);
 }
 
 void CapturePhotonWorker::handleEmission(const PositionSamplingRecord &pRec,
@@ -341,8 +396,8 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
 	const Spectrum &weight, int photoType) {
 	
-	if (m_bruteForce || (depth >= m_maxPathDepth && m_maxPathDepth > 0))
-		return;
+	//if (m_bruteForce || (depth >= m_maxPathDepth && m_maxPathDepth > 0))
+	//	return;
 
 	int maxInteractions = m_maxPathDepth - depth - 1;
 
@@ -369,6 +424,11 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 			}
 		}
 		else { //handling virtual directions
+			//since virtual direction will try to connect with sensor, when depth equals to 2, it actually
+			// get second order scattering results,but for real photon, it is the first order.
+			if (depth >= m_maxPathDepth && m_maxPathDepth > 0) {
+				return;
+			}
 			// At the intersected point, calculating the contribution of a photon tewards the virtual direction
 			//First, determine whether the point has been occluded.
 			const BSDF *bsdf = its.getBSDF();
@@ -441,8 +501,8 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 void CapturePhotonWorker::handleSurfaceInteractionUpDown(int depth, int nullInteractions,
 	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
 	const Spectrum &weight, int photoType) {
-	if (m_bruteForce || (depth >= m_maxPathDepth && m_maxPathDepth > 0))
-		return;
+	//if (m_bruteForce || (depth >= m_maxPathDepth && m_maxPathDepth > 0))
+	//	return;
 
 	int maxInteractions = m_maxPathDepth - depth - 1;
 	//radiation Products
@@ -568,7 +628,18 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 		if (m_hasBRFProducts) {
 			m_dirBRFs = new DirectionalBRF(m_numberOfDirections);
 			//get scene Size
-			m_dirBRFs->setDestinationFile(m_scene->getDestinationFile().string() + "_BRF.txt");
+			if (m_scene->getIntegrator()->getProperties().hasProperty("isThermal") &&
+				m_scene->getIntegrator()->getProperties().getBoolean("isThermal")) {
+				m_dirBRFs->setDestinationFile(m_scene->getDestinationFile().string() + "_BT.txt");
+				m_dirBRFs->setWavelengths(m_scene->getIntegrator()->getProperties().getSpectrum("wavelengths"));
+				m_dirBRFs->setCalculationMode(true);
+			}
+			else {
+				m_dirBRFs->setDestinationFile(m_scene->getDestinationFile().string() + "_BRF.txt");
+				m_dirBRFs->setInfoDestinationFile(m_scene->getDestinationFile().string() + "_LESS.txt");
+				m_dirBRFs->setCalculationMode(false);
+			}
+			
 			AABB scene_bound = m_scene->getKDTree()->getAABB();
 
 			Properties inegratorProps = m_scene->getIntegrator()->getProperties();
@@ -578,7 +649,9 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 			m_dirBRFs->setSceneBoundPlaneSize(Vector2(sceneBoundX, scenBoundZ));
 			//read virtual direction
 			m_virtualDirections = m_scene->getIntegrator()->getProperties().getString("virtualDirections", "");
+			m_virtualDetectorDirection = m_scene->getIntegrator()->getProperties().getString("virtualDetectorDirections", "");
 			m_dirBRFs->readVirtualDirections(m_virtualDirections);
+			m_dirBRFs->readVirtualDetectors(m_virtualDetectorDirection);
 			if (inegratorProps.getBoolean("SceneVirtualPlane", false)) {
 				double vSizeX = inegratorProps.getFloat("sizex", sceneBoundX);
 				double vSizeZ = inegratorProps.getFloat("sizez", scenBoundZ);
@@ -596,7 +669,7 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 
 ref<WorkProcessor> CapturePhotonProcess::createWorkProcessor() const {
 	return new CapturePhotonWorker(m_maxDepth, m_maxPathDepth,
-		m_rrDepth, m_bruteForce, m_hasBRFProducts,m_hasUpDownProducts, m_virtualDirections,m_numberOfDirections);
+		m_rrDepth, m_bruteForce, m_hasBRFProducts,m_hasUpDownProducts, m_virtualDirections,m_numberOfDirections, m_virtualDetectorDirection);
 }
 
 

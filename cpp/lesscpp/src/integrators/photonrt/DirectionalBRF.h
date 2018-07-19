@@ -66,6 +66,16 @@ public:
 		for (int i = 0; i < m_nVirtualDirections; i++) {
 			m_virtualBRFs[i] = Spectrum(stream);
 		}
+
+		m_numAngularDirection = stream->readInt();
+		m_anglarDirections.resize(m_numAngularDirection);
+		m_virtualDetectorBRFs.resize(m_numAngularDirection);
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			m_anglarDirections[i] = AngularDirection(stream->readDouble(), stream->readDouble(), stream->readDouble());
+			m_virtualDetectorBRFs[i] = Spectrum(stream);
+		}
+		m_isTheramlMode = stream->readBool();
+		m_wavelengths = Spectrum(stream);
 	}
 
 	void serialize(Stream *stream) const {
@@ -91,6 +101,16 @@ public:
 		for (int i = 0; i < m_nVirtualDirections; i++) {
 			m_virtualBRFs[i].serialize(stream);
 		}
+
+		stream->writeInt(m_numAngularDirection);
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			stream->writeDouble(m_anglarDirections[i].center_zenith);
+			stream->writeDouble(m_anglarDirections[i].center_azimuth);
+			stream->writeDouble(m_anglarDirections[i].angleInterval);
+			m_virtualDetectorBRFs[i].serialize(stream);
+		}
+		stream->writeBool(m_isTheramlMode);
+		m_wavelengths.serialize(stream);
 	}
 
 	void clear() {
@@ -102,6 +122,11 @@ public:
 				aziTmp.push_back(Spectrum(0.0));
 			}
 			m_brfs.push_back(aziTmp);
+		}
+
+		m_virtualDetectorBRFs.clear();
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			m_virtualDetectorBRFs.push_back(Spectrum(0.0));
 		}
 
 		m_virtualBRFs.clear();
@@ -133,6 +158,10 @@ public:
 		m_virtualBRFs[directionIndex] += value;
 	}
 
+	void setWavelengths(Spectrum spectrum) {
+		this->m_wavelengths = spectrum;
+	}
+
 	//Collect photons for each solid angle
 	void put(double zenith, double azimuth, Spectrum value) {
 		int zenithIndex;
@@ -150,7 +179,16 @@ public:
 		if (zenithIndex >= 0 && zenithIndex < m_brfs.size() &&
 			aziIndex >= 0 && aziIndex < m_brfs[zenithIndex].size()) {
 			m_brfs[zenithIndex][aziIndex] += value;
-		}		
+		}
+
+		//determine virtual detectors
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			AngularDirection angularDir = m_anglarDirections[i];
+			if (angularDir.isInside(zenith,azimuth)) {
+				m_virtualDetectorBRFs[i] += value;
+			}
+		}
+
 	}
 
 	vector<vector<Spectrum>> getBRFData() const{
@@ -170,13 +208,14 @@ public:
 			}
 		}
 
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			m_virtualDetectorBRFs[i] += dirBRF->m_virtualDetectorBRFs[i];
+		}
+
 		for (int i = 0; i < dirBRF->m_nVirtualDirections; i++) {
 			m_accBRFsPerDirection[i] += dirBRF->m_accBRFsPerDirection[i];
 			m_virtualBRFs[i] += dirBRF->m_virtualBRFs[i];
 		}
-
-		
-
 
 	}
 
@@ -188,10 +227,24 @@ public:
 		return degree / ((double)180) * PHRT_M_PI;
 	}
 
+	inline double InvertPlanck(double radiance, double wavelength) {
+		if (radiance <= 0)
+			return 0;
+		double kb = 1.38064852e-23;  // Boltzmann constant
+		double hp = 6.626070040e-34;  // Planck constant
+		double c = 299792458;
+		double wavelengthMeter = wavelength * std::pow(10, -9);
+		double scaledRadiance = radiance * std::pow(10, 9);
+
+		double inside = 1 + 2 * hp*c*c / (std::pow(wavelengthMeter, 5)*scaledRadiance);
+		double down = wavelengthMeter * kb*std::log(inside);
+		double up = hp * c;
+		return up / down;
+	}
+
 	void develop(double scale=1.0) {
 		//scale irradiance
 		scaleIrradiance(scale*1/ (m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
-		scaleVirtualBRFs(scale);
 		cout << "\nTotal Irradiance: " << m_verticalIrradiance.toString() << endl;
 		if (m_destnationFile != "") {
 			vector<double> zenithAngle(accumulated_ZenithAngle);
@@ -202,38 +255,69 @@ public:
 			else {
 				zenithAngle.insert(zenithAngle.begin(), 0);
 			}
-			
-			
 			double solidAnglePerPatch = 2 * PHRT_M_PI / (double)m_numOfDirections;
 
 			for (int i = 0; i < accumulated_ZenithAngle.size(); i++) {
 				azimuthAngle[i].insert(azimuthAngle[i].begin(), 0);
 			}
 			ofstream out(m_destnationFile);
-			out << "Zentih_Angle Azimuth_Angle BRF" << endl;
+			if(m_isTheramlMode)
+				out << "Zentih_Angle Azimuth_Angle BrightnessTemperature" << endl;
+			else
+				out << "Zentih_Angle Azimuth_Angle BRF" << endl;
 			Spectrum Albedo(0.0);
 			for (int i = 1; i < zenithAngle.size(); i++) {
 				for (int j = 1; j < azimuthAngle[i-1].size(); j++) {
 					double centerZenith = 0.5*(zenithAngle[i] + zenithAngle[i - 1]);
 					out << rad2degree(centerZenith) << " " << rad2degree(0.5*(azimuthAngle[i-1][j]+ azimuthAngle[i-1][j-1])) << " ";
-					Albedo += m_brfs[i - 1][j - 1] * scale;
-					for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
-						out << m_brfs[i-1][j-1][k] * scale/ solidAnglePerPatch/ (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(centerZenith))/ m_verticalIrradiance[k]*PHRT_M_PI << " ";
+					if (!m_isTheramlMode) {
+						Albedo += m_brfs[i - 1][j - 1] * scale;
+						for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+							out << m_brfs[i - 1][j - 1][k] * scale / solidAnglePerPatch / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(centerZenith)) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+						}
+					}
+					else {
+						for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+							out << InvertPlanck(m_brfs[i - 1][j - 1][k] * scale / solidAnglePerPatch / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(centerZenith)), m_wavelengths[k])<< " ";
+						}
 					}
 					out << endl;
 				}
 			}
-			Albedo = Albedo /( m_verticalIrradiance*(m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
-			cout << " - Albedo: ";
-			for (int i = 0; i < SPECTRUM_SAMPLES; i++)
-				cout << Albedo[i] << " ";
-			cout << endl;
+
+			if (!m_isTheramlMode) {
+				Albedo = Albedo / (m_verticalIrradiance*(m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
+				if (m_infoDestnationFile != "") {
+					ofstream infoOut(m_infoDestnationFile);
+					for (int i = 0; i < SPECTRUM_SAMPLES; i++)
+						infoOut << Albedo[i] << " ";
+					infoOut << endl;
+					infoOut.close();
+				}
+			}
+				
+
+			//virtual Detectors
+			for (int i = 0; i < m_numAngularDirection; i++) {
+				AngularDirection angularDir = m_anglarDirections[i];
+				out << rad2degree(angularDir.center_zenith) << " " << rad2degree(angularDir.center_azimuth) << " ";
+				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+					if(!m_isTheramlMode)
+						out<<m_virtualDetectorBRFs[i][k] * scale/ angularDir.solidAngle() / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(angularDir.center_zenith)) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+					else
+						out << InvertPlanck(m_virtualDetectorBRFs[i][k] * scale / angularDir.solidAngle() / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(angularDir.center_zenith)),m_wavelengths[k])<< " ";
+				}
+				out << endl;
+			}
 
 			//virtual directions
 			for (int i = 0; i < m_nVirtualDirections; i++) {
 				out << rad2degree(m_virtualDirZenith[i]) << " " << rad2degree(m_virtualDirAzimuth[i]) << " ";
 				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
-					out << m_virtualBRFs[i][k]/ (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(m_virtualDirZenith[i]))/ m_verticalIrradiance[k]*PHRT_M_PI<< " ";
+					if (!m_isTheramlMode)
+						out << m_virtualBRFs[i][k]* scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(m_virtualDirZenith[i]))/ m_verticalIrradiance[k]*PHRT_M_PI<< " ";
+					else
+						out << InvertPlanck(m_virtualBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(m_virtualDirZenith[i])),m_wavelengths[k]) << " ";
 				}
 				out << endl;
 			}
@@ -246,12 +330,71 @@ public:
 		m_destnationFile = destinationFile;
 	}
 
+	void setInfoDestinationFile(string infoDestinationFile) {
+		m_infoDestnationFile = infoDestinationFile;
+	}
+
 	void setSceneBoundPlaneSize(Vector2 size) {
 		this->m_scenBoundPlaneSize = size;
 	}
 
 	void setVirtualBoundXZSize(Vector2 size) {
 		this->m_virtualBoundXZSize = size;
+	}
+
+	void setCalculationMode(bool isThermal) {
+		this->m_isTheramlMode = isThermal;
+	}
+
+	//virtual detector
+	void readVirtualDetectors(string virtualDetectors) {
+		if (virtualDetectors == "") {
+			m_numAngularDirection = 0;
+			return;
+		}
+
+		m_anglarDirections.clear();
+
+		std::vector<std::string> tmp;
+		boost::algorithm::split(tmp, virtualDetectors, boost::is_any_of(";"));
+		if (tmp.size() == 3) { // combination
+			string zenithStr = tmp[0];
+			string AziStr = tmp[1];
+			string angleInterStr = tmp[2];
+			std::vector<std::string> zen_arr;
+			boost::algorithm::split(zen_arr, zenithStr, boost::is_any_of(","));
+
+			std::vector<std::string> azi_arr;
+			boost::algorithm::split(azi_arr, AziStr, boost::is_any_of(","));
+
+			double angleInterval = degree2rad(atof(angleInterStr.c_str()));
+
+			for (int i = 0; i < zen_arr.size(); i++) {
+				double zen = degree2rad(atof(zen_arr[i].c_str()));
+				for (int j = 0; j < azi_arr.size(); j++) {
+					double azi = degree2rad(atof(azi_arr[j].c_str()));
+					m_anglarDirections.push_back(AngularDirection(zen, azi, angleInterval));
+				}
+			}
+		}
+		else {
+			std::vector<std::string> arr;
+			boost::algorithm::split(arr, virtualDetectors, boost::is_any_of(",;"));
+			for (int i = 0; i < arr.size() - 1; i = i + 3) {
+				double zen = degree2rad(atof(arr[i].c_str()));
+				double azi = degree2rad(atof(arr[i + 1].c_str()));
+				double angleInterval = degree2rad(atof(arr[i + 2].c_str()));
+				m_anglarDirections.push_back(AngularDirection(zen, azi, angleInterval));
+			}
+		}
+
+		m_numAngularDirection = m_anglarDirections.size();
+
+		//initialize m_virtualBRFs
+		for (int i = 0; i < m_numAngularDirection; i++) {
+			m_virtualDetectorBRFs.push_back(Spectrum(0.0));
+		}
+
 	}
 
 	//virtual Directions
@@ -338,6 +481,7 @@ public:
 	int numberOfZenith=0; // Total number of zenith angles
 	vector<int> numberOfAzimuth; //Number of azimuth angles for each zenith angle
 	string m_destnationFile; //output file path
+	string m_infoDestnationFile;//out file path to albedo file
 	
 	vector<double> m_virtualDirZenith;
 	vector<double> m_virtualDirAzimuth;
@@ -345,6 +489,13 @@ public:
 	vector<Spectrum> m_virtualBRFs;
 	vector<int> m_accBRFsPerDirection; //Number of accumulated BRFs for each direction.
 	int m_nVirtualDirections=0;
+
+	//virtual detectors
+	int m_numAngularDirection; // number of virtual detectors
+	vector<AngularDirection> m_anglarDirections;
+	vector<Spectrum> m_virtualDetectorBRFs;
+	bool m_isTheramlMode;
+	Spectrum m_wavelengths;
 
 	//no need to serilize
 	int m_numOfDirections=0;

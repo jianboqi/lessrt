@@ -84,6 +84,12 @@ public:
 		EOnSurface      = 0x04
 	};
 
+	//========================================
+	//addtional interface
+	//========================================
+	virtual Spectrum getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, bool shaded) const;
+	virtual Spectrum getPowerAccordingToTemperature(Point p, int FrontorBack, bool shaded) const; //Front 1 back 0
+
 	// =============================================================
 	//! @{ \name Sampling interface
 	// =============================================================

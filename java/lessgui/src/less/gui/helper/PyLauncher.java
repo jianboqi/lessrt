@@ -46,7 +46,7 @@ public class PyLauncher extends Thread{
 	
 	public enum Operation {
 	    NEW_SIM, GENERATE_V_I, GENERATE_3D_MODEL,
-	    RUN_LESS,RUN_ALL,SAVE_AS,RUN_BATCH,RUN_BRF,
+	    RUN_LESS,RUN_ALL,SAVE_AS,RUN_BATCH,RUN_BRF,RUN_BT,
 	    RUN_TREE_DETECTION, GENERATE_TERRAIN, GENERATE_TREEHEIGHT_FOR_3DVIWER
 	}
 	
@@ -184,6 +184,9 @@ public class PyLauncher extends Thread{
 				break;
 			case RUN_BRF:
 				run_brf();
+				break;
+			case RUN_BT:
+				run_bt();
 				break;
 			case RUN_TREE_DETECTION:
 				run_tree_detection();
@@ -423,9 +426,18 @@ public class PyLauncher extends Thread{
 	 * 计算BRF
 	 */
 	public void run_brf(){
-		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(),getScriptsPath(Const.LESS_SCRIPT_POST_PROCESSING));
+		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(),getScriptsPath(Const.LESS_SCRIPT_POST_PROCESSING),"-t","BRF");
 		runProcess(pd);
 	}
+	
+	/**
+	 * run brightness temperature
+	 */
+	public void run_bt() {
+		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(),getScriptsPath(Const.LESS_SCRIPT_POST_PROCESSING),"-t","BT");
+		runProcess(pd);
+	}
+	
 	
 	/**
 	 * single tree detection

@@ -140,16 +140,51 @@ class SceneGenerate:
 
         # for thermal
         if cfg["sensor"]["thermal_radiation"]:
-            from Utils import emittion_spectral
             emitter_node = doc.createElement("emitter")
             demNode.appendChild(emitter_node)
-            emitter_node.setAttribute("type","area")
-            spectrumNode = doc.createElement("spectrum")
-            emitter_node.appendChild(spectrumNode)
-            spectrumNode.setAttribute("name","radiance")
-            emit_spectral = emittion_spectral(float(cfg["scene"]["temperature_properties"][cfg["scene"]["terrain"]["temperature"]]),
-                                    cfg["sensor"]["bands"])
-            spectrumNode.setAttribute("value",emit_spectral)
+            emitter_node.setAttribute("type", "planck")
+            tNode = doc.createElement("float")
+            emitter_node.appendChild(tNode)
+            tNode.setAttribute("name","temperature")
+            terrTempStr = cfg["scene"]["temperature_properties"][cfg["scene"]["terrain"]["temperature"]]
+            terrArr = terrTempStr.split(":")
+            tNode.setAttribute("value",terrArr[0])
+            tNode = doc.createElement("float")
+            emitter_node.appendChild(tNode)
+            tNode.setAttribute("name", "deltaTemperature")
+            tNode.setAttribute("value", terrArr[1])
+            arrs = cfg["sensor"]["bands"].split(",")
+            wavelengths = []
+            for wl in arrs:
+                arr = wl.split(":")
+                wavelengths.append(arr[0])
+            waveNode = doc.createElement("spectrum")
+            emitter_node.appendChild(waveNode)
+            waveNode.setAttribute("name","wavelengths")
+            waveNode.setAttribute("value",",".join(wavelengths))
+            ft = open(os.path.join(session.get_output_dir(),wavelength_file_for_thermal),'w')
+            ft.write(",".join(wavelengths))
+            ft.close()
+
+            v_node = doc.createElement("vector")
+            emitter_node.appendChild(v_node)
+            v_node.setAttribute("name", "direction")
+            theta = float(cfg["illumination"]["sun"]["sun_zenith"]) / 180.0 * np.pi
+            phi = (float(cfg["illumination"]["sun"]["sun_azimuth"]) - 90) / 180.0 * np.pi
+            x = np.sin(theta) * np.cos(phi)
+            z = np.sin(theta) * np.sin(phi)
+            y = -np.cos(theta)
+            v_node.setAttribute("x", str(x))
+            v_node.setAttribute("y", str(y))
+            v_node.setAttribute("z", str(z))
+
+            # from Utils import emittion_spectral
+            # spectrumNode = doc.createElement("spectrum")
+            # emitter_node.appendChild(spectrumNode)
+            # spectrumNode.setAttribute("name","radiance")
+            # emit_spectral = emittion_spectral(float(cfg["scene"]["temperature_properties"][cfg["scene"]["terrain"]["temperature"]]),
+            #                         cfg["sensor"]["bands"])
+            # spectrumNode.setAttribute("value",emit_spectral)
 
 
         if "landcover" not in cfg["scene"]["terrain"]:
@@ -386,17 +421,53 @@ class SceneGenerate:
 
                 # for thermal
                 if cfg["sensor"]["thermal_radiation"]:
-                    from Utils import emittion_spectral
                     emitter_node = objdoc.createElement("emitter")
                     subshapnode.appendChild(emitter_node)
-                    emitter_node.setAttribute("type", "area")
-                    spectrumNode = objdoc.createElement("spectrum")
-                    emitter_node.appendChild(spectrumNode)
-                    spectrumNode.setAttribute("name", "radiance")
-                    emit_spectral = emittion_spectral(
-                        float(cfg["scene"]["temperature_properties"][temperatureName]),
-                        cfg["sensor"]["bands"])
-                    spectrumNode.setAttribute("value", emit_spectral)
+                    emitter_node.setAttribute("type", "planck")
+                    tNode = objdoc.createElement("float")
+                    emitter_node.appendChild(tNode)
+                    tNode.setAttribute("name", "temperature")
+                    tmperatureStr = cfg["scene"]["temperature_properties"][temperatureName]
+                    tmparr = tmperatureStr.split(":")
+                    tNode.setAttribute("value", tmparr[0])
+                    tNode = objdoc.createElement("float")
+                    emitter_node.appendChild(tNode)
+                    tNode.setAttribute("name", "deltaTemperature")
+                    tNode.setAttribute("value", tmparr[1])
+                    arrs = cfg["sensor"]["bands"].split(",")
+                    wavelengths = []
+                    for wl in arrs:
+                        arr = wl.split(":")
+                        wavelengths.append(arr[0])
+                    waveNode = objdoc.createElement("spectrum")
+                    emitter_node.appendChild(waveNode)
+                    waveNode.setAttribute("name", "wavelengths")
+                    waveNode.setAttribute("value", ",".join(wavelengths))
+
+                    v_node = objdoc.createElement("vector")
+                    emitter_node.appendChild(v_node)
+                    v_node.setAttribute("name", "direction")
+                    theta = float(cfg["illumination"]["sun"]["sun_zenith"]) / 180.0 * np.pi
+                    phi = (float(cfg["illumination"]["sun"]["sun_azimuth"]) - 90) / 180.0 * np.pi
+                    x = np.sin(theta) * np.cos(phi)
+                    z = np.sin(theta) * np.sin(phi)
+                    y = -np.cos(theta)
+                    v_node.setAttribute("x", str(x))
+                    v_node.setAttribute("y", str(y))
+                    v_node.setAttribute("z", str(z))
+
+
+                    # from Utils import emittion_spectral
+                    # emitter_node = objdoc.createElement("emitter")
+                    # subshapnode.appendChild(emitter_node)
+                    # emitter_node.setAttribute("type", "area")
+                    # spectrumNode = objdoc.createElement("spectrum")
+                    # emitter_node.appendChild(spectrumNode)
+                    # spectrumNode.setAttribute("name", "radiance")
+                    # emit_spectral = emittion_spectral(
+                    #     float(cfg["scene"]["temperature_properties"][temperatureName]),
+                    #     cfg["sensor"]["bands"])
+                    # spectrumNode.setAttribute("value", emit_spectral)
         xm = objdoc.toprettyxml()
         # xm = xm.replace('<?xml version="1.0" ?>', '')
         objf.write(xm)
@@ -478,11 +549,13 @@ class SceneGenerate:
                 trnode = doc.createElement("transform")
                 shapenode.appendChild(trnode)
                 trnode.setAttribute("name", "toWorld")
-                # if len(arr) == 6: # fit with
-                #     scale_node = doc.createElement("scale")
-                #     trnode.appendChild(scale_node)
-                #     scale_node.setAttribute("x", str(float(arr[4]) / bound_dict[objectName][0]))
-                #     scale_node.setAttribute("y", str(float(arr[5]) / bound_dict[objectName][1]))
+                if len(arr) == 6: # fit with
+                    scale_node = doc.createElement("scale")
+                    trnode.appendChild(scale_node)
+                    scale_node.setAttribute("x", str(float(arr[4]) / bound_dict[objectName][0]))
+                    scale_node.setAttribute("z", str(float(arr[4]) / bound_dict[objectName][0]))
+                    scale_node.setAttribute("y", str(float(arr[5]) / bound_dict[objectName][1]))
+
                 if len(arr) == 5: # for roatation of the tree
                     angle = arr[len(arr)-1]
                     rotatenode = doc.createElement("rotate")

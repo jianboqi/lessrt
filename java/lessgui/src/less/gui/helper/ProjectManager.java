@@ -77,6 +77,9 @@ public class ProjectManager {
 	public ComboBox<String> comboBoxTerrainTemper = null;
 	private TerminalTab terminal=null;
 	
+	public Label skyTemperatureLabel = null;
+	public ComboBox<String> comboBoxSkyTemper = null;
+	
 	
 	private AnchorPane virtualPlanePane = null;
 	public TextField xpos = null;
@@ -632,29 +635,44 @@ public class ProjectManager {
 			temperListView.setItems(this.temperatureList);
 			this.temperatureList.clear();
 			this.temperatureList.add("T300");
-			this.mwController.temperatureMap.put("T300", "300");
+			this.mwController.temperatureMap.put("T300", "300:5");
 			
 			
 			TextField temperValField = new TextField();
-			temperValField.setPromptText("300");
+			temperValField.setPromptText("300:5");
 			temperValField.setPrefWidth(150);
 			AnchorPane.setLeftAnchor(temperValField, 260.0);
 			AnchorPane.setTopAnchor(temperValField, 80.0);
+			Label tipLabel = new Label("(Mean T:Delta T)");
+			tipLabel.setTextFill(Color.web("#777777"));
+			AnchorPane.setLeftAnchor(tipLabel, 420.0);
+			AnchorPane.setTopAnchor(tipLabel, 85.0);
 		
-			opticalThermalPane.getChildren().addAll(tempLabel, addBtn,delBtn,temperNameField,temperListView,temperValField);
+			opticalThermalPane.getChildren().addAll(tempLabel, addBtn,delBtn,temperNameField,temperListView,temperValField,tipLabel);
 			
 			//show for terrain
 			terrainTemperLabel = new Label("Temperature: ");
 			comboBoxTerrainTemper = new ComboBox<String>();
-			comboBoxTerrainTemper.setPrefWidth(224);
+			//comboBoxTerrainTemper.setPrefWidth(224);
 			comboBoxTerrainTemper.setItems(this.temperatureList);
 			comboBoxTerrainTemper.getSelectionModel().select(Const.LESS_DEFAULT_TEMPERATURE);
 			this.mwController.terrainOpticalAnchorPane.getChildren().addAll(terrainTemperLabel, comboBoxTerrainTemper);
 			AnchorPane.setLeftAnchor(terrainTemperLabel, 0.0);
-			AnchorPane.setTopAnchor(terrainTemperLabel, 50.0);
-			AnchorPane.setLeftAnchor(comboBoxTerrainTemper, 150.0);
-			AnchorPane.setTopAnchor(comboBoxTerrainTemper, 45.0);
+			AnchorPane.setTopAnchor(terrainTemperLabel, 100.0);
+			AnchorPane.setLeftAnchor(comboBoxTerrainTemper, 110.0);
+			AnchorPane.setTopAnchor(comboBoxTerrainTemper, 95.0);
 			
+			
+			//show for sky
+			skyTemperatureLabel = new Label("Temperature: ");
+			comboBoxSkyTemper = new ComboBox<String>();
+			comboBoxSkyTemper.setItems(this.temperatureList);
+			comboBoxSkyTemper.getSelectionModel().select(Const.LESS_DEFAULT_TEMPERATURE);
+			this.mwController.skyPane.getChildren().addAll(skyTemperatureLabel,comboBoxSkyTemper);
+			AnchorPane.setLeftAnchor(skyTemperatureLabel, 5.0);
+			AnchorPane.setTopAnchor(skyTemperatureLabel, 140.0);
+			AnchorPane.setLeftAnchor(comboBoxSkyTemper, 150.0);
+			AnchorPane.setTopAnchor(comboBoxSkyTemper, 135.0);
 			
 			temperListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 				@Override
@@ -669,7 +687,7 @@ public class ProjectManager {
 				String temperName = temperNameField.getText();
 				if(!temperName.equals("") && !temperatureList.contains(temperName)){
 					temperatureList.add(temperName);
-					mwController.temperatureMap.put(temperName, "300");
+					mwController.temperatureMap.put(temperName, "300:5");
 				}
 			});
 			
@@ -695,6 +713,12 @@ public class ProjectManager {
 			}
 			if (comboBoxTerrainTemper != null){
 				this.mwController.terrainOpticalAnchorPane.getChildren().remove(comboBoxTerrainTemper);
+			}
+			if(skyTemperatureLabel != null) {
+				this.mwController.skyPane.getChildren().remove(skyTemperatureLabel);
+			}
+			if(comboBoxSkyTemper != null) {
+				this.mwController.skyPane.getChildren().remove(comboBoxSkyTemper);
 			}
 		}
 		
@@ -947,7 +971,7 @@ public class ProjectManager {
 		    		AnchorPane.setRightAnchor(mwController.numOfDirectionTextField, 20.0);
 		    		AnchorPane.setTopAnchor(mwController.numOfDirectionTextField, 80.0);
 		        	
-		        	mwController.virtualLabel = new Label("Virutal Directions:");
+		        	mwController.virtualLabel = new Label("Virutal Directions [°]:");
 		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualLabel);
 		    		AnchorPane.setLeftAnchor(mwController.virtualLabel, 0.0);
 		    		AnchorPane.setTopAnchor(mwController.virtualLabel, 125.0);
@@ -956,13 +980,26 @@ public class ProjectManager {
 		    		mwController.ptConfigPanel.getChildren().add(mwController.virtualDirTextField);
 		    		AnchorPane.setLeftAnchor(mwController.virtualDirTextField, 150.0);
 		    		AnchorPane.setRightAnchor(mwController.virtualDirTextField, 20.0);
-		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, 120.0);		    		
+		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, 120.0);
+		    		
+		    		mwController.virtualDetectorLabel = new Label("Virutal Detectors [°]:");
+		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualDetectorLabel);
+		    		AnchorPane.setLeftAnchor(mwController.virtualDetectorLabel, 0.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDetectorLabel, 170.0);
+		    		mwController.virtualDetectorTextField = new TextField();
+		    		mwController.virtualDetectorTextField.setPromptText("centerZenith,centerAzimuth,angleInterval;centerZenith,centerAzimuth,angleInterval");
+		    		mwController.ptConfigPanel.getChildren().add(mwController.virtualDetectorTextField);
+		    		AnchorPane.setLeftAnchor(mwController.virtualDetectorTextField, 150.0);
+		    		AnchorPane.setRightAnchor(mwController.virtualDetectorTextField, 20.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDetectorTextField, 165.0);
 		    		
 		        }else {
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualLabel);
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDirTextField);
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.numOfDirectionLabel);
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.numOfDirectionTextField);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDetectorLabel);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDetectorTextField);
 		        }
 		    }
 		});

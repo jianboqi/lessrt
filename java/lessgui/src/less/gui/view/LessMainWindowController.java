@@ -80,6 +80,7 @@ import less.gui.utils.ConstConfig;
 import less.gui.utils.DBReader;
 import less.gui.utils.EditingCell;
 import less.gui.utils.NumberStringFilteredConverter;
+import net.sf.cglib.core.Local;
 
 public class LessMainWindowController {
 	@FXML
@@ -243,6 +244,8 @@ public class LessMainWindowController {
 	public TextField virtualDirTextField;
 	public Label numOfDirectionLabel;
 	public TextField numOfDirectionTextField;
+	public Label virtualDetectorLabel;
+	public TextField virtualDetectorTextField;
 	public CheckBox productUpDownRadiationCheckbox;// for photon tracing
 	public TextField cfFovTextField;// for fisheye parameters
 	public ComboBox<String> combobox;
@@ -305,6 +308,7 @@ public class LessMainWindowController {
 	public TextField atsPercentageField;
 	@FXML
 	public ComboBox<String> atsTypeCombobox;
+	public Button atsButton;
 	@FXML
 	public Label unitLabel;
 	@FXML
@@ -611,7 +615,8 @@ public class LessMainWindowController {
 	 * Prevent the invalid inputs
 	 */
 	private void inputValidation(){
-		NumberStringFilteredConverter converter = new NumberStringFilteredConverter();
+		java.util.Locale locale = new java.util.Locale("en");
+		NumberStringFilteredConverter converter = new NumberStringFilteredConverter(locale);
         final TextFormatter<Number> formatterX = new TextFormatter<>(
                 converter,
                 100,
@@ -752,15 +757,16 @@ public class LessMainWindowController {
 			@Override 
 			public void changed(ObservableValue ov, String oldVal, String newVal) {
 				if(newVal.equals(Const.LESS_ATS_TYPE_SKY)){
+					skyPane.getChildren().remove(atsButton);
 					skyPane.getChildren().add(SkyTotalPane);
 				}
 				if (newVal.equals(Const.LESS_ATS_TYPE_ATS)){
 					skyPane.getChildren().remove(SkyTotalPane);
 					//add a button to show atmosphere dialog
-					Button button = new Button("Define Atmosphere...");
-					skyPane.getChildren().add(button);
-					AnchorPane.setLeftAnchor(button, 150.0);
-					AnchorPane.setTopAnchor(button, 80.0);
+					atsButton = new Button("Define Atmosphere...");
+					skyPane.getChildren().add(atsButton);
+					AnchorPane.setLeftAnchor(atsButton, 150.0);
+					AnchorPane.setTopAnchor(atsButton, 80.0);
 				}
 		    } 
 		});
@@ -885,9 +891,14 @@ public class LessMainWindowController {
 	        new EventHandler<CellEditEvent<FacetOptical, String>>() {
 	            @Override
 	            public void handle(CellEditEvent<FacetOptical, String> t) {
+	               String oldVal = t.getOldValue();
 	                ((FacetOptical) t.getTableView().getItems().get(
 	                    t.getTablePosition().getRow())
 	                    ).setOpticalName(t.getNewValue());
+	                int index = terrainOpticalData.indexOf(oldVal);
+	                terrainOpticalData.add(index, t.getNewValue());
+	                terrainOpticalData.remove(oldVal);
+	                
 	            }
 	        }
 	    );
@@ -929,7 +940,7 @@ public class LessMainWindowController {
 	}
 	
 	/**
-	 * Optical 锟斤拷锟斤拷锟斤拷兀锟斤拷锟接伙拷锟斤拷删锟斤拷optical
+	 * Optical 
 	 */
 	@FXML
 	private void addOptical(){
@@ -1370,7 +1381,7 @@ public class LessMainWindowController {
 	
 	
 	@FXML
-	private void saveSim(){
+	public void saveSim(){
 		this.before_run();
 	}
 	
@@ -1461,7 +1472,7 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
-	private void run_all(){
+	public void run_all(){
 		before_run();
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
@@ -1484,6 +1495,16 @@ public class LessMainWindowController {
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.RUN_BRF, latch, outputConsole);
+		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
+		currentRunningStatusThread.setMainController(this);
+		currentRunningStatusThread.start();
+	}
+	
+	@FXML
+	private void runBT() {
+		CountDownLatch latch = new CountDownLatch(1);
+		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.RUN_BT, latch, outputConsole);
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
 		currentRunningStatusThread.setMainController(this);
 		currentRunningStatusThread.start();

@@ -193,8 +193,9 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 
 			sensorRay.scaleDifferential(diffScaleFactor);
 
-			spec *= Li(sensorRay, rRec);
-			multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
+			spec *= Li(sensorRay, rRec); 
+			//multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
+			multiImageblock->getMainImageBlock()->put_no_filter(Point2i(points[i]), spec, rRec.alpha);
 			if (m_hasFourComponentProduct) {
 				fourcomps[rRec.extra - 1]++;
 			}

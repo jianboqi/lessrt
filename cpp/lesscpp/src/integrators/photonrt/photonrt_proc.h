@@ -14,7 +14,8 @@ MTS_NAMESPACE_BEGIN
 class CapturePhotonWorkResult :public WorkResult {
 public:
 	inline CapturePhotonWorkResult(const Vector2i &res, const ReconstructionFilter *filter, 
-		bool hasBRFProducts, bool hasUpDownProducts, string virtualDirectionStr, int numberOfDirections){
+		bool hasBRFProducts, bool hasUpDownProducts, string virtualDirectionStr, int numberOfDirections,
+		string virtualDetectorDirection){
 		m_range = new RangeWorkUnit();
 
 		m_hasUpDownProducts = hasUpDownProducts;
@@ -29,6 +30,7 @@ public:
 		if (m_hasBRFProducts) {
 			m_dirBRFWorkResult = new DirectionalBRF(m_numberOfDirections);
 			m_dirBRFWorkResult->readVirtualDirections(virtualDirectionStr);
+			m_dirBRFWorkResult->readVirtualDetectors(virtualDetectorDirection);
 		}
 		
 		m_PhtonsEachProcess = 0;
@@ -88,10 +90,10 @@ public:
 
 	inline CapturePhotonWorker(int maxDepth, int maxPathDepth,
 		int rrDepth, bool bruteForce, bool hasBRFProducts, bool hasUpDownProducts, string virtualDirections,
-		int numberOfDirections) : PhotonTracer(maxDepth, rrDepth, true),
+		int numberOfDirections, string virtualDetectorDirection) : PhotonTracer(maxDepth, rrDepth, true),
 		m_maxPathDepth(maxPathDepth), m_bruteForce(bruteForce), m_hasBRFProducts(hasBRFProducts),
 		m_hasUpDownProducts(hasUpDownProducts), m_virtualDirections(virtualDirections),
-		m_numberOfDirections(numberOfDirections){ }
+		m_numberOfDirections(numberOfDirections), m_virtualDetectorDirection(virtualDetectorDirection){ }
 
 	CapturePhotonWorker(Stream *stream, InstanceManager *manager);
 
@@ -147,6 +149,11 @@ public:
 		const MediumSamplingRecord &mRec, const Medium *medium,
 		const Vector &wi, const Spectrum &weight);
 
+	/**
+	* determine the repetitive occlusion 
+	*/
+	Spectrum repetitiveOcclude(Spectrum value, Point p, Vector d, const Scene* scene, bool & isRepetitiveOcclude)const;
+
 	MTS_DECLARE_CLASS()
 protected:
 	/// Virtual destructor
@@ -172,6 +179,7 @@ private:
 	bool m_hasUpDownProducts;
 	string m_virtualDirections;
 	int m_numberOfDirections;
+	string m_virtualDetectorDirection;
 };
 
 
@@ -229,6 +237,7 @@ private:
 	bool m_hasBRFProducts;
 	bool m_hasUpDownProducts;
 	string m_virtualDirections;
+	string m_virtualDetectorDirection;
 	int m_numberOfDirections;
 
 	size_t m_totalPhotons;

@@ -169,6 +169,9 @@ public:
 
 	/// Stores a pointer to the parent instance, if applicable
 	const Shape *instance;
+
+	/// is this point shaded or not
+	bool shaded;
 };
 
 /** \brief Abstract base class of all shapes

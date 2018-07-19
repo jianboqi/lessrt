@@ -17,13 +17,19 @@ def do_simulation_multi_spectral(cores):
     cfg = json.load(f)
     excuable = "lessrt"
     distFileName = ""
+    imgPrefix = ""
+    if cfg["sensor"]["thermal_radiation"]:
+        imgPrefix = thermal_img_prefix
+    else:
+        imgPrefix = spectral_img_prefix
+
     if cfg["sensor"]["sensor_type"] == "orthographic":
-        distFileName = spectral_img_prefix + "VZ=" + str(cfg["observation"]["obs_zenith"]) + \
+        distFileName = imgPrefix + "VZ=" + str(cfg["observation"]["obs_zenith"]) + \
                 "_VA=" + str(cfg["observation"]["obs_azimuth"])
     if cfg["sensor"]["sensor_type"] == "perspective" or cfg["sensor"]["sensor_type"] == "CircularFisheye":
         ox,oy,oz,tx,ty,tz = cfg["observation"]["obs_o_x"], cfg["observation"]["obs_o_y"], cfg["observation"]["obs_o_z"],\
                             cfg["observation"]["obs_t_x"], cfg["observation"]["obs_t_y"], cfg["observation"]["obs_t_z"]
-        distFileName = spectral_img_prefix + "ox=%.2f_oy=%.2f_oz=%.2f_tx=%.2f_ty=%.2f_tz=%.2f"%(ox,oy,oz,tx,ty,tz)
+        distFileName = imgPrefix + "ox=%.2f_oy=%.2f_oz=%.2f_tx=%.2f_ty=%.2f_tz=%.2f"%(ox,oy,oz,tx,ty,tz)
         distFileName = distFileName.replace(".","_")
 
     if cfg["sensor"]["sensor_type"] == "PhotonTracing":
@@ -76,13 +82,22 @@ def do_simulation_multi_spectral(cores):
         output_fileName = distFile + "_4Components.npy"
 
         if output_format not in ("npy", "NPY") and os.path.exists(output_fileName):
-            data = np.load(output_fileName)[:,:,0]
+            data = np.load(output_fileName)
+            dshape = data.shape
+            if len(dshape) == 3:
+                data = data[:,:,0]
             bandlist = []
             RasterHelper.saveToHdr_no_transform(data, out_file_no_extension, bandlist, output_format)
             os.remove(output_fileName)
 
         if output_format not in ("npy", "NPY") and os.path.exists(distFile + ".npy"):
             data = np.load(distFile + ".npy")
+
+            # converte to brightness temperature
+            if cfg["sensor"]["thermal_radiation"]:
+                bandlist = cfg["sensor"]["bands"].split(",")
+                data = RasterHelper.convertRadiance2BTimage(data, bandlist)
+
             bandlist = cfg["sensor"]["bands"].split(",")
             RasterHelper.saveToHdr_no_transform(data, distFile, bandlist, output_format)
             os.remove(distFile + ".npy")

@@ -39,7 +39,8 @@ public class SpectralBandsDefineController {
 	}
 	
 	public void inputValidation(){
-		NumberStringFilteredConverter converter = new NumberStringFilteredConverter();
+		java.util.Locale locale = new java.util.Locale("en");
+		NumberStringFilteredConverter converter = new NumberStringFilteredConverter(locale);
 		FromTextField.setTextFormatter(new TextFormatter<>(converter,600.0,converter.getFilter()));
 		ToTextField.setTextFormatter(new TextFormatter<>(converter,900.0,converter.getFilter()));
 		BandNumTextField.setTextFormatter(new TextFormatter<>(converter,2,converter.getFilter()));

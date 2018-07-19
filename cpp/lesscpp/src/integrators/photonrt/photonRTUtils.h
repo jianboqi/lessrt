@@ -10,19 +10,55 @@ using namespace std;
 #define PHRT_M_PI 3.14159265358979323846
 
 struct AngularDirection {
-	double zenith_start, zenith_end;
-	double azimuth_start, azimuth_end;
-	double solidAngle;
 public:
-	AngularDirection(double zenith_start, double zenith_end,
-		double azimuth_start,double azimuth_end,
-		double solidAngle) {
-		this->zenith_start = zenith_start;
-		this->zenith_end = zenith_end;
-		this->azimuth_start = azimuth_start;
-		this->azimuth_end = azimuth_end;
-		this->solidAngle = solidAngle;
+	double center_zenith, center_azimuth; // rad
+	double angleInterval; //rad
+
+public:
+	AngularDirection(){}
+	AngularDirection(double center_zenith, double center_azimuth,
+		double angleInterval) {
+		this->center_zenith = center_zenith;
+		this->center_azimuth = center_azimuth;
+		this->angleInterval = angleInterval;
+		costerm = std::cos(0.5*angleInterval);
+		cx = std::sin(center_zenith)*std::cos(center_azimuth);
+		cy = std::sin(center_zenith)*std::sin(center_azimuth);
+		cz = std::cos(center_zenith);
 	}
+	double solidAngle() {
+		double h = 1 - costerm;
+		double a = std::sin(0.5*angleInterval);
+		return PHRT_M_PI * (h*h + a * a);
+	}
+	//to determine if (zenith, azimuth) is inside this angular sector
+	bool isInside(double zenith, double azimuth) {
+		double x, y, z;
+		x = std::sin(zenith)*std::cos(azimuth);
+		y = std::sin(zenith)*std::sin(azimuth);
+		z = std::cos(zenith);
+		double dotproduct = cx * x + cy * y + cz * z;
+		if (dotproduct >= costerm) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	std::string toString() {
+		std::ostringstream oss;
+		oss << "AngularDirection:[" << endl;
+		oss << "Center Zenith: " << center_zenith << endl;
+		oss << "Center Azimuth: " << center_azimuth << endl;
+		oss << "Angle Interval: " << angleInterval << endl;
+		oss << "Solid Angle: " << solidAngle() << endl;
+		oss << "]" << endl;;
+		return oss.str();
+	}
+protected:
+	double costerm;
+	double cx, cy, cz;
 };
 
 class PhotonRTUtils {

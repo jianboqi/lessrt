@@ -154,6 +154,14 @@ class SceneParser:
                 strNode.setAttribute("name","virtualDirections")
                 strNode.setAttribute("value",virtualDirectionStr)
 
+            # virtual detectors
+            virtualDetectorStr = cfg["sensor"]["PhotonTracing"]["virtualDetectorDirections"]
+            if virtualDetectorStr != "":
+                strNode = doc.createElement("string")
+                integratorNode.appendChild(strNode)
+                strNode.setAttribute("name", "virtualDetectorDirections")
+                strNode.setAttribute("value", virtualDetectorStr)
+
             # Number of directions for solid patches
             intNode = doc.createElement("integer")
             integratorNode.appendChild(intNode)
@@ -203,6 +211,22 @@ class SceneParser:
         integratorNode.appendChild(intNode)
         intNode.setAttribute("name","RepetitiveScene")
         intNode.setAttribute("value",str(cfg["sensor"]["RepetitiveScene"]))
+
+        arrs = cfg["sensor"]["bands"].split(",")
+        wavelengths = []
+        for wl in arrs:
+            arr = wl.split(":")
+            wavelengths.append(arr[0])
+        waveNode = doc.createElement("spectrum")
+        integratorNode.appendChild(waveNode)
+        waveNode.setAttribute("name", "wavelengths")
+        waveNode.setAttribute("value", ",".join(wavelengths))
+
+        if cfg["sensor"]["thermal_radiation"]:
+            booleanNode = doc.createElement("boolean")
+            integratorNode.appendChild(booleanNode)
+            booleanNode.setAttribute("name", "isThermal")
+            booleanNode.setAttribute("value", "true")
 
         if "hasFourComponentProduct" in cfg["sensor"]:
             booleanNode = doc.createElement("boolean")
@@ -523,28 +547,49 @@ class SceneParser:
 
         #emitters
         #direct
-        d_e_node = doc.createElement("emitter")
-        rootNode.appendChild(d_e_node)
-        if cfg["sensor"]["sensor_type"] == "PhotonTracing":
-            d_e_node.setAttribute("type", "directional")
-        else:
-            d_e_node.setAttribute("type","directional")
-        v_node = doc.createElement("vector")
-        d_e_node.appendChild(v_node)
-        v_node.setAttribute("name","direction")
-        theta = float(cfg["illumination"]["sun"]["sun_zenith"])/180.0*np.pi
-        phi = (float(cfg["illumination"]["sun"]["sun_azimuth"])-90)/180.0*np.pi
-        x = np.sin(theta)*np.cos(phi)
-        z = np.sin(theta) * np.sin(phi)
-        y = -np.cos(theta)
-        v_node.setAttribute("x", str(x))
-        v_node.setAttribute("y", str(y))
-        v_node.setAttribute("z", str(z))
+        # For thermal radiation, no need to consider the sun radiation
+        if not cfg["sensor"]["thermal_radiation"]:
+            d_e_node = doc.createElement("emitter")
+            rootNode.appendChild(d_e_node)
+            if cfg["sensor"]["sensor_type"] == "PhotonTracing":
+                d_e_node.setAttribute("type", "directional")
+            else:
+                d_e_node.setAttribute("type","directional")
+            v_node = doc.createElement("vector")
+            d_e_node.appendChild(v_node)
+            v_node.setAttribute("name","direction")
+            theta = float(cfg["illumination"]["sun"]["sun_zenith"])/180.0*np.pi
+            phi = (float(cfg["illumination"]["sun"]["sun_azimuth"])-90)/180.0*np.pi
+            x = np.sin(theta)*np.cos(phi)
+            z = np.sin(theta) * np.sin(phi)
+            y = -np.cos(theta)
+            v_node.setAttribute("x", str(x))
+            v_node.setAttribute("y", str(y))
+            v_node.setAttribute("z", str(z))
+
+
+        #sky radiance according to planck
+        if cfg["sensor"]["thermal_radiation"]:
+            from Utils import emittion_spectral
+            sky_e_node = doc.createElement("emitter")
+            rootNode.appendChild(sky_e_node)
+            sky_e_node.setAttribute("type", "hemisphere")
+            spectrum_node = doc.createElement("spectrum")
+            sky_e_node.appendChild(spectrum_node)
+            spectrum_node.setAttribute("name", "radiance")
+            skyTemperStr = cfg["scene"]["temperature_properties"][cfg["illumination"]["atmosphere"]["AtsTemperature"]]
+            skyarr = skyTemperStr.split(":")
+            emit_spectral = emittion_spectral(
+                    float(skyarr[0]), cfg["sensor"]["bands"])
+
+            spectrum_node.setAttribute("value", emit_spectral)
 
         # write BOA to output  batch模式下，每个运行单元的irradiance可能不同，需要分别计算
         # fi = open(combine_file_path(session.get_output_dir(), main_scene_xml_file_prifix+irradiance_file), 'w')
         irr_str = "" #返回一个字符串，包含了太阳水平下行辐射和天空光辐射
-        if cfg["illumination"]["atmosphere"]["ats_type"] == "SKY_TO_TOTAL" or cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
+        if (not cfg["sensor"]["thermal_radiation"])\
+                and (cfg["illumination"]["atmosphere"]["ats_type"] == "SKY_TO_TOTAL"
+                     or cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE"):
             spectrum_node = doc.createElement("spectrum")
             d_e_node.appendChild(spectrum_node)
             spectrum_node.setAttribute("name", "irradiance")

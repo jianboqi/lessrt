@@ -63,8 +63,8 @@ class LESS:
         self.generate3D()
         self.generateView()
 
-    # def runLess(self,cores=-1):
-    #     os.system(self.getPyExePath() + " " + self.getScriptPath("less.py") + " -r n -p "+str(cores))
+    def runLess(self,cores=-1):
+        os.system(self.getPyExePath() + " " + self.getScriptPath("less") + " -r n -p "+str(cores))
 
     def getPyExePath(self):
         return sys.executable
@@ -122,6 +122,16 @@ class LESSGUI:
     def placeInstance(self,xyz):
         xyzstr = "instance_"+str(xyz[0])+"_"+str(xyz[1])+"_"+str(xyz[2])+"\n"
         self.sock.sendall(xyzstr.encode('utf-8'))
+
+    def defineIlluminationResolution(self, value):
+        sendStr = "IllumRes_"+str(value)+"\n"
+        self.sock.sendall(sendStr.encode('utf-8'))
+
+
+    # run
+    def runAll(self):
+        sendStr = "RUN_ALL"+"\n"
+        self.sock.sendall(sendStr.encode('utf-8'))
 #
 
 # if __name__ == "__main__":

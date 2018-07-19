@@ -60,6 +60,15 @@ ref<Shape> AbstractEmitter::createShape(const Scene *scene) {
 	return NULL;
 }
 
+
+Spectrum AbstractEmitter::getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec,bool shaded) const {
+	NotImplementedError("getSpectrumAccordingToTemperature");
+}
+
+Spectrum AbstractEmitter::getPowerAccordingToTemperature(Point p, int FrontorBack, bool shaded) const {
+	NotImplementedError("getPowerAccordingToTemperature");
+}
+
 Spectrum AbstractEmitter::samplePosition(PositionSamplingRecord &pRec,
 		const Point2 &sample, const Point2 *extra) const {
 	NotImplementedError("samplePosition");

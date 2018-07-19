@@ -42,6 +42,17 @@ public class PyServer implements Runnable{
             		mwController.objectAndPositionMap.get(objName).add(new PositionXY(arr[1], arr[2],arr[3]));
             	}
             	
+            	if(fromClient.startsWith("IllumRes")) {
+            		String arr[] = fromClient.split("_");
+            		System.out.println("Set Illumination Resolution to "+arr[1]);
+            		this.mwController.illumResTextField.setText(arr[1]);
+            		this.mwController.saveSim();
+            	}
+            	
+            	if(fromClient.startsWith("RUN_ALL")) {
+            		this.mwController.run_all();
+            	}
+            	
                 fromClient= in.readLine();
             }
             in.close();

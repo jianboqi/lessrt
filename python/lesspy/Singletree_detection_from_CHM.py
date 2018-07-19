@@ -40,20 +40,21 @@ def sub_fun(_nuclear, _areas, _detected_trees_pos, _seg_index, _real_coordinate,
                 tmpmax = _nuclear[treepixel[0][m]][treepixel[1][m]]
                 tx, ty = treepixel[0][m], treepixel[1][m]
         maxHeight = _nuclear[tx, ty]
-        SF = abs(crown-_crownDiameterList)*0.5/_crownDiameterList + abs(maxHeight-_crownHeightsList)*0.5/_crownHeightsList
-        nearest_pos = min(range(len(SF)),
-                          key=lambda i: abs(SF[i]))
+        if maxHeight > 0:
+            SF = abs(crown-_crownDiameterList)*0.5/_crownDiameterList + abs(maxHeight-_crownHeightsList)*0.5/_crownHeightsList
+            nearest_pos = min(range(len(SF)),
+                              key=lambda i: abs(SF[i]))
 
-        if _real_coordinate:
-            x = _offset_x + ty * _pixel_size
-            y = _offset_y + tx * _pixel_size
-            # _detected_trees_pos[i-1,:] = [random.randint(0, _obj_num - 1), x, y]
-            _detected_trees_pos[i - 1, :] = [nearest_pos, x, y, crown, maxHeight]
-        else:
-            x = _offset_x + ty
-            y = _offset_y + tx
-            # _detected_trees_pos[i-1, :] = [random.randint(0, _obj_num - 1), y, x]
-            _detected_trees_pos[i - 1, :] = [nearest_pos, x, y,crown, maxHeight]
+            if _real_coordinate:
+                x = _offset_x + ty * _pixel_size
+                y = _offset_y + tx * _pixel_size
+                # _detected_trees_pos[i-1,:] = [random.randint(0, _obj_num - 1), x, y]
+                _detected_trees_pos[i - 1, :] = [nearest_pos, x, y, crown, maxHeight]
+            else:
+                x = _offset_x + ty
+                y = _offset_y + tx
+                # _detected_trees_pos[i-1, :] = [random.randint(0, _obj_num - 1), y, x]
+                _detected_trees_pos[i - 1, :] = [nearest_pos, x, y,crown, maxHeight]
 
 def save_as_random_color_img(_dataarr, filepath):
     rows, cols = _dataarr.shape
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("-seg_size", help="Tree number for each core. ", type=int, default=2000)
     parser.add_argument("-subregion", help="Divide image into subregions (pixels). ", type=int, default=1000)
     parser.add_argument("-height_threshold", help="Threshold to remove grass, bushes etc. ", type=float, default=3)
-    parser.add_argument("-window_size", help="Window size for segmentation. ", type=int, default=5)
+    parser.add_argument("-window_size", help="Window size for segmentation. ", type=int, default=7)
     parser.add_argument("-real_coordinate", help="Whether output real coordinates or pixel positions. ",
                         type=bool, default=True)
     args = parser.parse_args()
@@ -111,10 +112,10 @@ if __name__ == "__main__":
     obj_num = len(objList)
 
     crownDiameterList = args.c.strip().split("*")
-    crownDiameterList = np.array(map(lambda x:float(x),crownDiameterList))
+    crownDiameterList = np.array(list(map(lambda x:float(x),crownDiameterList)))
 
     crownHeightsList = args.b.strip().split("*")
-    crownHeightsList = np.array(map(lambda x: float(x), crownHeightsList))
+    crownHeightsList = np.array(list(map(lambda x: float(x), crownHeightsList)))
 
 
     band = idata_set.GetRasterBand(1)
@@ -173,6 +174,7 @@ if __name__ == "__main__":
             folder = tempfile.mkdtemp()
             detected_trees_pos = np.memmap(os.path.join(folder, 'treedetect'), dtype=float, shape=(area_max, 5),
                                            mode='w+')
+            detected_trees_pos += -1
 
             joblib.Parallel(n_jobs=joblib.cpu_count()-1, max_nbytes=None)(
                 joblib.delayed(sub_fun)(nuclear, areas, detected_trees_pos, i,
@@ -187,11 +189,13 @@ if __name__ == "__main__":
             else:
                 fw = open(out_file, 'a')
             for i in range(0, len(detected_trees_pos)):
-                # outstr = objList[int(detected_trees_pos[i][0])] + " " + str(detected_trees_pos[i][1]) + " " + str(
-                #     detected_trees_pos[i][2])+" 0 "+str(detected_trees_pos[i][3])+" "+str(detected_trees_pos[i][4])
-                outstr = objList[int(detected_trees_pos[i][0])] + " " + str(detected_trees_pos[i][1]) + " " + str(
-                    detected_trees_pos[i][2]) + " 0"
-                fw.write(outstr + "\n")
+                if detected_trees_pos[i][0] >= 0:
+                    outstr = objList[int(detected_trees_pos[i][0])] + " " + str(detected_trees_pos[i][1]) + " " + str(
+                        detected_trees_pos[i][2])+" 0 "+str(detected_trees_pos[i][3])+" "+str(detected_trees_pos[i][4])
+                # if detected_trees_pos[i][0] >= 0:
+                #     outstr = objList[int(detected_trees_pos[i][0])] + " " + str(detected_trees_pos[i][1]) + " " + str(
+                #         detected_trees_pos[i][2]) + " 0"
+                    fw.write(outstr + "\n")
             fw.close()
             del detected_trees_pos
 
