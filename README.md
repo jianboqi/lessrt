@@ -16,7 +16,7 @@ LESS is a 3D radiative transfer model which can simulate large-scale spectral im
 ## Todo
 
 * [ ] Integrate a plane-parallel atmosphere model
-  * [×] A plane-parallel medium has been implemented.
+  * [x] A plane-parallel medium has been implemented.
   * [ ] Need a atmosphere database which stores parameters of different type of atmosphere (maybe from Modtran)
 * [ ] Release under linux
   * [ ] Find a solution to package all into a installer for different linux distributions.
