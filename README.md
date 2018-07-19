@@ -1,6 +1,6 @@
 LESS is a 3D radiative transfer model which can simulate large-scale spectral images and remote sensing data.
 
-![Image of LESS example](http://jianboqi.github.io/img/lessExample.jpg)
+![Image of LESS example](http://jianboqi.github.io/img/lessExample1.jpg)
 
 ## Features
 
