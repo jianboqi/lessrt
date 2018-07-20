@@ -1,0 +1,48 @@
+  A new SCons checkpoint release, 2.5.1, is now available
+  on the SCons download page:
+
+          http://www.scons.org/download.php
+
+  This is a minor release
+
+  Here is a summary of the changes since 2.5.0:
+
+  NEW FUNCTIONALITY
+
+    - None
+
+  DEPRECATED FUNCTIONALITY
+
+    - None
+
+  CHANGED/ENHANCED EXISTING FUNCTIONALITY
+
+    - None
+
+  FIXES
+
+    - None
+
+  IMPROVEMENTS
+
+    - Use memoization to optimize PATH evaluation across all dependencies per
+      node. (PR #345)  This should fix some performance degredation due to 
+      changes to enable enhanced multi-language scanning added in 2.5.0
+
+  PACKAGING
+
+    - Fixed missing scons-configure-cache.py. (It was accidently omitted)
+
+  DOCUMENTATION
+
+    - None
+
+  DEVELOPMENT
+
+    - None
+
+  Thanks to William Deegan and Alexey Klimkin for their contributions to this release.
+  Contributors are listed alphabetically by their last name.
+
+Copyright (c) 2001 - 2016 The SCons Foundation
+src/RELEASE.txt rel_2.5.1:3735:9dc6cee5c168 2016/11/03 14:02:02 bdbaddog

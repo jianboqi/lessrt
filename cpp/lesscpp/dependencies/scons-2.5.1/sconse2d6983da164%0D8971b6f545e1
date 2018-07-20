@@ -1,0 +1,142 @@
+# HG changeset patch
+# User Bitbucket <noreply@bitbucket.org>
+# Date 0 0
+# Node ID de25fee7cf27d26f4e83740d6e0ba4688158dfb6
+# Parent  8971b6f545e1e1391a7cb7feb258d8c77a23f641
+# Parent  e2d6983da16456221857f57e70b0a05b4275b6da
+Merge preview of source (e2d6983da16456221857f57e70b0a05b4275b6da) to destination (8971b6f545e1e1391a7cb7feb258d8c77a23f641).
+
+diff -r 8971b6f545e1e1391a7cb7feb258d8c77a23f641 -r de25fee7cf27d26f4e83740d6e0ba4688158dfb6 CHANGES.txt
+--- a/CHANGES.txt
++++ b/CHANGES.txt
+@@ -73,6 +73,9 @@
+     - Fixed PCHPDBFLAGS causing a deprecation warning on MSVC v8 and later when
+       using PCHs and PDBs together.
+ 
++  From Dean Glazeski:
++    - Added Visual Studio 2017 support (MSVC 15.0).
++
+ 
+ RELEASE 2.5.1 - Mon, 03 Nov 2016 13:37:42 -0400
+ 
+diff -r 8971b6f545e1e1391a7cb7feb258d8c77a23f641 -r de25fee7cf27d26f4e83740d6e0ba4688158dfb6 engine/SCons/Tool/MSCommon/arch.py
+--- a/engine/SCons/Tool/MSCommon/arch.py
++++ b/engine/SCons/Tool/MSCommon/arch.py
+@@ -57,6 +57,10 @@
+         ['ARM'],
+     ),
+ 
++    ArchitectureDefinition(
++        'arm64',
++        ['ARM64'],
++    )
+ ]
+ 
+ SupportedArchitectureMap = {}
+diff -r 8971b6f545e1e1391a7cb7feb258d8c77a23f641 -r de25fee7cf27d26f4e83740d6e0ba4688158dfb6 engine/SCons/Tool/MSCommon/vc.py
+--- a/engine/SCons/Tool/MSCommon/vc.py
++++ b/engine/SCons/Tool/MSCommon/vc.py
+@@ -83,6 +83,8 @@
+     "x86"       : "x86",
+     "x86_64"    : "amd64",
+     "x86_amd64" : "x86_amd64", # Cross compile to 64 bit from 32bits
++    "arm"       : "arm",
++    "arm64"     : "arm64",
+ }
+ 
+ # Given a (host, target) tuple, return the argument for the bat file. Both host
+@@ -91,9 +93,13 @@
+     ("x86", "x86"): "x86",
+     ("x86", "amd64"): "x86_amd64",
+     ("x86", "x86_amd64"): "x86_amd64",
++    ("x86", "arm"): "x86_arm",
++    ("x86", "arm64"): "x86_arm64",
+     ("amd64", "x86_amd64"): "x86_amd64", # This is present in (at least) VS2012 express
+     ("amd64", "amd64"): "amd64",
+     ("amd64", "x86"): "x86",
++    ("amd64", "arm"): "amd64_arm",
++    ("amd64", "arm64"): "amd64_arm64",
+     ("x86", "ia64"): "x86_ia64"
+ }
+ 
+@@ -135,9 +141,11 @@
+ 
+ # If you update this, update SupportedVSList in Tool/MSCommon/vs.py, and the
+ # MSVC_VERSION documentation in Tool/msvc.xml.
+-_VCVER = ["14.0", "14.0Exp", "12.0", "12.0Exp", "11.0", "11.0Exp", "10.0", "10.0Exp", "9.0", "9.0Exp","8.0", "8.0Exp","7.1", "7.0", "6.0"]
++_VCVER = ["15.0", "14.0", "14.0Exp", "12.0", "12.0Exp", "11.0", "11.0Exp", "10.0", "10.0Exp", "9.0", "9.0Exp","8.0", "8.0Exp","7.1", "7.0", "6.0"]
+ 
+ _VCVER_TO_PRODUCT_DIR = {
++    '15.0' : [
++        (SCons.Util.HKEY_LOCAL_MACHINE, r'Microsoft\VisualStudio\SxS\VS7\15.0')],
+     '14.0' : [
+         (SCons.Util.HKEY_LOCAL_MACHINE, r'Microsoft\VisualStudio\14.0\Setup\VC\ProductDir')],
+     '14.0Exp' : [
+@@ -276,14 +284,16 @@
+     # filter out e.g. "Exp" from the version name
+     msvc_ver_numeric = ''.join([x for x in msvc_version if x in string_digits + "."])
+     vernum = float(msvc_ver_numeric)
+-    if 7 <= vernum < 8:
++    if vernum < 7:
++        pdir = os.path.join(pdir, "Bin")
++        batfilename = os.path.join(pdir, "vcvars32.bat")
++    elif vernum < 8:
+         pdir = os.path.join(pdir, os.pardir, "Common7", "Tools")
+         batfilename = os.path.join(pdir, "vsvars32.bat")
+-    elif vernum < 7:
+-        pdir = os.path.join(pdir, "Bin")
+-        batfilename = os.path.join(pdir, "vcvars32.bat")
+-    else: # >= 8
++    elif vernum < 15:
+         batfilename = os.path.join(pdir, "vcvarsall.bat")
++    else:  # vernum >= 15
++        batfilename = os.path.join(pdir, "VC", "Auxiliary", "Build", "vcvarsall.bat")
+ 
+     if not os.path.exists(batfilename):
+         debug("Not found: %s" % batfilename)
+diff -r 8971b6f545e1e1391a7cb7feb258d8c77a23f641 -r de25fee7cf27d26f4e83740d6e0ba4688158dfb6 engine/SCons/Tool/MSCommon/vs.py
+--- a/engine/SCons/Tool/MSCommon/vs.py
++++ b/engine/SCons/Tool/MSCommon/vs.py
+@@ -199,6 +199,16 @@
+ # Tool/MSCommon/vc.py, and the MSVC_VERSION documentation in Tool/msvc.xml.
+ 
+ SupportedVSList = [
++    # Visual Studio 2017
++    VisualStudio('15.0',
++                 vc_version='15.0',
++                 sdk_version='10.0A',
++                 hkeys=[r'Microsoft\VisualStudio\SxS\VS7\15.0'],
++                 common_tools_var='VS150COMNTOOLS',  # This isn't in the environment until after vcvarsall.bat is ran
++                 executable_path=r'Common7\IDE\devenv.com',
++                 batch_file_path=r'VC\Auxiliary\Build\vcvarsall.bat',
++                 supported_arch=['x86', 'amd64', 'x86_arm', 'amd64_arm', 'x86_arm64', 'amd64_arm64'],
++    ),
+     # Visual Studio 2015
+     VisualStudio('14.0',
+                  vc_version='14.0',
+diff -r 8971b6f545e1e1391a7cb7feb258d8c77a23f641 -r de25fee7cf27d26f4e83740d6e0ba4688158dfb6 engine/SCons/Tool/msvc.xml
+--- a/engine/SCons/Tool/msvc.xml
++++ b/engine/SCons/Tool/msvc.xml
+@@ -352,6 +352,9 @@
+ 
+ <para>
+ Valid values for Windows are
++<literal>15.0</literal>
++<literal>14.0</literal>
++<literal>14.0Exp</literal>
+ <literal>12.0</literal>,
+ <literal>12.0Exp</literal>,
+ <literal>11.0</literal>,
+@@ -433,7 +436,11 @@
+ <literal>emt64</literal>,
+ <literal>x86_64</literal>
+ (for 64 bits);
+-and <literal>ia64</literal> (Itanium).
++<literal>ia64</literal>
++(for Itanium);
++<literal>arm</literal>,
++<literal>arm64</literal>
++(for ARM).
+ For example, if you want to compile 64-bit binaries, you would set
+ <literal>TARGET_ARCH='x86_64'</literal> in your SCons environment.
+ </para>
