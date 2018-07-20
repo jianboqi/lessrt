@@ -25,6 +25,7 @@
 
 //#define MTS_INFO
 
+
 MTS_NAMESPACE_BEGIN
 //const static int SPECTRUM_SAMPLES = FFBN("bands.cfg");
 const static int SPECTRUM_MIN_WAVELENGTH = FF(".less/range.cfg", 1);

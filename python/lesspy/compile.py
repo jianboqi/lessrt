@@ -9,24 +9,24 @@ for file in files:
     if os.path.isfile(file):
         os.remove(file)
 
-os.system(r"d:\Python36\python -m compileall -b .")
-# compileall.compile_dir("./")
+# os.system(r"d:\Python36\python -m compileall -b .")
+
 
 # copy to
-files = glob.iglob(os.path.join("./", "*.pyc"))
+files = glob.iglob(os.path.join("./", "*.py"))
 for file in files:
     if os.path.isfile(file):
-        shutil.copy2(file, "../../build/LessPyc")
+        shutil.copy2(file, "../../build/LessPy")
 
-if os.path.exists("../../build/LessPyc/bin"):
-    shutil.rmtree("../../build/LessPyc/bin")
-shutil.copytree("bin","../../build/LessPyc/bin")
-if os.path.exists("../../build/LessPyc/SpectralDB"):
-    shutil.rmtree("../../build/LessPyc/SpectralDB")
-shutil.copytree("SpectralDB","../../build/LessPyc/SpectralDB")
-if os.path.exists("../../build/LessPyc/Utility"):
-    shutil.rmtree("../../build/LessPyc/Utility")
-shutil.copytree("Utility","../../build/LessPyc/Utility")
-shutil.copy("const.conf","../../build/LessPyc")
-shutil.copy("default.conf","../../build/LessPyc")
-shutil.copy("batch.conf","../../build/LessPyc")
+if os.path.exists("../../build/LessPy/bin"):
+    shutil.rmtree("../../build/LessPy/bin")
+shutil.copytree("bin","../../build/LessPy/bin")
+if os.path.exists("../../build/LessPy/SpectralDB"):
+    shutil.rmtree("../../build/LessPy/SpectralDB")
+shutil.copytree("SpectralDB","../../build/LessPy/SpectralDB")
+if os.path.exists("../../build/LessPy/Utility"):
+    shutil.rmtree("../../build/LessPy/Utility")
+shutil.copytree("Utility","../../build/LessPy/Utility")
+shutil.copy("const.conf","../../build/LessPy")
+shutil.copy("default.conf","../../build/LessPy")
+shutil.copy("batch.conf","../../build/LessPy")

@@ -21,14 +21,14 @@
 		<mkdir dir="externalLibs" />
 	
 		<copy todir="externalLibs">
-			<fileset dir="E:\Coding\LessProject\java\lessgui\libs">
+			<fileset dir="${basedir}/../libs">
 				<filename name="**/*"/>
 			</fileset>
 		</copy>
 	
 		<mkdir dir="project" />
 		<copy todir="project">
-			<fileset dir="E:\Coding\LessProject\java\lessgui">
+			<fileset dir="${basedir}/../">
 				<include name="src/**" />
 			</fileset>
 		</copy>
@@ -92,13 +92,13 @@
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
 		<copy todir="dist/bin/python" >
-		    <fileset dir="d:\Python36" />
+		    <fileset dir="${basedir}/../../../Utility/Python36" />
 		</copy>
 		
 		<mkdir dir="dist/bin/scripts" />
 		<mkdir dir="dist/bin/scripts/Lesspy" />
 		<copy todir="dist/bin/scripts/Lesspy" >
-		    <fileset dir="E:\Coding\LessProject\build\LessPyc" />
+		    <fileset dir="${basedir}/../../../python/LessPy" />
 		</copy>
 		
 	

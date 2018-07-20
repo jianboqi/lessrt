@@ -56,11 +56,11 @@ public class PyLauncher extends Thread{
 		}
 		String pypath;
 		if(Const.LESS_MODE.equals("development")){
-			if(SystemUtils.IS_OS_LINUX){
-				pypath= Paths.get("/home/jimb/miniconda2/bin/","python").toString();
-			}else{
-				pypath= Paths.get("d:\\python36","python").toString();
-			}
+//			if(SystemUtils.IS_OS_LINUX){
+//				pypath= Paths.get("/home/jimb/miniconda2/bin/","python").toString();
+//			}else{
+			pypath= Paths.get(Paths.get(System.getProperty("user.dir")).getParent().getParent().toString(),"Utility","Python36","python").toString();
+//			}
 			
 		}else{
 			if(SystemUtils.IS_OS_LINUX){
@@ -94,7 +94,7 @@ public class PyLauncher extends Thread{
 		if(Const.LESS_MODE.equals("development")){
 			pypath= Paths.get(PyLauncher.getLessPyFolderPath(), scriptsName+".py").toString();
 		}else{
-			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",scriptsName+".pyc").toString();
+			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",scriptsName+".py").toString();
 		}
 		return pypath;
 	}
@@ -125,7 +125,7 @@ public class PyLauncher extends Thread{
 		if(Const.LESS_MODE.equals("development")){
 			pypath= Paths.get(PyLauncher.getLessPyFolderPath(), Const.LESS_LAUNCH_SCRIPT).toString();
 		}else{
-			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_LAUNCH_SCRIPT_PYC).toString();
+			pypath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_LAUNCH_SCRIPT).toString();
 		}
 		return pypath;
 	}
