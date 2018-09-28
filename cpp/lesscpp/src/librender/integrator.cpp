@@ -182,6 +182,7 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			rRec.newQuery(queryType, sensor->getMedium());
 			Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
 
+
 			if (needsApertureSample)
 				apertureSample = rRec.nextSample2D();
 			if (needsTimeSample)
@@ -196,7 +197,7 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			spec *= Li(sensorRay, rRec); 
 			//multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
 			multiImageblock->getMainImageBlock()->put_no_filter(Point2i(points[i]), spec, rRec.alpha);
-			if (m_hasFourComponentProduct) {
+			if (m_hasFourComponentProduct && rRec.extra > 0) {
 				fourcomps[rRec.extra - 1]++;
 			}
 			sampler->advance();

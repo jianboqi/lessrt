@@ -971,7 +971,7 @@ public class ProjectManager {
 		    		AnchorPane.setRightAnchor(mwController.numOfDirectionTextField, 20.0);
 		    		AnchorPane.setTopAnchor(mwController.numOfDirectionTextField, 80.0);
 		        	
-		        	mwController.virtualLabel = new Label("Virutal Directions [°]:");
+		        	mwController.virtualLabel = new Label("Virutal Directions [\u00B0]:");
 		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualLabel);
 		    		AnchorPane.setLeftAnchor(mwController.virtualLabel, 0.0);
 		    		AnchorPane.setTopAnchor(mwController.virtualLabel, 125.0);
@@ -982,7 +982,7 @@ public class ProjectManager {
 		    		AnchorPane.setRightAnchor(mwController.virtualDirTextField, 20.0);
 		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, 120.0);
 		    		
-		    		mwController.virtualDetectorLabel = new Label("Virutal Detectors [°]:");
+		    		mwController.virtualDetectorLabel = new Label("Virutal Detectors [\u00B0]:");
 		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualDetectorLabel);
 		    		AnchorPane.setLeftAnchor(mwController.virtualDetectorLabel, 0.0);
 		    		AnchorPane.setTopAnchor(mwController.virtualDetectorLabel, 170.0);

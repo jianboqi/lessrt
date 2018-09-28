@@ -330,6 +330,7 @@ void Scene::initialize() {
 		size_t primitiveCount = 0, effPrimitiveCount = 0;
 
 		for (size_t i=0; i<temp.size(); ++i) {
+			cout << "shape: " << temp[i].toString() << endl;
 			addShape(temp[i]);
 			primitiveCount += temp[i]->getPrimitiveCount();
 			effPrimitiveCount += temp[i]->getEffectivePrimitiveCount();
@@ -512,8 +513,9 @@ void Scene::addChild(const std::string &name, ConfigurableObject *child) {
 				Log(EError, "The scene may only contain one environment emitter");
 			m_environmentEmitter = emitter;
 		}
-
+		
 		m_emitters.push_back(emitter);
+		
 	} else if (cClass->derivesFrom(MTS_CLASS(Shape))) {
 		Shape *shape = static_cast<Shape *>(child);
 		if (shape->isSensor()) // determine sensors as early as possible
@@ -567,8 +569,12 @@ void Scene::addShape(Shape *shape) {
 	} else {
 		if (shape->isSensor() && !m_sensors.contains(shape->getSensor()))
 			m_sensors.push_back(shape->getSensor());
-		if (shape->isEmitter())
+		//cout << "shape..." << shape->toString() << endl;
+		//cout << "shape->isEmitter(): " << shape->isEmitter() << endl;
+		if (shape->isEmitter() && !shape->getEmitter()->isPlanckEmitter()) {
 			m_emitters.push_back(shape->getEmitter());
+		}
+			
 		if (shape->hasSubsurface()) {
 			m_netObjects.push_back(shape->getSubsurface());
 			m_ssIntegrators.push_back(shape->getSubsurface());

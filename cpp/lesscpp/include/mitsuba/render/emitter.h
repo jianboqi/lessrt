@@ -456,7 +456,9 @@ public:
 	 */
 	enum EEmitterFlags {
 		/// Is this an environment emitter, such as a HDRI map?
-		EEnvironmentEmitter = 0x010
+		EEnvironmentEmitter = 0x010,
+		/// Is this an planck emitter with thermal radiation
+		EPlanckEmitter = 0x020
 	};
 
 	// =================================================================
@@ -570,6 +572,9 @@ public:
 
 	/// Is this an environment emitter? (e.g. an HDRI environment map?)
 	inline bool isEnvironmentEmitter() const { return m_type & EEnvironmentEmitter; }
+
+	/// Is this an planck emitter?
+	inline bool isPlanckEmitter() const { return m_type & EPlanckEmitter; }
 
 	/**
 	 * \brief Return the radiant emittance from an environment emitter

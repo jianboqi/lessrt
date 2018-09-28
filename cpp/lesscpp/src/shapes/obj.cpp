@@ -221,7 +221,7 @@ public:
 		Transform objectToWorld = props.getTransform("toWorld", Transform());
 
 		/* Import materials from a MTL file, if any? */
-		bool loadMaterials = props.getBoolean("loadMaterials", true);
+		bool loadMaterials = props.getBoolean("loadMaterials", false);
 
 		/* Load the geometry */
 		Log(EInfo, "Loading geometry from \"%s\" ..", path.filename().string().c_str());

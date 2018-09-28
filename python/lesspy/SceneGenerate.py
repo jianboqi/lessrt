@@ -582,6 +582,7 @@ class SceneGenerate:
                     its = scene.rayIntersect(ray)
                     if not its is None:
                         translatenode.setAttribute("y", str(its.p[1]+z))
+                        # translatenode.setAttribute("y", str(z))
                     else:
                         # log("warning: precise height not found.")
                         if cfg["scene"]["terrain"]["terrain_type"] == "RASTER":

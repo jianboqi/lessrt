@@ -147,26 +147,29 @@ class SceneParser:
             boolNode.setAttribute("value", "true" if cfg["sensor"]["PhotonTracing"]["UpDownProduct"] else "false")
 
             # virtual directions virtualDirections
-            virtualDirectionStr = cfg["sensor"]["PhotonTracing"]["virtualDirections"]
-            if virtualDirectionStr != "":
-                strNode = doc.createElement("string")
-                integratorNode.appendChild(strNode)
-                strNode.setAttribute("name","virtualDirections")
-                strNode.setAttribute("value",virtualDirectionStr)
+            if "virtualDirections" in cfg["sensor"]["PhotonTracing"]:
+                virtualDirectionStr = cfg["sensor"]["PhotonTracing"]["virtualDirections"]
+                if virtualDirectionStr != "":
+                    strNode = doc.createElement("string")
+                    integratorNode.appendChild(strNode)
+                    strNode.setAttribute("name","virtualDirections")
+                    strNode.setAttribute("value",virtualDirectionStr)
 
             # virtual detectors
-            virtualDetectorStr = cfg["sensor"]["PhotonTracing"]["virtualDetectorDirections"]
-            if virtualDetectorStr != "":
-                strNode = doc.createElement("string")
-                integratorNode.appendChild(strNode)
-                strNode.setAttribute("name", "virtualDetectorDirections")
-                strNode.setAttribute("value", virtualDetectorStr)
+            if "virtualDetectorDirections" in  cfg["sensor"]["PhotonTracing"]:
+                virtualDetectorStr = cfg["sensor"]["PhotonTracing"]["virtualDetectorDirections"]
+                if virtualDetectorStr != "":
+                    strNode = doc.createElement("string")
+                    integratorNode.appendChild(strNode)
+                    strNode.setAttribute("name", "virtualDetectorDirections")
+                    strNode.setAttribute("value", virtualDetectorStr)
 
             # Number of directions for solid patches
-            intNode = doc.createElement("integer")
-            integratorNode.appendChild(intNode)
-            intNode.setAttribute("name","NumberOfDirections")
-            intNode.setAttribute("value",str(cfg["sensor"]["PhotonTracing"]["NumberOfDirections"]))
+            if "NumberOfDirections" in cfg["sensor"]["PhotonTracing"]:
+                intNode = doc.createElement("integer")
+                integratorNode.appendChild(intNode)
+                intNode.setAttribute("name","NumberOfDirections")
+                intNode.setAttribute("value",str(cfg["sensor"]["PhotonTracing"]["NumberOfDirections"]))
 
         else:
             integratorNode.setAttribute("type", "path")

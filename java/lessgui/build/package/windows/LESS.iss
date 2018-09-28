@@ -3,8 +3,8 @@
 [Setup]
 AppId={{fxApplication}}
 AppName=LESS
-AppVersion=1.8       
-AppVerName=LESS 1.8
+AppVersion=1.8.1       
+AppVerName=LESS 1.8.1
 AppPublisher=Jianbo Qi
 AppComments=LessGUI
 AppCopyright=Copyright (C) 2018

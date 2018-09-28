@@ -185,8 +185,9 @@ void GeometryConverter::convertOBJ(const fs::path &inputFile,
 			ref<FileResolver> fRes = Thread::getThread()->getFileResolver()->clone();
 			fRes->prependPath(fs::absolute(fRes->resolve(inputFile)).parent_path());
 			fs::path fullMtlName = fRes->resolve(mtlName);
-			if (fs::exists(fullMtlName))
+			if (fs::exists(fullMtlName)) {
 				parseMaterials(this, os, textureDirectory, fullMtlName, mtlList);
+			}	
 			else
 				SLog(EWarn, "Could not find referenced material library '%s'", mtlName.c_str());
 		} else {

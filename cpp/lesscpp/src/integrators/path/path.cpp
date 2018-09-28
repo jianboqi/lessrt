@@ -126,6 +126,8 @@ public:
 		m_sceneZSize = props.getFloat("subSceneZSize", 100.0);
 
 		m_isThermal = props.getBoolean("isThermal", false);
+
+		m_isOnlyMultiScattering = props.getBoolean("isOnlyMultiScattering", false);
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -444,7 +446,13 @@ public:
 							? bsdf->pdf(bRec) : 0;
 						/* Weight using the power heuristic */
 						Float weight = miWeight(dRec.pdf, bsdfPdf);
-						Li += throughput * value * bsdfVal * weight;
+						if (m_isOnlyMultiScattering && rRec.depth == 1) {
+
+						}
+						else {
+							Li += throughput * value * bsdfVal * weight;
+						}
+						
 					}
 				}
 			}
@@ -500,7 +508,6 @@ public:
 			} else {
 				/* Intersected nothing -- perhaps there is an environment map? */
 				const Emitter *env = scene->getEnvironmentEmitter();
-
 				if (env) {
 					if (m_hideEmitters && !scattered)
 						break;
@@ -595,6 +602,8 @@ protected:
 	AABB m_virtualBounds;
 
 	bool m_isThermal;
+
+	bool m_isOnlyMultiScattering; //Only records the multiple scattering energy for a image
 };
 
 MTS_IMPLEMENT_CLASS_S(MIPathTracer, false, MonteCarloIntegrator)

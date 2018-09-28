@@ -13,7 +13,7 @@ MTS_NAMESPACE_BEGIN
 class PlanckAreaLight : public Emitter {
 public:
 	PlanckAreaLight(const Properties &props) : Emitter(props) {
-		m_type |= EOnSurface;
+		m_type |= EOnSurface | EPlanckEmitter;
 
 		if (props.hasProperty("toWorld"))
 			Log(EError, "Found a 'toWorld' transformation -- this is not "
