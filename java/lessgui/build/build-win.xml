@@ -92,7 +92,7 @@
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
 		<copy todir="dist/bin/python" >
-		    <fileset dir="${basedir}/../../../Utility/Python36" />
+		    <fileset dir="${basedir}/../../../Utility/Python36"/>
 		</copy>
 		
 		<mkdir dir="dist/bin/scripts" />
