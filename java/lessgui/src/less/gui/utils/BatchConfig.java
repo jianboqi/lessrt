@@ -24,7 +24,7 @@ public JSONObject data;
 			jsonPath= Paths.get(PyLauncher.getLessPyFolderPath(),Const.LESS_BATCH_JSON_NAME).toString();
 		}else{
 			jsonPath = Paths.get(System.getProperty("user.dir"),"bin","scripts","Lesspy",Const.LESS_BATCH_JSON_NAME).toString();
-		}	
+		}
 		JSONTokener jsonTokener = null;
 		try {
 			jsonTokener = new JSONTokener(new FileReader(new File(jsonPath)));

@@ -451,14 +451,17 @@ public:
 
 		Spectrum result;
 		if (m_mipmap3.get()) {
-			Spectrum value;
-			if (m_mipmap3->getFilterType() != ENearest)
-				value = m_mipmap3->evalBilinear(0, uv);
-			else
+			//Spectrum value;
+			if (m_mipmap3->getFilterType() != ENearest) {
+				result = m_mipmap3->evalBilinear(0, uv);
+			}
+			else {
 				result = m_mipmap3->evalBox(0, uv);
+			}
+				
 			//result.fromLinearRGB(value[0], value[1], value[2]);
 		} else {
-			Spectrum value;
+			Spectrum value;			
 			if (m_mipmap1->getFilterType() != ENearest)
 				value = m_mipmap1->evalBilinear(0, uv);
 			else
@@ -466,7 +469,6 @@ public:
 			result = Spectrum(value[0]);
 		}
 		stats::filteredLookups.incrementBase();
-
 		return result;
 	}
 

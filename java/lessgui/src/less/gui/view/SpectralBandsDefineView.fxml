@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.SpectralBandsDefineController">
+<BorderPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.SpectralBandsDefineController">
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
@@ -18,7 +18,7 @@
             <Label layoutX="28.0" layoutY="130.0" text="BandNum:" />
             <TextField fx:id="BandNumTextField" layoutX="133.0" layoutY="124.0" prefHeight="35.0" prefWidth="181.0" text="2" />
             <Label layoutX="28.0" layoutY="180.0" text="BandWidth:" />
-            <TextField fx:id="BandWidthTextField" layoutX="133.0" layoutY="174.0" prefHeight="35.0" prefWidth="181.0" text="10" />
+            <TextField fx:id="BandWidthTextField" layoutX="133.0" layoutY="174.0" prefHeight="35.0" prefWidth="181.0" text="2" />
             <Label layoutX="316.0" layoutY="39.0" text="nm" />
             <Label layoutX="316.0" layoutY="82.0" text="nm" />
             <Label layoutX="316.0" layoutY="130.0" text="nm" />

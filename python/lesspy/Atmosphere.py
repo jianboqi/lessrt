@@ -104,7 +104,81 @@ def weights_for_phase_function(ext_coeff_mol, single_albedo_mol, ext_coeff_aeros
             weights[row][1] = (ext_aerosol * albedo_aerosl) / (ext_mol * albedo_mol + ext_aerosol * albedo_aerosl)
     return weights
 
+# This if for two step mode, i.e., calculate atmosphere standalone
+def generateAtsXmlNFTwoStepMode(dart_maket_path, output_xml_path):
+    log("INFO: Generating atmosphere.")
+    layer_depths, g_params, ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol \
+        = readParametersFromDartMaketFile(dart_maket_path)
 
+    total_ext_coeff = ext_coeff_mol + ext_coeff_aerosol
+    total_albedo = weighted_albedo(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol)
+    weightsForPhase = weights_for_phase_function(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol,
+                                                 single_albedo_aerosol)
+
+    f = codecs.open(output_xml_path, "w", "utf-8-sig")
+    doc = minidom.Document()
+    root = doc.createElement("scene")
+    doc.appendChild(root)
+    root.setAttribute("version", "0.5.0")
+
+    vertical_offset = -0.00001
+
+    mediumNode = doc.createElement("medium")
+    root.appendChild(mediumNode)
+    mediumNode.setAttribute("id", "ats_medium")
+    mediumNode.setAttribute("name", "interior")
+    mediumNode.setAttribute("type", "planeparallel")
+    floatNode = doc.createElement("float")
+    mediumNode.appendChild(floatNode)
+    floatNode.setAttribute("name", "startAltitude")
+    floatNode.setAttribute("value", str(vertical_offset))
+    strNode = doc.createElement("string")
+    mediumNode.appendChild(strNode)
+    strNode.setAttribute("name", "layerThickness")
+    strNode.setAttribute("value", ",".join([str(t) for t in layer_depths]))
+    layer_index = 1
+    for i in range(len(layer_depths)):
+        if any(total_ext_coeff[i] > 0):
+            specNode = doc.createElement("spectrum")
+            mediumNode.appendChild(specNode)
+            specNode.setAttribute("name", "singmaT_layer" + str(layer_index))
+            specNode.setAttribute("value", ",".join([str(t) for t in total_ext_coeff[i]]))
+            specNode = doc.createElement("spectrum")
+            mediumNode.appendChild(specNode)
+            specNode.setAttribute("name", "albedo_layer" + str(layer_index))
+            specNode.setAttribute("value", ",".join([str(t) for t in total_albedo[i]]))
+            strNode = doc.createElement("string")
+            mediumNode.appendChild(strNode)
+            strNode.setAttribute("name", "phasefunc_weights_layer" + str(layer_index))
+            strNode.setAttribute("value", ",".join([str(t) for t in weightsForPhase[i]]))
+            floatNode = doc.createElement("float")
+            mediumNode.appendChild(floatNode)
+            floatNode.setAttribute("name", "phasefunc_g_value_layer" + str(layer_index))
+            floatNode.setAttribute("value", str(g_params.mean()))
+            layer_index += 1
+
+    # ingegrator Node
+    integratorNode = doc.createElement("integrator")
+    root.appendChild(integratorNode)
+    integratorNode.setAttribute("type","volpath_simple")
+    integerNode = doc.createElement("integer")
+    integratorNode.appendChild(integerNode)
+    integerNode.setAttribute("name","maxDepth")
+    integerNode.setAttribute("value", "-1")
+
+    # sensor
+    sensorNode = doc.createElement("sensor")
+    root.appendChild(sensorNode)
+    sensorNode.setAttribute("type","spherical")
+
+    xm = doc.toprettyxml()
+    # xm = xm.replace('<?xml version="1.0" ?>', '')
+    f.write(xm)
+    f.close()
+    log("INFO: Atmosphere generated.")
+
+
+# This is for one-step mode, i.e., sensor are involved in the medium
 def generateAtsXmlNF(dart_maket_path, output_xml_path, width, height):
     log("INFO: Generating atmosphere.")
     layer_depths, g_params, ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol \

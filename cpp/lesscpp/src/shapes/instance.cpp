@@ -99,6 +99,9 @@ void Instance::addChild(const std::string &name, ConfigurableObject *child) {
 	const Class *cClass = child->getClass();
 	if (cClass->getName() == "ShapeGroup") {
 		m_shapeGroup = static_cast<ShapeGroup *>(child);
+		if (m_shapeGroup->isEmitter()) {
+			m_emitter = m_shapeGroup->getEmitter();
+		}
 	} else {
 		Shape::addChild(name, child);
 	}

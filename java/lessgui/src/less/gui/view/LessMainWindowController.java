@@ -113,7 +113,14 @@ public class LessMainWindowController {
 	@FXML
 	public VBox terrainVbox;
 	@FXML
-	private Button selectTerrBtn;
+	public Button selectTerrBtn;
+	
+	public AnchorPane terrainPane;
+	
+	public Button selectLandAlbedoBtn;
+	
+	public TextField landAlbedoTextField;
+	public Label landAlbedoLabel;
 	@FXML
 	public ComboBox<String> comboBoxDEMType;
 	@FXML
@@ -179,6 +186,8 @@ public class LessMainWindowController {
 	private SplitMenuButton posRandom;
 	@FXML
 	private Button DeleteAllPosBtn;
+	@FXML
+	public CheckBox objFileCacheChecbox;
 	
 	/**
 	 * object list
@@ -247,6 +256,11 @@ public class LessMainWindowController {
 	public Label virtualDetectorLabel;
 	public TextField virtualDetectorTextField;
 	public CheckBox productUpDownRadiationCheckbox;// for photon tracing
+	
+	public CheckBox productfPARChecbox;
+	public Label fPARLayerLabel;
+	public TextField fPARLayerTextEdit;
+	
 	public TextField cfFovTextField;// for fisheye parameters
 	public ComboBox<String> combobox;
 	@FXML
@@ -273,6 +287,8 @@ public class LessMainWindowController {
 	
 	
 	//observation and illumination
+	@FXML
+	public AnchorPane illuAtmPane;
 	@FXML
 	public VBox obsVbox;
 	@FXML
@@ -442,11 +458,12 @@ public class LessMainWindowController {
 		drawtoolBarHelper.initDrawToolBar();
 		
 		FieldUtils.fixBlurryText(this.sensorAnchorPane);
+		FieldUtils.fixBlurryText(this.illuAtmPane);
+		FieldUtils.fixBlurryText(this.terrainPane);
 		
 		hidenotImplemented();
 		
 	}
-
 	
 	private void hidenotImplemented(){
 		if(Const.LESS_HIDE_NOT_IMPLEMENTED){
@@ -767,6 +784,11 @@ public class LessMainWindowController {
 					skyPane.getChildren().add(atsButton);
 					AnchorPane.setLeftAnchor(atsButton, 150.0);
 					AnchorPane.setTopAnchor(atsButton, 80.0);
+					atsButton.setOnAction(new EventHandler<ActionEvent>() {
+					    @Override public void handle(ActionEvent e) {
+					    	projManager.OpenAtmosphereEditor();
+					    }
+					});				
 				}
 		    } 
 		});
@@ -940,7 +962,7 @@ public class LessMainWindowController {
 	}
 	
 	/**
-	 * Optical 
+	 * Optical from manual
 	 */
 	@FXML
 	private void addOptical(){
@@ -956,7 +978,7 @@ public class LessMainWindowController {
                 opticalNameField.getText(),
                 opticalRefFrantField.getText(),
                 opticalRefBackField.getText(),
-                opticalTransField.getText()));
+                opticalTransField.getText(), Const.LESS_OP_TYPE_MANUAL));
 		terrainOpticalData.add(opticalNameField.getText());
 	}
 	@FXML
@@ -973,7 +995,7 @@ public class LessMainWindowController {
 					newName,
 					facetOptical.getReflectanceFront(),
 	                facetOptical.getReflectanceBack(),
-	                facetOptical.getTransmittance()));
+	                facetOptical.getTransmittance(),Const.LESS_OP_TYPE_MANUAL));
 			terrainOpticalData.add(newName);
 		}
 		
@@ -1039,6 +1061,8 @@ public class LessMainWindowController {
 	private void selectTerrainFile(){
 		this.projManager.selectTerrainFile();
 	}
+	
+	
 	// import land cover map
 	@FXML
 	private void handleLandcoverCheckbox(){
@@ -1113,11 +1137,21 @@ public class LessMainWindowController {
 			dbController.initView();
 			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
 			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+			subStage.initOwner(this.mainApp.getPrimaryStage());
 			subStage.show();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Open Prospect-D dialog
+	 */
+	
+	@FXML
+	private void OpenProspectD() {
+		this.projManager.OpenProspectD();
 	}
 	
 	@FXML
@@ -1131,7 +1165,8 @@ public class LessMainWindowController {
 	@FXML
 	private void RefreshDB(){
 		String waveLength_and_bandwidth = this.sensorBandsField.getText().trim();
-		dbReader.refreshOpticalDB(opticalData, waveLength_and_bandwidth);
+		
+		dbReader.refreshOpticalDB(this, opticalData, waveLength_and_bandwidth);
 		
 	}
 	

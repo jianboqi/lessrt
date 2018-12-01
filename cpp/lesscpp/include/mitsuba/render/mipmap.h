@@ -573,7 +573,6 @@ public:
 			/* The lookup is larger than the entire texture */
 			return evalBox(m_levels-1, uv);
 		}
-
 		/* Convert to fractional pixel coordinates on the specified level */
 		const Vector2i &size = m_pyramid[level].getSize();
 		Float u = uv.x * size.x - 0.5f, v = uv.y * size.y - 0.5f;
@@ -581,7 +580,6 @@ public:
 		int xPos = math::floorToInt(u), yPos = math::floorToInt(v);
 		Float dx1 = u - xPos, dx2 = 1.0f - dx1,
 		      dy1 = v - yPos, dy2 = 1.0f - dy1;
-
 		return evalTexel(level, xPos, yPos) * dx2 * dy2
 		     + evalTexel(level, xPos, yPos + 1) * dx2 * dy1
 		     + evalTexel(level, xPos + 1, yPos) * dx1 * dy2

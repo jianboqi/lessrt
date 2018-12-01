@@ -6,6 +6,7 @@ from session import *
 import math
 from RasterHelper import *
 from Atmosphere import *
+import Simulation
 from create_envmap import create_isotropic_diffuse_sky
 
 class SceneParser:
@@ -50,43 +51,45 @@ class SceneParser:
 
         # read object bounding box
         objBoundboxFilePath = os.path.join(session.get_input_dir(),obj_bounding_box_file)
-        f = open(objBoundboxFilePath)
-        objBoundDics = dict()
-        for line in f:
-            arr = line.split(":")
-            objName = arr[0]
-            arr = list(map(lambda x:float(x), arr[1].split()))
-            aabb = AABB()
-            aabb.reset()
-            for i in range(0, len(arr), 6):
-                minx, miny,minz,maxx,maxy,maxz = arr[i:i+6]
-                subAABB = AABB(Point(minx, miny,minz), Point(maxx,maxy,maxz))
-                aabb.expandBy(subAABB)
-            objBoundDics[objName] = aabb
-        f.close()
+        if os.path.exists(objBoundboxFilePath):
+            f = open(objBoundboxFilePath)
+            objBoundDics = dict()
+            for line in f:
+                arr = line.split(":")
+                objName = arr[0]
+                arr = list(map(lambda x:float(x), arr[1].split()))
+                aabb = AABB()
+                aabb.reset()
+                for i in range(0, len(arr), 6):
+                    minx, miny,minz,maxx,maxy,maxz = arr[i:i+6]
+                    subAABB = AABB(Point(minx, miny,minz), Point(maxx,maxy,maxz))
+                    aabb.expandBy(subAABB)
+                objBoundDics[objName] = aabb
+            f.close()
 
         totalAABB = self.getTerrainBoundingAABB(main_scene_xml_file_prifix)
 
         # get bounding box of the whole scene
         instanceFilePth = os.path.join(session.get_input_dir(), instanceFileName)
-        f = open(instanceFilePth)
-        for line in f:
-            arr = line.split()
-            objName = arr[0]
+        if os.path.exists(instanceFilePth):
+            f = open(instanceFilePth)
+            for line in f:
+                arr = line.split()
+                objName = arr[0]
 
-            x = float(arr[1])
-            y = float(arr[2])
-            z = float(arr[3])
-            treeX = 0.5 * xScale - x
-            treeZ = 0.5 * zScale - y
+                x = float(arr[1])
+                y = float(arr[2])
+                z = float(arr[3])
+                treeX = 0.5 * xScale - x
+                treeZ = 0.5 * zScale - y
 
-            insPoint = [treeX, z, treeZ]
-            aabb = AABB(objBoundDics[objName])
-            aabb.min = Point(insPoint[0]+aabb.min[0],insPoint[1]+aabb.min[1],insPoint[2]+aabb.min[2])
-            aabb.max = Point(insPoint[0] + aabb.max[0], insPoint[1] + aabb.max[1], insPoint[2] + aabb.max[2])
-            totalAABB.expandBy(aabb)
+                insPoint = [treeX, z, treeZ]
+                aabb = AABB(objBoundDics[objName])
+                aabb.min = Point(insPoint[0]+aabb.min[0],insPoint[1]+aabb.min[1],insPoint[2]+aabb.min[2])
+                aabb.max = Point(insPoint[0] + aabb.max[0], insPoint[1] + aabb.max[1], insPoint[2] + aabb.max[2])
+                totalAABB.expandBy(aabb)
 
-        f.close()
+            f.close()
         bSphere = totalAABB.getBSphere()
         radius = bSphere.radius
         targetx, targety, targetz = bSphere.center[0], bSphere.center[1], bSphere.center[2]
@@ -146,6 +149,11 @@ class SceneParser:
             boolNode.setAttribute("name", "UpDownProduct")
             boolNode.setAttribute("value", "true" if cfg["sensor"]["PhotonTracing"]["UpDownProduct"] else "false")
 
+            boolNode = doc.createElement("boolean")
+            integratorNode.appendChild(boolNode)
+            boolNode.setAttribute("name", "fPARProduct")
+            boolNode.setAttribute("value", "true" if cfg["sensor"]["PhotonTracing"]["fPARProduct"] else "false")
+
             # virtual directions virtualDirections
             if "virtualDirections" in cfg["sensor"]["PhotonTracing"]:
                 virtualDirectionStr = cfg["sensor"]["PhotonTracing"]["virtualDirections"]
@@ -170,6 +178,13 @@ class SceneParser:
                 integratorNode.appendChild(intNode)
                 intNode.setAttribute("name","NumberOfDirections")
                 intNode.setAttribute("value",str(cfg["sensor"]["PhotonTracing"]["NumberOfDirections"]))
+
+            # layer definition
+            if "LayerDefinition" in cfg["sensor"]["PhotonTracing"]:
+                strNode = doc.createElement("string")
+                integratorNode.appendChild(strNode)
+                strNode.setAttribute("name", "LayerDefinition")
+                strNode.setAttribute("value", cfg["sensor"]["PhotonTracing"]["LayerDefinition"])
 
         else:
             integratorNode.setAttribute("type", "path")
@@ -238,12 +253,19 @@ class SceneParser:
             booleanNode.setAttribute("value","true" if cfg["sensor"]["hasFourComponentProduct"] else "false")
 
         if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
-            # generate atmosphere xml file
-            generateAtsXmlNF(r"D:\DART\user_data\simulations\Hemisphere\skyView\output\atmosphereMaket.txt",
-                             os.path.join(session.get_scenefile_path(), atmosphere_scene_file), 50000, 50000)
-            includenode = doc.createElement("include")
-            rootNode.appendChild(includenode)
-            includenode.setAttribute("filename", atmosphere_scene_file)
+            if cfg["illumination"]["atmosphere"]["AtsParams"]["atsCalMode"] == "One-Step Mode":
+                # generate atmosphere xml file
+                generateAtsXmlNF(r"D:\DART\user_data\simulations\Hemisphere\skyView\output\atmosphereMaket.txt",
+                                 os.path.join(session.get_scenefile_path(), atmosphere_scene_file), 50000, 50000)
+                includenode = doc.createElement("include")
+                rootNode.appendChild(includenode)
+                includenode.setAttribute("filename", atmosphere_scene_file)
+            else: # Two-step Mode
+                generateAtsXmlNFTwoStepMode(r"D:\DART\user_data\simulations\Hemisphere\skyView\output\atmosphereMaket.txt",
+                                 os.path.join(session.get_scenefile_path(), atmosphere_scene_file))
+                # run simulation
+                Simulation.do_ats_simulation(cfg["Advanced"]["number_of_cores"])
+
         else:
             if os.path.exists(os.path.join(session.get_scenefile_path(), atmosphere_scene_file)):
                 os.remove(os.path.join(session.get_scenefile_path(), atmosphere_scene_file))
@@ -480,18 +502,17 @@ class SceneParser:
             # convert from samples per square meter to per pixels
             # that is to determine the pixels size.
             # total samples
-            total_samples = cfg["sensor"]["orthographic"]["sample_per_square_meter"] * \
-            cfg["sensor"]["orthographic"]["sub_region_width"] * cfg["sensor"]["orthographic"]["sub_region_height"]
-            # per pixel samples
-            per_pixel = int(math.ceil(total_samples / float(cfg["sensor"]["image_width"] * cfg["sensor"]["image_height"])))
-            i_node.setAttribute("value", str(per_pixel))
+            # total_samples = cfg["sensor"]["orthographic"]["sample_per_square_meter"] * \
+            # cfg["sensor"]["orthographic"]["sub_region_width"] * cfg["sensor"]["orthographic"]["sub_region_height"]
+            # # per pixel samples
+            # per_pixel = int(math.ceil(total_samples / float(cfg["sensor"]["image_width"] * cfg["sensor"]["image_height"])))
+            # i_node.setAttribute("value", str(per_pixel))
+            i_node.setAttribute("value", str(cfg["sensor"]["orthographic"]["sample_per_square_meter"]))
 
         if cfg["sensor"]["sensor_type"] == "perspective":
-            #首先计算perspective覆盖的范围
             i_node.setAttribute("value", str(cfg["sensor"]["perspective"]["sample_per_square_meter"]))
 
         if cfg["sensor"]["sensor_type"] == "CircularFisheye":
-            #首先计算perspective覆盖的范围
             i_node.setAttribute("value", str(cfg["sensor"]["CircularFisheye"]["sample_per_square_meter"]))
 
 
@@ -509,11 +530,18 @@ class SceneParser:
             float_node.setAttribute("value", "2")
             rfilterNode = doc.createElement("rfilter")
             film_node.appendChild(rfilterNode)
-            rfilterNode.setAttribute("type", "lanczos")
-            integerNode = doc.createElement("integer")
-            rfilterNode.appendChild(integerNode)
-            integerNode.setAttribute("name", "lobes")
-            integerNode.setAttribute("value", "2")
+            rfilterNode.setAttribute("type", "box")
+            floatNode = doc.createElement("float")
+            rfilterNode.appendChild(floatNode)
+            floatNode.setAttribute("name", "radius")
+            floatNode.setAttribute("value", "0.4")
+            # rfilterNode = doc.createElement("rfilter")
+            # film_node.appendChild(rfilterNode)
+            # rfilterNode.setAttribute("type", "lanczos")
+            # integerNode = doc.createElement("integer")
+            # rfilterNode.appendChild(integerNode)
+            # integerNode.setAttribute("name", "lobes")
+            # integerNode.setAttribute("value", "2")
         if cfg["sensor"]["film_type"] == "spectrum":
             film_node.setAttribute("type", "mfilm")
             strNode = doc.createElement("string")
@@ -544,9 +572,11 @@ class SceneParser:
         i_node.setAttribute("value", str(cfg["sensor"]["image_height"]))
 
         if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
-            refNode = doc.createElement("ref")
-            sensor_node.appendChild(refNode)
-            refNode.setAttribute("id","ats_medium")
+            # Only two-step calculation mode needs this
+            if cfg["illumination"]["atmosphere"]["AtsParams"]["atsCalMode"] == "Two-Step Mode":
+                refNode = doc.createElement("ref")
+                sensor_node.appendChild(refNode)
+                refNode.setAttribute("id","ats_medium")
 
         #emitters
         #direct

@@ -112,10 +112,18 @@ class SceneGenerate:
             # raster_file = combine_file_path(session.get_input_dir(), cfg["scene"]["terrain"]["terr_file"])
             # meshfile = combine_file_path(session.get_scenefile_path(), cfg["scene"]["terrain"]["terr_file"]+".obj")
             # RasterHelper.Raster2Ojb(raster_file, meshfile)
+
+            distObjFile = os.path.join(session.get_scenefile_path(), cfg["scene"]["terrain"]["terr_file"])
+            srcObjFile = os.path.join(session.get_input_dir(), cfg["scene"]["terrain"]["terr_file"])
+            if os.path.exists(distObjFile):
+                os.remove(distObjFile)
+            from shutil import copyfile
+            copyfile(srcObjFile, distObjFile)
+
             facenormalNode = doc.createElement("boolean")
             demNode.appendChild(facenormalNode)
-            facenormalNode.setAttribute("name","faceNormals")
-            facenormalNode.setAttribute("value","true")
+            facenormalNode.setAttribute("name", "faceNormals")
+            facenormalNode.setAttribute("value", "true")
 
         if cfg["scene"]["terrain"]["terrain_type"] == "PLANE":
 
@@ -135,7 +143,7 @@ class SceneGenerate:
         demNode.appendChild(bsdf)
         if cfg["scene"]["terrain"]["terrBRDFType"] == "Soilspect":
             bsdf.setAttribute("type","soilspect")
-        elif cfg["scene"]["terrain"]["terrBRDFType"] == "Lambertian":
+        else:
             bsdf.setAttribute("type", "diffuse")
 
         # for thermal
@@ -194,7 +202,7 @@ class SceneGenerate:
                 reflectancenode.setAttribute("name", "reflectance")
                 factor = cfg["scene"]["terrain"]["optical_scale"]
                 defined_optical_name = cfg["scene"]["terrain"]["optical"]
-                optical_name_or_list = cfg["scene"]["optical_properties"][defined_optical_name]
+                optical_name_or_list = cfg["scene"]["optical_properties"][defined_optical_name]["value"]
                 if optical_name_or_list == "":
                     log("No optical property of ground detected.")
                     sys.exit(0)
@@ -228,11 +236,39 @@ class SceneGenerate:
                 bsdf.appendChild(spec)
                 spec.setAttribute("name", "h2")
                 spec.setAttribute("value", cfg["scene"]["terrain"]["soilSpectParams"]["h2"])
+            elif cfg["scene"]["terrain"]["terrBRDFType"] == "Land Albedo Map":
+                textureNode = doc.createElement("texture")
+                bsdf.appendChild(textureNode)
+                textureNode.setAttribute("type", "bitmap")
+                textureNode.setAttribute("name", "reflectance")
+                filterTypeNode = doc.createElement("string")
+                textureNode.appendChild(filterTypeNode)
+                filterTypeNode.setAttribute("name", "filterType")
+                filterTypeNode.setAttribute("value", "nearest")
+
+                strNode = doc.createElement("string")
+                textureNode.appendChild(strNode)
+                strNode.setAttribute("name", "filename")
+                strNode.setAttribute("value", "landalbedo.exr")
+                boolNode = doc.createElement("boolean")
+                textureNode.appendChild(boolNode)
+                boolNode.setAttribute("name", "cache")
+                boolNode.setAttribute("value", "false")
+                from create_envmap import createLandAlbedoMap
+                log("INFO: Creating land albedo map...")
+                createLandAlbedoMap(len(cfg["sensor"]["bands"].split(",")),
+                                    os.path.join(session.get_input_dir(), cfg["scene"]["terrain"]["landalbedo"]),
+                                    os.path.join(session.get_scenefile_path(), "landalbedo.exr"))
         else:
             textureNode = doc.createElement("texture")
             bsdf.appendChild(textureNode)
             textureNode.setAttribute("type", "bitmap")
             textureNode.setAttribute("name","reflectance")
+            filterTypeNode = doc.createElement("string")
+            textureNode.appendChild(filterTypeNode)
+            filterTypeNode.setAttribute("name","filterType")
+            filterTypeNode.setAttribute("value","nearest")
+
             strNode = doc.createElement("string")
             textureNode.appendChild(strNode)
             strNode.setAttribute("name","filename")
@@ -243,10 +279,10 @@ class SceneGenerate:
             boolNode.setAttribute("value","false")
             from create_envmap import createLandcoverMap, createLandcoverMap_trans
             log("INFO: Creating land cover map...")
-            createLandcoverMap(os.path.join(session.get_input_dir(),imported_landcover_raster_name),
+            createLandcoverMap(os.path.join(session.get_input_dir(), imported_landcover_raster_name),
                                os.path.join(session.get_scenefile_path(), "landcover.exr"),
                                os.path.join(session.get_input_dir(), "landcover.txt"),
-                               cfg["scene"]["optical_properties"],
+                               cfg["scene"]["optical_properties"]["value"],
                                len(cfg["sensor"]["bands"].split(",")))
             # createLandcoverMap_trans(os.path.join(session.get_input_dir(), imported_landcover_raster_name),
             #                    os.path.join(session.get_scenefile_path(), "landtrans.exr"),
@@ -331,7 +367,7 @@ class SceneGenerate:
 
         opticalSet = list(opticalSet)
         for i in range(0, len(opticalSet)):
-            defined_op = cfg["scene"]["optical_properties"][opticalSet[i]]
+            defined_op = cfg["scene"]["optical_properties"][opticalSet[i]]["value"]
             arr = defined_op.split(";")
             if len(arr) != 3:
                 log("Error while setting optical properties.")
@@ -400,6 +436,7 @@ class SceneGenerate:
                 subshapnode = objdoc.createElement("shape")
                 shapenode.appendChild(subshapnode)
                 subshapnode.setAttribute("type", "serialized")
+                subshapnode.setAttribute("id", os.path.splitext(compnentName)[0])
                 strnode = objdoc.createElement("string")
                 subshapnode.appendChild(strnode)
                 strnode.setAttribute("name", "filename")
@@ -408,7 +445,7 @@ class SceneGenerate:
                 # the string reading from object.txt, which is produced by Java, is in gbk encoding
                 # objfile = os.path.join(session.get_input_dir(), compnentName.encode("gbk").decode("utf-8"))
                 objfile = os.path.join(session.get_input_dir(), compnentName)
-                convert_obj_2_serialized(objfile, session.get_scenefile_path())
+                convert_obj_2_serialized(objfile, session.get_scenefile_path(), cfg["scene"]["forest"]["CacheOBJFile"])
                 strnode.setAttribute("value", os.path.splitext(compnentName)[0] + ".serialized")
                 refnode = objdoc.createElement("ref")
                 subshapnode.appendChild(refnode)

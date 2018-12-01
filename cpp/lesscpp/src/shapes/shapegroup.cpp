@@ -117,6 +117,9 @@ void ShapeGroup::addChild(const std::string &name, ConfigurableObject *child) {
 		Shape *shape = static_cast<Shape *>(child);
 		/*if (shape->isEmitter())
 			Log(EError, "Instancing of emitters is not supported");*/
+		if (shape->isEmitter()) {
+			m_emitter = shape->getEmitter();
+		}
 		if (shape->isSensor())
 			Log(EError, "Instancing of sensors is not supported");
 		if (shape->hasSubsurface())

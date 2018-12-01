@@ -6,32 +6,32 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.SunPostionCalculatorController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.SunPostionCalculatorController">
    <left>
       <AnchorPane prefHeight="550.0" prefWidth="457.0" BorderPane.alignment="CENTER">
          <children>
+            <TextField fx:id="yearTextField" layoutX="151.0" layoutY="35.0" prefHeight="35.0" prefWidth="200.0" text="2017" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="monthTextField" layoutX="151.0" layoutY="84.0" prefHeight="35.0" prefWidth="202.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="dayTextField" layoutX="148.0" layoutY="127.0" prefHeight="35.0" prefWidth="202.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
             <Label layoutX="59.0" layoutY="45.0" text="Year:" AnchorPane.leftAnchor="50.0" />
             <Label layoutX="47.0" layoutY="181.0" text="Hour:" AnchorPane.leftAnchor="50.0" />
             <Label layoutX="51.0" layoutY="224.0" text="Minute:" AnchorPane.leftAnchor="51.0" />
             <Label layoutX="50.0" layoutY="274.0" text="Second:" AnchorPane.leftAnchor="50.0" />
-            <TextField fx:id="hourTextField" layoutX="151.0" layoutY="175.0" AnchorPane.leftAnchor="150.0" />
-            <TextField fx:id="minuteTextField" layoutX="151.0" layoutY="218.0" AnchorPane.leftAnchor="150.0" />
-            <TextField fx:id="secondTextField" layoutX="151.0" layoutY="267.0" AnchorPane.leftAnchor="150.0" />
+            <TextField fx:id="hourTextField" layoutX="151.0" layoutY="175.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="minuteTextField" layoutX="151.0" layoutY="218.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="secondTextField" layoutX="151.0" layoutY="267.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
             <Label layoutX="51.0" layoutY="362.0" text="Latitude:" AnchorPane.leftAnchor="50.0" />
             <Label layoutX="51.0" layoutY="411.0" text="Longitude:" AnchorPane.leftAnchor="50.0" />
-            <TextField fx:id="latTextField" layoutX="151.0" layoutY="356.0" AnchorPane.leftAnchor="150.0" />
-            <TextField fx:id="lonTextField" layoutX="151.0" layoutY="405.0" AnchorPane.leftAnchor="150.0" />
+            <TextField fx:id="timezoneTextField" layoutX="151.0" layoutY="310.0" text="+8" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="latTextField" layoutX="151.0" layoutY="356.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <TextField fx:id="lonTextField" layoutX="151.0" layoutY="405.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
             <Label layoutX="50.0" layoutY="317.0" text="Time zone:" AnchorPane.leftAnchor="50.0" />
-            <TextField fx:id="timezoneTextField" layoutX="151.0" layoutY="310.0" text="+8" AnchorPane.leftAnchor="150.0" />
-            <Button layoutX="174.0" layoutY="498.0" mnemonicParsing="false" onAction="#onOK" prefHeight="35.0" prefWidth="74.0" text="OK" />
-            <Button layoutX="276.0" layoutY="498.0" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
-            <TextField fx:id="yearTextField" layoutX="151.0" layoutY="35.0" prefHeight="35.0" prefWidth="227.0" text="2017" AnchorPane.leftAnchor="150.0" />
+            <TextField fx:id="AltitudeTextField" layoutX="152.0" layoutY="449.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="110.0" />
+            <Button layoutX="166.0" layoutY="498.0" mnemonicParsing="false" onAction="#onOK" prefHeight="20.0" prefWidth="72.0" text="OK" />
+            <Button layoutX="250.0" layoutY="498.0" mnemonicParsing="false" onAction="#onCancel" prefHeight="20.0" text="Cancel" />
             <Label layoutX="50.0" layoutY="89.0" text="Month:" AnchorPane.leftAnchor="50.0" />
-            <TextField fx:id="monthTextField" layoutX="151.0" layoutY="84.0" prefHeight="35.0" prefWidth="227.0" AnchorPane.leftAnchor="150.0" />
             <Label layoutX="52.0" layoutY="133.0" text="Day:" AnchorPane.leftAnchor="52.0" />
-            <TextField fx:id="dayTextField" layoutX="148.0" layoutY="127.0" prefHeight="35.0" prefWidth="227.0" AnchorPane.leftAnchor="150.0" />
             <Label layoutX="52.0" layoutY="455.0" text="Altitude:" AnchorPane.leftAnchor="50.0" />
-            <TextField fx:id="AltitudeTextField" layoutX="152.0" layoutY="449.0" AnchorPane.leftAnchor="150.0" />
          </children>
       </AnchorPane>
    </left>

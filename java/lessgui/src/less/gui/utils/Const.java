@@ -29,6 +29,7 @@ public class Const {
 	public static String LESS_TERRAIN_LANDCOVER_FILE = "landcover.txt";
 	public static String LESS_TERRAIN_BRDF_LAMBERTIAN = "Lambertian";
 	public static String LESS_TERRAIN_BRDF_SOILSPECT = "Soilspect";
+	public static String LESS_TERRAIN_BRDF_LANDALBEDOMAP = "Land Albedo Map";
 	
 	public static String LESS_SENSOR_TYPE_ORTH = "orthographic";
 	public static String LESS_SENSOR_TYPE_PER = "perspective";
@@ -58,7 +59,7 @@ public class Const {
 	
 	// LESS Mode
 	public static String LESS_MODE= "development";
-	public static String LESS_VERSION = "V1.8.2";
+	public static String LESS_VERSION = "V1.8.5";
 	
 	public static boolean LESS_OUT_ALL = false;
 	
@@ -82,6 +83,7 @@ public class Const {
 	public static String LESS_UTILITY_SCRIPT_DEF2OBJ = "def2obj";
 	public static String LESS_UTILITY_SCRIPT_LCTYPES = "extractLandcoverType";
 	public static String LESS_UTILITY_SCRIPT_RASTER2OBJ = "Raster2obj";
+	public static String LESS_UTILITY_SCRIPT_PROSPECT5D = "Prospect5AndD";
 	
 	public static String LESS_PYTHON_STARTUP_SCRIPT = "startup_scripts";
 	
@@ -97,6 +99,10 @@ public class Const {
 	public static String LESS_DEFAULT_TEMPERATURE = "T300";
 	public static Color LESS_DEFAULT_BRANCH_COLOR = Color.web("#b34d1a");
 	
+	public static int LESS_OP_TYPE_DB = 0;
+	public static int LESS_OP_TYPE_MANUAL = 1;
+	public static int LESS_OP_TYPE_PROSPECT_D = 2;
+	
 	
 	//cluster
 	public static String LESS_SERVER_EXE = "lesssrv";
@@ -111,5 +117,7 @@ public class Const {
 	//atmosphere
 	public static String LESS_ATS_TYPE_SKY = "SKY_TO_TOTAL";
 	public static String LESS_ATS_TYPE_ATS = "ATMOSPHERE";
+	public static String LESS_ATS_CAL_MODE_TWOSTEP = "Two-Step Mode";
+	public static String LESS_ATS_CAL_MODE_ONESTEP = "One-Step Mode";
 	
 }

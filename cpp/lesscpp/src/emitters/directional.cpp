@@ -80,7 +80,6 @@ public:
 
 		//virtual bounds to narrow the illumination area
 		m_hasVirtualPlane = props.getBoolean("virtualBounds", false);
-
 	}
 
 	DirectionalEmitter(Stream *stream, InstanceManager *manager)
@@ -127,7 +126,7 @@ public:
 			double z_min = virtualPlaneCenter.y - 0.5*virtualPlaneSize.y;
 			double z_max = virtualPlaneCenter.y + 0.5*virtualPlaneSize.y;
 			AABB virtualbox = AABB(Point(x_min, 0, z_min), Point(x_max, virtualPlaneHeight, z_max));
-			m_bsphere = virtualbox.getBSphere();
+			m_bsphere = virtualbox.getBSphere();//目前没有使用这个
 			
 		}
 		else {
@@ -142,7 +141,11 @@ public:
 		Emitter::configure();
 		Float surfaceArea = M_PI * m_bsphere.radius * m_bsphere.radius;
 		m_invSurfaceArea = 1.0f / surfaceArea;
-		m_power = m_normalIrradiance * surfaceArea;
+		//这里很奇怪，如果直接写m_power=m_normalIrradiance * surfaceArea,在并行计算时，
+		//如果核数量比较多时，会出错。
+		Spectrum tmp = m_normalIrradiance * surfaceArea;
+		m_power = tmp;
+		//m_power = Spectrum(0.0);
 	}
 
 	Spectrum samplePosition(PositionSamplingRecord &pRec, const Point2 &sample, const Point2 *extra) const {
@@ -194,6 +197,7 @@ public:
 			Float time) const {
 		const Transform &trafo = m_worldTransform->eval(time);
 		Point2 p = warp::squareToUniformDiskConcentric(spatialSample);
+
 		Vector perpOffset = trafo(Vector(p.x, p.y, 0) * m_bsphere.radius);
 		Vector d = trafo(Vector(0, 0, 1));
 		//ray.setOrigin(m_bsphere.center - d*m_bsphere.radius + perpOffset);

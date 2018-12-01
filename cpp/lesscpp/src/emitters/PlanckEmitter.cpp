@@ -161,7 +161,6 @@ public:
 			const Point2 &spatialSample,
 			const Point2 &directionalSample,
 			Float time) const {
-		NotImplementedError("PlanckAreaLight");
 
 		PositionSamplingRecord pRec(time);
 		m_shape->samplePosition(pRec, spatialSample);
@@ -202,18 +201,16 @@ public:
 	Spectrum sampleDirect(DirectSamplingRecord &dRec,
 			const Point2 &sample) const {
 		m_shape->sampleDirect(dRec, sample);
-
-		//must determine whether the sampled position is shaded or not
-		//which will determine the emitted radiance
-
-
 		/* Check that the emitter and reference position are oriented correctly
 		   with respect to each other. Note that the >= 0 check
 		   for 'refN' is intentional -- those sampling requests that specify
 		   a reference point within a medium or on a transmissive surface
 		   will set dRec.refN = 0, hence they should always be accepted. */
-		if (dot(dRec.d, dRec.refN) >= 0 && dRec.pdf != 0) {
+		//if (dot(dRec.d, dRec.refN) >= 0 && dRec.pdf != 0) {
+		dRec.pdf = dRec.pdf*0.5;
+		if (dRec.pdf != 0) {
 			return m_radiance / dRec.pdf;
+			
 		} else {
 			dRec.pdf = 0.0f;
 			return Spectrum(0.0f);
@@ -224,7 +221,7 @@ public:
 		/* Check that the emitter and receiver are oriented correctly
 		   with respect to each other. */
 		if (dot(dRec.d, dRec.refN) >= 0 ) {
-			return m_shape->pdfDirect(dRec);
+			return 0.5*m_shape->pdfDirect(dRec);
 		} else {
 			return 0.0f;
 		}
@@ -264,7 +261,6 @@ public:
 			radiance = m_lowerThermalSpectrum;
 		else
 			radiance = m_upperThermalSpecturm;
-
 		//query absorbtion coefficient by quering reflectance
 		const BSDF *bsdf = m_shape->getBSDF();
 		if (dot(dRec.d, dRec.n) < 0) {//reference point is at front side of the emitter

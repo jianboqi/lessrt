@@ -268,7 +268,7 @@
                                                       <Label layoutY="94.99999809265137" text="Height [Pixels]:" AnchorPane.leftAnchor="0.0" />
                                                       <TextField fx:id="sensorWidthField" layoutX="106.99999809265137" layoutY="44.99999809265137" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
                                                       <TextField fx:id="sensorHeightField" layoutX="106.99999809265137" layoutY="88.39999961853027" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
-                                                      <Label fx:id="pixelUnitLabel" layoutX="11.0" layoutY="140.0" text="Samples [m-2]:" AnchorPane.leftAnchor="0.0" />
+                                                      <Label fx:id="pixelUnitLabel" layoutX="11.0" layoutY="140.0" text="Samples [/pixel]:" AnchorPane.leftAnchor="0.0" />
                                                       <TextField fx:id="sensorSampleField" layoutX="118.0" layoutY="133.0" prefHeight="35.0" prefWidth="181.0" text="128" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
                                                       <Label layoutY="184.0" text="Spectral Bands:" />
                                                       <TextField fx:id="sensorBandsField" layoutX="133.0" layoutY="178.0" prefHeight="35.0" prefWidth="292.0" text="600:10,900:10" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="116.0" />
@@ -370,64 +370,71 @@
                         </TitledPane>
                         <TitledPane animated="false" text="Illumination &amp; Atmosphere">
                           <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <AnchorPane fx:id="illuAtmPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                       <children>
-                                          <AnchorPane fx:id="orthographicPane11" prefHeight="169.0" prefWidth="631.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
+                                    <ScrollPane fitToWidth="true" layoutX="10.399999618530273" layoutY="-1.600000023841858" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <content>
+                                          <VBox prefHeight="517.0" prefWidth="616.0">
                                              <children>
-                                                <Label layoutX="14.0" layoutY="14.0" text="Sun Zenith [°]:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
-                                                <Label layoutX="7.0" layoutY="33.0" text="Sun Azimuth [°]:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
-                                                <TextField fx:id="sunZenithField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="45" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
-                                                <TextField fx:id="sunAzimuthField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="90" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
-                                                <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun " />
-                                                <Button layoutX="414.0" layoutY="121.0" mnemonicParsing="false" onAction="#OpenSunPosCalculator" text="Sun Postion Calculator" AnchorPane.rightAnchor="20.0" />
-                                             </children>
-                                          </AnchorPane>
-                                          <AnchorPane fx:id="skyPane" prefHeight="150.0" prefWidth="558.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
-                                             <children>
-                                                <Label layoutX="14.0" layoutY="14.0" text="Type:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
-                                                <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sky " />
-                                                <ComboBox fx:id="atsTypeCombobox" layoutX="151.0" layoutY="25.0" prefWidth="150.0" value="SKY_TO_TOTAL" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0">
-      	                                          <items>
-      	                                              <FXCollections fx:factory="observableArrayList">
-      	                                                 <String fx:value="SKY_TO_TOTAL" />
-      	                                                 <String fx:value="ATMOSPHERE" />
-      	                                              </FXCollections>
-      	                                           </items>
-                                                </ComboBox>
-                                                <AnchorPane fx:id="SkyTotalPane" layoutX="2.0" layoutY="68.0" prefHeight="106.0" prefWidth="634.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0">
+                                                <AnchorPane fx:id="orthographicPane11" prefHeight="177.0" prefWidth="634.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
                                                    <children>
-                                                      <Label layoutX="352.0" layoutY="56.0" text="Note: it should match with spectral bands" textFill="#8a8888" />
-                                                      <TextField fx:id="atsPercentageField" layoutX="155.0" layoutY="14.0" prefHeight="35.0" prefWidth="451.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
-                                                      <Label layoutX="14.0" layoutY="22.0" text="Percentage:" AnchorPane.leftAnchor="6.0" />
+                                                      <Label layoutX="14.0" layoutY="14.0" text="Sun Zenith [°]:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
+                                                      <Label layoutX="7.0" layoutY="33.0" text="Sun Azimuth [°]:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
+                                                      <TextField fx:id="sunZenithField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="45" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
+                                                      <TextField fx:id="sunAzimuthField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="90" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
+                                                      <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun " />
+                                                      <Button layoutX="447.0" layoutY="125.0" mnemonicParsing="false" onAction="#OpenSunPosCalculator" text="Sun Postion Calculator" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="20.0" />
                                                    </children>
+                                                   <VBox.margin>
+                                                      <Insets top="15.0" />
+                                                   </VBox.margin>
+                                                </AnchorPane>
+                                                <AnchorPane fx:id="skyPane" prefHeight="150.0" prefWidth="558.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
+                                                   <children>
+                                                      <Label layoutX="14.0" layoutY="14.0" text="Type:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
+                                                      <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sky " />
+                                                      <ComboBox fx:id="atsTypeCombobox" layoutX="151.0" layoutY="25.0" prefWidth="150.0" value="SKY_TO_TOTAL" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0">
+            	                                          <items>
+            	                                              <FXCollections fx:factory="observableArrayList">
+            	                                                 <String fx:value="SKY_TO_TOTAL" />
+            	                                                 <String fx:value="ATMOSPHERE" />
+            	                                              </FXCollections>
+            	                                           </items>
+                                                      </ComboBox>
+                                                      <AnchorPane fx:id="SkyTotalPane" layoutX="2.0" layoutY="68.0" prefHeight="106.0" prefWidth="634.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0">
+                                                         <children>
+                                                            <Label layoutX="352.0" layoutY="56.0" text="Note: it should match with spectral bands" textFill="#8a8888" />
+                                                            <TextField fx:id="atsPercentageField" layoutX="155.0" layoutY="14.0" prefHeight="35.0" prefWidth="451.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" />
+                                                            <Label layoutX="14.0" layoutY="22.0" text="Percentage:" AnchorPane.leftAnchor="6.0" />
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets top="20.0" />
+                                                   </VBox.margin>
+                                                </AnchorPane>
+                                                <CheckBox fx:id="SolarSpectrumCheckbox" mnemonicParsing="false" text="Input solar spectrum manually">
+                                                   <VBox.margin>
+                                                      <Insets top="10.0" />
+                                                   </VBox.margin>
+                                                </CheckBox>
+                                                <AnchorPane fx:id="SolarSpectrumPane" prefHeight="123.0" prefWidth="341.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
+                                                   <children>
+                                                      <Label layoutX="14.0" layoutY="14.0" text="Sun Spectrum:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
+                                                      <Label layoutX="7.0" layoutY="33.0" text="Sky Spectrum:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
+                                                      <TextField fx:id="SolarSpectrumSunTextField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="1.32,1.06" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
+                                                      <TextField fx:id="SolarSpectrumSkyTextField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
+                                                      <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun &amp; Sky" />
+                                                      <Label fx:id="unitLabel" layoutX="152.0" layoutY="1.0" text="W·m-2·nm-1" textFill="#797878" />
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets top="20.0" />
+                                                   </VBox.margin>
                                                 </AnchorPane>
                                              </children>
-                                             <VBox.margin>
-                                                <Insets top="20.0" />
-                                             </VBox.margin>
-                                          </AnchorPane>
-                                          <CheckBox fx:id="SolarSpectrumCheckbox" mnemonicParsing="false" text="Input solar spectrum manually">
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-                                          </CheckBox>
-                                          <AnchorPane fx:id="SolarSpectrumPane" prefHeight="123.0" prefWidth="341.0" style="-fx-border-width: 1px; -fx-border-color: gray;">
-                                             <children>
-                                                <Label layoutX="14.0" layoutY="14.0" text="Sun Spectrum:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="30.0" />
-                                                <Label layoutX="7.0" layoutY="33.0" text="Sky Spectrum:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="80.0" />
-                                                <TextField fx:id="SolarSpectrumSunTextField" layoutX="130.0" layoutY="1.0" prefHeight="35.0" prefWidth="181.0" text="1.32,1.06" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
-                                                <TextField fx:id="SolarSpectrumSkyTextField" layoutX="135.0" layoutY="28.0" prefHeight="35.0" prefWidth="181.0" text="0.0,0.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="75.0" />
-                                                <Label layoutX="10.0" layoutY="-12.0" style="-fx-background-color: #fff; -fx-border-width: 1px; -fx-border-color: gray;" text=" Sun &amp; Sky" />
-                                                <Label fx:id="unitLabel" layoutX="152.0" layoutY="1.0" text="W/(m^2·nm)" textFill="#797878" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="20.0" />
-                                             </VBox.margin>
-                                          </AnchorPane>
-                                       </children>
-                                    </VBox>
+                                          </VBox>
+                                       </content>
+                                    </ScrollPane>
                                  </children></AnchorPane>
                           </content>
                         </TitledPane>
@@ -446,77 +453,84 @@
                                     <TextField fx:id="opticalRefBackField" layoutX="229.0" layoutY="16.0" prefHeight="35.0" prefWidth="103.0" promptText="Ref (Back)" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalTransField" layoutX="390.6" layoutY="58.6" prefHeight="35.0" prefWidth="98.0" promptText="Transmittance" AnchorPane.leftAnchor="330.0" AnchorPane.topAnchor="3.0" />
                                     <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="511.0" AnchorPane.topAnchor="7.0" />
-                                    <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="Choose from database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="307.0" layoutY="354.0" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="240.0" />
+                                    <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="From database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
+                                    <Button layoutX="213.4000000000001" layoutY="381.5999999999999" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="340.0" AnchorPane.topAnchor="340.0" />
                                     <Button layoutX="588.0" layoutY="27.4" mnemonicParsing="false" onAction="#copyOptical" prefHeight="28.0" prefWidth="56.0" text="Copy" AnchorPane.topAnchor="7.0" />
+                                    <Button layoutX="357.0" layoutY="350.0" mnemonicParsing="false" onAction="#OpenProspectD" prefHeight="28.0" prefWidth="149.0" text="From PROSPECT-D..." AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="340.0" />
                                  </children>
                               </AnchorPane>
                           </content>
                         </TitledPane>
                       <TitledPane animated="false" text="Terrain">
                         <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                          <AnchorPane fx:id="terrainPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <VBox fx:id="terrainVbox" layoutX="26.6" layoutY="14.0" prefHeight="269.0" prefWidth="337.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                       <children>
-                                          <AnchorPane>
+                                    <ScrollPane fitToWidth="true" layoutX="10.399999618530273" layoutY="10.399999618530273" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <content>
+                                          <VBox fx:id="terrainVbox" prefHeight="269.0" prefWidth="337.0">
                                              <children>
-                                                <Label layoutY="5.0" text="Type:" />
-                                                <ComboBox fx:id="comboBoxDEMType" layoutX="106.99999809265137" prefHeight="35.0" prefWidth="221.0" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="30.0">
-            										   <items>
-            										       <FXCollections fx:factory="observableArrayList">
-            											      <String fx:value="PLANE" />
-            											      <String fx:value="RASTER" />
-            											      <String fx:value="MESH" />
-            										       </FXCollections>
-            										   </items>
-                                                		<value>
-            										        <String fx:value="PLANE" />
-            										    </value>
-                                                </ComboBox>
-                                                <Label layoutY="52.99999809265137" text="XSize [m]:" />
-                                                <Label layoutY="94.99999809265137" text="YSize [m]:" />
-                                                <TextField fx:id="sceneXSizeField" layoutX="106.99999809265137" layoutY="44.99999809265137" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="30.0" />
-                                                <TextField fx:id="sceneYSizeField" layoutX="106.99999809265137" layoutY="88.39999961853027" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="30.0" />
+                                                <AnchorPane>
+                                                   <children>
+                                                      <Label layoutY="5.0" text="Type:" />
+                                                      <ComboBox fx:id="comboBoxDEMType" layoutX="106.99999809265137" prefHeight="35.0" prefWidth="221.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="30.0">
+                  										   <items>
+                  										       <FXCollections fx:factory="observableArrayList">
+                  											      <String fx:value="PLANE" />
+                  											      <String fx:value="RASTER" />
+                  											      <String fx:value="MESH" />
+                  										       </FXCollections>
+                  										   </items>
+                                                      		<value>
+                  										        <String fx:value="PLANE" />
+                  										    </value>
+                                                      </ComboBox>
+                                                      <Label layoutY="52.99999809265137" text="XSize [m]:" />
+                                                      <Label layoutY="94.99999809265137" text="YSize [m]:" />
+                                                      <TextField fx:id="sceneXSizeField" layoutX="106.99999809265137" layoutY="44.99999809265137" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="30.0" />
+                                                      <TextField fx:id="sceneYSizeField" layoutX="106.99999809265137" layoutY="88.39999961853027" prefHeight="35.0" prefWidth="181.0" text="100" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="30.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                                <AnchorPane fx:id="terrFilePane" prefHeight="38.0" prefWidth="200.0">
+                                                   <children>
+                                                      <TextField fx:id="terrFileField" layoutX="159.0" prefHeight="35.0" prefWidth="151.0" AnchorPane.leftAnchor="120.0" AnchorPane.rightAnchor="70.0" />
+                                                      <Label layoutX="57.0" layoutY="6.0" text="Terrain File:" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="0.0" />
+                                                      <Button fx:id="selectTerrBtn" layoutX="268.0" mnemonicParsing="false" onAction="#selectTerrainFile" prefHeight="35.0" prefWidth="37.0" text="···" AnchorPane.rightAnchor="30.0" />
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets top="10.0" />
+                                                   </VBox.margin>
+                                                </AnchorPane>
+                                                <AnchorPane fx:id="terrainOpticalAnchorPane" prefHeight="70.0" prefWidth="636.0">
+                                                   <children>
+                                                      <Label layoutY="61.0" text="Optical Property:" AnchorPane.leftAnchor="0.0" />
+                                                      <ComboBox fx:id="terrainOpticalCombox" layoutX="110.0" layoutY="52.0" prefHeight="35.0" prefWidth="224.0" AnchorPane.leftAnchor="120.0" />
+                                                      <Label layoutY="16.0" text="BRDF Type:" AnchorPane.leftAnchor="0.0" />
+                                                      <ComboBox fx:id="terrainBRDFTypeCombox" layoutX="110.0" layoutY="8.0" prefHeight="35.0" prefWidth="224.0" value="Lambertian" AnchorPane.leftAnchor="120.0">
+                                                      	<items>
+                                                                  <FXCollections fx:factory="observableArrayList">
+                                                                     <String fx:value="Lambertian" />
+                                                                     <String fx:value="Soilspect" />
+                                                                     <String fx:value="Land Albedo Map" />
+                                                                  </FXCollections>
+                                                               </items>
+                                                      </ComboBox>
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets top="10.0" />
+                                                   </VBox.margin>
+                                                </AnchorPane>
+                                                <AnchorPane fx:id="landcoverAnchorPane" prefHeight="200.0" prefWidth="200.0">
+                                                   <children>
+                                                      <CheckBox fx:id="landcoverCheckbox" layoutX="112.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleLandcoverCheckbox" AnchorPane.leftAnchor="112.0" AnchorPane.topAnchor="20.0" />
+                                                      <Label layoutY="14.0" text="Land Cover Map:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="20.0" />
+                                                   </children>
+                                                </AnchorPane>
                                              </children>
-                                          </AnchorPane>
-                                          <AnchorPane fx:id="terrFilePane" prefHeight="38.0" prefWidth="200.0">
-                                             <children>
-                                                <TextField fx:id="terrFileField" layoutX="159.0" prefHeight="35.0" prefWidth="151.0" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="70.0" />
-                                                <Label layoutX="57.0" layoutY="6.0" text="Terrain File:" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="0.0" />
-                                                <Button fx:id="selectTerrBtn" layoutX="268.0" mnemonicParsing="false" onAction="#selectTerrainFile" prefHeight="35.0" prefWidth="37.0" text="···" AnchorPane.rightAnchor="30.0" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-                                          </AnchorPane>
-                                          <AnchorPane fx:id="terrainOpticalAnchorPane" prefHeight="109.0" prefWidth="636.0">
-                                             <children>
-                                                <Label layoutY="61.0" text="Optical Property:" AnchorPane.leftAnchor="0.0" />
-                                                <ComboBox fx:id="terrainOpticalCombox" layoutX="110.0" layoutY="52.0" prefHeight="35.0" prefWidth="224.0" AnchorPane.leftAnchor="110.0" />
-                                                <Label layoutY="16.0" text="BRDF Type:" AnchorPane.leftAnchor="0.0" />
-                                                <ComboBox fx:id="terrainBRDFTypeCombox" layoutX="110.0" layoutY="8.0" prefHeight="35.0" prefWidth="224.0" value="Lambertian" AnchorPane.leftAnchor="110.0">
-                                                	<items>
-                                                            <FXCollections fx:factory="observableArrayList">
-                                                               <String fx:value="Lambertian" />
-                                                               <String fx:value="Soilspect" />
-                                                            </FXCollections>
-                                                         </items>
-                                                </ComboBox>
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets top="10.0" />
-                                             </VBox.margin>
-                                          </AnchorPane>
-                                          <AnchorPane fx:id="landcoverAnchorPane" prefHeight="200.0" prefWidth="200.0">
-                                             <children>
-                                                <CheckBox fx:id="landcoverCheckbox" layoutX="100.0" layoutY="13.0" mnemonicParsing="false" onAction="#handleLandcoverCheckbox" AnchorPane.leftAnchor="100.0" AnchorPane.topAnchor="15.0" />
-                                                <Label layoutX="8.0" layoutY="13.0" text="Land Cover" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="15.0" />
-                                             </children>
-                                          </AnchorPane>
-                                       </children>
-                                    </VBox>
-                                 </children></AnchorPane>
+                                          </VBox>
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </AnchorPane>
                         </content>
                       </TitledPane>
                       <TitledPane animated="false" text="Objects">
@@ -538,8 +552,8 @@
                                                 </TableView>
                                                 <Label layoutX="11.0" layoutY="3.0" text="Objects:" />
                                                 <Label layoutX="240.0" layoutY="3.0" text="Positions (X, Y):" />
-                                                <Button fx:id="posAddBtn" disable="true" layoutX="479.0" layoutY="40.0" mnemonicParsing="false" text="Add" />
-                                                <Button fx:id="posDelBtn" disable="true" layoutX="540.0" layoutY="39.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="59.0" text="Del" />
+                                                <Button fx:id="posAddBtn" disable="true" layoutX="484.0" layoutY="40.0" mnemonicParsing="false" text="Add" />
+                                                <Button fx:id="posDelBtn" disable="true" layoutX="540.0" layoutY="39.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="45.0" text="Del" />
                                                 <Button layoutX="21.0" layoutY="39.0" mnemonicParsing="false" onAction="#onDefineForest" text="Define Object..." />
                                                 <TextField fx:id="XPosField" layoutX="240.0" layoutY="39.0" prefHeight="35.0" prefWidth="65.0" promptText="X" />
                                                 <TextField fx:id="YPosField" layoutX="318.0" layoutY="39.0" prefHeight="35.0" prefWidth="65.0" promptText="Y" />
@@ -567,6 +581,7 @@
                                                 </Button>
                                                 <CheckBox fx:id="displayPosOn2DCheck" layoutY="55.0" mnemonicParsing="false" onAction="#onDisplayPosOn2DCheck" selected="true" text="Display on 2D map" />
                                                 <CheckBox fx:id="HideSelectedCheck" layoutY="93.0" mnemonicParsing="false" onAction="#onHideSelectedOn2DCheck" text="Hide selected Objects:" />
+                                                <CheckBox fx:id="objFileCacheChecbox" layoutX="163.0" layoutY="56.0" mnemonicParsing="false" selected="true" text="Cache OBJ file" />
                                              </children>
                                           </AnchorPane>
                                        </children>

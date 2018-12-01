@@ -12,9 +12,12 @@ import org.json.JSONTokener;
 import com.google.gson.JsonObject;
 import com.sun.jmx.remote.internal.ServerNotifForwarder;
 
+import javafx.scene.control.Alert;
 import javafx.scene.control.Toggle;
 import less.gui.helper.PyLauncher;
+import less.gui.model.AtmosphereParams;
 import less.gui.model.FacetOptical;
+import less.gui.model.ProspectDParams;
 import less.gui.model.SunPos;
 import less.gui.utils.Const;
 
@@ -86,6 +89,9 @@ public class ControlJsonWrapper {
 	    if(this.mwcontroller.atsTypeCombobox.getSelectionModel().getSelectedItem().equals(Const.LESS_ATS_TYPE_SKY)) {
 		    atmosphere.put("percentage", this.mwcontroller.atsPercentageField.getText());
 	    }else {
+	    	if(this.mwcontroller.projManager.atmosphereParams != null) {
+	    		atmosphere.put("AtsParams", this.mwcontroller.projManager.atmosphereParams.toJsonObject());
+	    	}    	
 	    }
 	    illumination.put("atmosphere", atmosphere);
 	    json.put("illumination",illumination);
@@ -164,6 +170,18 @@ public class ControlJsonWrapper {
 	    		photontracing.put("virtualDetectorDirections", mwcontroller.virtualDetectorTextField.getText());
 	    	}
 	    	photontracing.put("UpDownProduct", mwcontroller.productUpDownRadiationCheckbox.isSelected());
+	    	photontracing.put("fPARProduct", mwcontroller.productfPARChecbox.isSelected());
+	    	if(mwcontroller.productfPARChecbox.isSelected()) {
+	    		if(mwcontroller.fPARLayerTextEdit.getText().equals("")) {
+	    			Alert alert = new Alert(Alert.AlertType.ERROR);
+				    alert.setTitle("Error...");
+				    alert.setHeaderText("Error");
+				    alert.setContentText("Layer definition can not be empty!");
+				    alert.showAndWait();
+	    		}
+	    		photontracing.put("LayerDefinition", mwcontroller.fPARLayerTextEdit.getText());
+	    	}
+	    	
 	    	sensor.put("PhotonTracing", photontracing);
 	    }
 	    
@@ -185,11 +203,20 @@ public class ControlJsonWrapper {
 	    JSONObject scene = new JSONObject();
 	    JSONObject optical_properties = new JSONObject();
 	    for(int i=0;i<this.mwcontroller.opticalData.size();i++){
+	    	
+	    	JSONObject oneOptical = new JSONObject();
+	    	
 	    	FacetOptical facetOptical = this.mwcontroller.opticalData.get(i);
 	    	String opticalVal = facetOptical.getReflectanceFront()+";"+
 							    	facetOptical.getReflectanceBack()+";"+
 							    			facetOptical.getTransmittance();
-	    	optical_properties.put(facetOptical.getOpticalName(), opticalVal);
+	    	oneOptical.put("value", opticalVal);
+	    	oneOptical.put("Type", facetOptical.getOpType());
+	    	if(facetOptical.getOpType() == Const.LESS_OP_TYPE_PROSPECT_D) {
+	    		oneOptical.put("ProspectDParams", this.mwcontroller.projManager.prospectDParamsMap.get(facetOptical.getOpticalName()).toJsonObject());
+	    	}
+	    	
+	    	optical_properties.put(facetOptical.getOpticalName(), oneOptical);
 	    }
 	    scene.put("optical_properties", optical_properties);
 	    JSONObject temperature_properties = new JSONObject();
@@ -226,6 +253,12 @@ public class ControlJsonWrapper {
 			soilspect.put("h1", this.mwcontroller.h1TextField.getText());
 			soilspect.put("h2", this.mwcontroller.h2TextField.getText());
 			terrain.put("soilSpectParams", soilspect);
+		}else if(selectedBRDFMode.equals(Const.LESS_TERRAIN_BRDF_LANDALBEDOMAP)) {
+			//land albedo
+		    if(this.mwcontroller.landAlbedoTextField.getText().equals("")) {
+		    	mwcontroller.outputConsole.log("Land Albedo Map is empty.\n");
+		    }
+		    terrain.put("landalbedo", this.mwcontroller.landAlbedoTextField.getText());
 		}
 	    
 	    if(this.mwcontroller.ThermalCheckbox.isSelected()){
@@ -247,6 +280,7 @@ public class ControlJsonWrapper {
 	    JSONObject forest = new JSONObject();
 	    forest.put("tree_pos_file", Const.LESS_INSTANCE_FILE_NAME);
 	    forest.put("objects_file", Const.LESS_OBJECTS_FILE_NAME);
+	    forest.put("CacheOBJFile", this.mwcontroller.objFileCacheChecbox.isSelected());
 	    scene.put("forest", forest);
 	    scene.put("extra_scene", "");
 	    json.put("scene",scene);
@@ -351,6 +385,12 @@ public class ControlJsonWrapper {
 					this.mwcontroller.virtualDetectorTextField.setText(camera.getString("virtualDetectorDirections"));
 			}
 			if(camera.has("UpDownProduct")) this.mwcontroller.productUpDownRadiationCheckbox.setSelected(camera.getBoolean("UpDownProduct"));
+			if(camera.has("fPARProduct")) {
+				this.mwcontroller.productfPARChecbox.setSelected(camera.getBoolean("fPARProduct"));
+				if(camera.has("LayerDefinition"))
+					this.mwcontroller.fPARLayerTextEdit.setText(camera.getString("LayerDefinition"));
+				}
+			
 			this.mwcontroller.virtualPlaneCheckbox.setDisable(false);
 	    }
 		
@@ -407,7 +447,11 @@ public class ControlJsonWrapper {
 		if(ats_type.equals(Const.LESS_ATS_TYPE_SKY)) {
 			this.mwcontroller.atsPercentageField.setText(ats.getString("percentage"));
 		}else {
-			
+			if(ats.has("AtsParams")) {
+				AtmosphereParams atmosphereParams = new AtmosphereParams();
+				atmosphereParams.fromJsonObject(ats.getJSONObject("AtsParams"));
+				this.mwcontroller.projManager.atmosphereParams = atmosphereParams;
+			}		
 		}
 		
 		//solar spectrum
@@ -428,8 +472,6 @@ public class ControlJsonWrapper {
 	    	sunPos.fromJsonObject(illumination.getJSONObject("calculator_params"));
 	    	this.mwcontroller.projManager.sunpos = sunPos;
 	    }
-		
-		
 		
 		//observation
 		JSONObject observation = data.getJSONObject("observation");
@@ -452,22 +494,49 @@ public class ControlJsonWrapper {
 			
 		}
 		
-		
-		
-		
-		
 		//scene
-		scene = data.getJSONObject("scene");		
+		scene = data.getJSONObject("scene");
+		//forest
+		JSONObject forest = scene.getJSONObject("forest");
+		if(forest.has("CacheOBJFile")) {
+			this.mwcontroller.objFileCacheChecbox.setSelected(forest.getBoolean("CacheOBJFile"));
+		}
 		//optical reading
 		JSONObject optical_properties = scene.getJSONObject("optical_properties");
 		Iterator<?> keys = optical_properties.keys();
 		this.mwcontroller.opticalData.clear();
 		this.mwcontroller.terrainOpticalData.clear();
-		while( keys.hasNext() ) {
+		// compatible to older versions
+		while( keys.hasNext()) {
 		    String key = (String)keys.next();
-		    String value = optical_properties.getString(key);
-		    String [] vals = value.trim().split(";");
-		    this.mwcontroller.opticalData.add(new FacetOptical(key, vals[0],vals[1],vals[2]));
+		    Object tmpObj = optical_properties.get(key);
+		    if(tmpObj instanceof String) { //older projects
+		    	 String value = optical_properties.getString(key);
+				 String [] vals = value.trim().split(";");
+				 this.mwcontroller.opticalData.add(new FacetOptical(key, vals[0],vals[1],vals[2], Const.LESS_OP_TYPE_MANUAL));
+		    }
+		    else {
+		    	JSONObject opticalObj = optical_properties.getJSONObject(key);
+		    	int opType = opticalObj.getInt("Type");
+		    	if(opType == Const.LESS_OP_TYPE_PROSPECT_D) {
+		    		String value = opticalObj.getString("value");
+					String [] vals = value.trim().split(";");
+					this.mwcontroller.opticalData.add(new FacetOptical(key, vals[0],vals[1],vals[2], Const.LESS_OP_TYPE_PROSPECT_D));
+					ProspectDParams prospectDParams = new ProspectDParams();
+					prospectDParams.fromJsonObject(opticalObj.getJSONObject("ProspectDParams"));
+					this.mwcontroller.projManager.prospectDParamsMap.put(key, prospectDParams);
+					
+		    	}else if(opType == Const.LESS_OP_TYPE_DB) {
+		    		String value = opticalObj.getString("value");
+					String [] vals = value.trim().split(";");
+					this.mwcontroller.opticalData.add(new FacetOptical(key, vals[0],vals[1],vals[2], Const.LESS_OP_TYPE_DB));
+		    	}else if(opType == Const.LESS_OP_TYPE_MANUAL) {
+		    		String value = opticalObj.getString("value");
+					String [] vals = value.trim().split(";");
+					this.mwcontroller.opticalData.add(new FacetOptical(key, vals[0],vals[1],vals[2], Const.LESS_OP_TYPE_MANUAL));
+		    	}
+		    }
+		    
 		    this.mwcontroller.terrainOpticalData.add(key);
 		}
 		
@@ -498,6 +567,11 @@ public class ControlJsonWrapper {
 				this.mwcontroller.h1TextField.setText(soilspect.getString("h1"));
 				this.mwcontroller.h2TextField.setText(soilspect.getString("h2"));
 			}
+			else if(terrBRDFType.equals(Const.LESS_TERRAIN_BRDF_LANDALBEDOMAP)) {
+				if(terrain.has("landalbedo")) {
+					this.mwcontroller.landAlbedoTextField.setText(terrain.getString("landalbedo"));
+				}
+			}
 		}else {
 			this.mwcontroller.terrainOpticalCombox.getSelectionModel().select(terrain.getString("optical"));
 		}
@@ -507,6 +581,7 @@ public class ControlJsonWrapper {
 			this.mwcontroller.projManager.handleLandcoverCheckbox();//create listview control
 			this.mwcontroller.projManager.readLandcover2File();
 		}
+		
 		if(this.mwcontroller.ThermalCheckbox.isSelected()){
 			this.mwcontroller.projManager.comboBoxTerrainTemper.getSelectionModel().select(terrain.getString("temperature"));
 		}

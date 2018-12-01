@@ -27,6 +27,8 @@ public:
 		m_hasUpDownProducts = props.getBoolean("UpDownProduct", false);
 		m_numberOfDirections = props.getInteger("NumberOfDirections", 150);
 
+		m_hasfPARProducts = props.getBoolean("fPARProduct", false);
+
 		/* Rely on hitting the sensor via ray tracing? */
 		m_bruteForce = props.getBoolean("bruteForce", false);
 
@@ -46,6 +48,7 @@ public:
 		m_hasBRFProducts = stream->readBool();
 		m_hasUpDownProducts = stream->readBool();
 		m_numberOfDirections = stream->readInt();
+		m_hasfPARProducts = stream->readBool();
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -57,6 +60,7 @@ public:
 		stream->writeBool(m_hasBRFProducts);
 		stream->writeBool(m_hasUpDownProducts);
 		stream->writeInt(m_numberOfDirections);
+		stream->writeBool(m_hasfPARProducts);
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
@@ -111,7 +115,7 @@ public:
 		ref<ParallelProcess> process = new CapturePhotonProcess(
 			job, queue, m_sampleCount, m_granularity,
 			maxPtracerDepth, m_maxDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts,
-			m_hasUpDownProducts, m_numberOfDirections);
+			m_hasUpDownProducts, m_numberOfDirections, m_hasfPARProducts);
 		process->bindResource("scene", sceneResID);
 		process->bindResource("sensor", sensorResID);
 		process->bindResource("sampler", samplerResID);
@@ -146,6 +150,8 @@ protected:
 	bool m_hasBRFProducts;
 	bool m_hasUpDownProducts;
 	int m_numberOfDirections;
+
+	bool m_hasfPARProducts;
 };
 
 MTS_IMPLEMENT_CLASS_S(PhotonRtTracer, false, Integrator)

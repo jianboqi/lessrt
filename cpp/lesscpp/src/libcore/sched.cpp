@@ -456,6 +456,7 @@ Scheduler::EStatus Scheduler::acquireWork(Item &item,
 
 			wStatus = item.proc->generateWork(item.workUnit, item.workerIndex);
 		} catch (const std::exception &ex) {
+			cout << "test canceling..." << endl;
 			Log(EWarn, "Caught an exception - canceling process %i: %s",
 				item.id, ex.what());
 			cancel(item.proc);

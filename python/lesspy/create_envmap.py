@@ -8,7 +8,35 @@ import array, Imath
 import shutil
 
 
+# create land albedo map from input albedo map
+def createLandAlbedoMap(band_num, landAlbedoRasterFile, out_exr_file):
+    band_start = const.get_value("NO_BAND_WIDTH_MODE_BAND_START")
+    band_end = const.get_value("NO_BAND_WIDTH_MODE_BAND_END")
+    wavelengths = np.linspace(band_start, band_end, band_num + 1)
 
+    import gdal
+    dataset = gdal.Open(landAlbedoRasterFile)
+    imgXsize = dataset.RasterXSize
+    imgYSize = dataset.RasterYSize
+
+    band_dict = dict()
+    half_chan = Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))
+    chaneldict = dict()
+    for i in range(0, band_num):
+        start = wavelengths[i]
+        end = wavelengths[i + 1]
+        band_name = "%.2f" % start + "-" + "%.2fnm" % end
+        band = dataset.GetRasterBand(i+1)
+        singleband = band.ReadAsArray(0, 0, imgXsize, imgYSize)
+        singleband = np.fliplr(singleband)
+        singleband = np.reshape(singleband, (imgXsize * imgYSize))
+        radiance_str = array.array('f', singleband).tostring()  # generate arr
+        band_dict[band_name] = radiance_str
+        chaneldict[band_name] = half_chan
+    header = OpenEXR.Header(imgXsize, imgYSize)
+    header["channels"] = chaneldict
+    out = OpenEXR.OutputFile(out_exr_file, header)
+    out.writePixels(band_dict)
 
 def get_nearest_theta_phi(theta, phi, theta_phi):
     arrlen = len(theta_phi)
@@ -31,7 +59,7 @@ def createLandcoverMap(landcoverRasterFile,out_exr_file, opticalFile, opticalTab
     import gdal
     dataset = gdal.Open(landcoverRasterFile)
     band = dataset.GetRasterBand(1)
-    dataarr = band.ReadAsArray(0,0, band.XSize, band.YSize)
+    dataarr = band.ReadAsArray(0, 0, band.XSize, band.YSize)
     lc_map = np.zeros((band.YSize, band.XSize, band_num))
     for i in range(0, band.YSize):
         for j in range(0, band.XSize):

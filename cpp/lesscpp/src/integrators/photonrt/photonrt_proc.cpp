@@ -19,6 +19,9 @@ void CapturePhotonWorkResult::load(Stream *stream) {
 		m_dirBRFWorkResult->unserialize(stream);
 	m_hasUpDownProducts = stream->readBool();
 	m_numberOfDirections = stream->readInt();
+	m_hasfPARProducts = stream->readBool();
+	if (m_hasfPARProducts)
+		m_fPARsWordResult->unserialize(stream);
 }
 
 void CapturePhotonWorkResult::save(Stream *stream) const {
@@ -35,6 +38,9 @@ void CapturePhotonWorkResult::save(Stream *stream) const {
 		m_dirBRFWorkResult->serialize(stream);
 	stream->writeBool(m_hasUpDownProducts);
 	stream->writeInt(m_numberOfDirections);
+	stream->writeBool(m_hasfPARProducts);
+	if (m_hasfPARProducts)
+		m_fPARsWordResult->serialize(stream);
 }
 
 
@@ -48,6 +54,7 @@ CapturePhotonWorker::CapturePhotonWorker(Stream *stream, InstanceManager *manage
 	m_hasBRFProducts = stream->readBool();
 	m_hasUpDownProducts = stream->readBool();
 	m_numberOfDirections = stream->readInt();
+	m_hasfPARProducts = stream->readBool();
 }
 
 void CapturePhotonWorker::serialize(Stream *stream, InstanceManager *manager) const {
@@ -57,6 +64,7 @@ void CapturePhotonWorker::serialize(Stream *stream, InstanceManager *manager) co
 	stream->writeBool(m_hasBRFProducts);
 	stream->writeBool(m_hasUpDownProducts);
 	stream->writeInt(m_numberOfDirections);
+	stream->writeBool(m_hasfPARProducts);
 }
 
 void CapturePhotonWorker::prepare() {
@@ -150,7 +158,7 @@ Spectrum CapturePhotonWorker::repetitiveOcclude(Spectrum value, Point p, Vector 
 
 void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResult,
 	const bool &stop) {
-	if ((!m_hasBRFProducts) && (!m_hasUpDownProducts)) {
+	if ((!m_hasBRFProducts) && (!m_hasUpDownProducts) && (!m_hasfPARProducts)) {
 		return;
 	}
 	
@@ -163,9 +171,12 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		m_workResult->m_downwellingWorkResult->clear();
 		m_workResult->m_upwellingWorkResult->clear();
 	}
-	
+
 	if (m_hasBRFProducts)
 		m_workResult->m_dirBRFWorkResult->clear();
+	if (m_hasfPARProducts)
+		m_workResult->m_fPARsWordResult->clear();
+
 	m_workResult->m_PhtonsEachProcess = 0;	
 
 	Intersection its;
@@ -180,8 +191,10 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		const Medium *medium;
 		Spectrum power;
 		Ray ray;
+
 		power = m_scene->sampleEmitterRay(ray, emitter,
 			m_sampler->next2D(), m_sampler->next2D(), pRec.time);
+
 		//Determine emitted power with shded or sunlit temperature
 		//This of for simulating thrermal radiation, but it is not correct
 		//if (!power.isZero()) {
@@ -206,9 +219,10 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		//BRF calculation needs repetitive, while up and down welling do not need
 		int photoType = EPhotonType::ETypeNull;
 		if(m_hasBRFProducts) photoType = photoType | ETypeBRF;
-		if(m_hasUpDownProducts) photoType = photoType | EtypeBRFUpDown;
+		if (m_hasfPARProducts) photoType = photoType | ETypefPAR;
+		if(m_hasUpDownProducts) photoType = photoType | ETypeUpDown;
 
-		if (m_hasBRFProducts) {
+		if (m_hasBRFProducts || m_hasfPARProducts) {
 			//sample 一条光线后，首先判断是否是有效光线，即在场景的顶部
 			//如果再场景顶部，则进入场景
 			double H = ray.o[1] - m_sceneBounds.max.y;
@@ -221,13 +235,18 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 				if (its_p.x >= m_sceneBounds.min.x && its_p.x <= m_sceneBounds.max.x
 					&& its_p.z >= m_sceneBounds.min.z && its_p.z <= m_sceneBounds.max.z
 					) {
-					m_workResult->m_dirBRFWorkResult->putIrradiance(power);
+					if (m_hasBRFProducts)
+						m_workResult->m_dirBRFWorkResult->putIrradiance(power);
+					if(m_hasfPARProducts)
+						m_workResult->m_fPARsWordResult->putIrradiance(power);
 				}
 				else {
+					//光子若从四边入射，对于brf和fpar计算来说都无效了，只保留辐射的计算，
 					//此时的光子对于BRF来说已经无效，不需要继续计算，但是对于上下行辐射来说，是有效的
 					//如果不需要计算上下行辐射，则可以停止计算。如果需要则需要设置光子状态。
-					if (photoType & EtypeBRFUpDown) {
+					if (photoType & ETypeUpDown) { //表示要继续计算下去,但是需要去掉brf和fpar属性
 						photoType &= ~EPhotonType::ETypeBRF;
+						photoType &= ~EPhotonType::ETypefPAR;
 					}
 					else {
 						continue;
@@ -246,8 +265,9 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
 			m_scene->rayIntersect(ray, its);
 			
-			//如果需要计算BRF产品，且photon type正确，则计算
-			if (m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) {
+			//如果需要计算BRF产品，且photon type正确，则计算. repetitive
+			if ((m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) ||
+				(m_hasfPARProducts && (photoType & EPhotonType::ETypefPAR))) {
 					if (its.t == std::numeric_limits<Float>::infinity()) {
 						//maximum iteration = 5
 						for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
@@ -285,7 +305,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 						}
 					}//is infinity
 
-			}//hasBRFProducts
+			}//hasBRFProducts or hasfPARProducts
 
 			//如果最大穿越场景次数之后，还是没有交点，则放弃
 			if (its.t == std::numeric_limits<Float>::infinity()) {
@@ -307,6 +327,27 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 						handleSurfaceInteractionUpDown(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 						break;
 					}
+				}
+				if (m_hasfPARProducts) {
+					Spectrum ref1;
+					if (dot(its.shFrame.n, bRec.wi) >= 0) {//入射方向在证明,计算正面反射率
+						Intersection its_tmp1;
+						its_tmp1.p = its.p;
+						BSDFSamplingRecord bRecref1(its_tmp1, Vector(0, 0, 1), Vector(0, 0, 1));
+						ref1 = bsdf->eval(bRecref1)*M_PI_DBL;
+					}
+					else {
+						Intersection its_tmp2;
+						its_tmp2.p = its.p;
+						BSDFSamplingRecord bRecref2(its_tmp2, Vector(0, 0, -1), Vector(0, 0, -1));
+						ref1 = bsdf->eval(bRecref2)*M_PI_DBL;
+					}
+					Intersection its_tmp;
+					its_tmp.p = its.p;
+					BSDFSamplingRecord bRecref(its_tmp, Vector(0, 0, -1), Vector(0, 0, 1));
+					Spectrum ref2 = bsdf->eval(bRecref)*M_PI_DBL;
+					Spectrum singleAbsorbtion = Spectrum(1.0) - ref1 - ref2;
+					handleSurfaceInteractionFPAR(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power*singleAbsorbtion, photoType);
 				}
 				handleSurfaceInteractionBRF(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 				handleSurfaceInteractionUpDown(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
@@ -338,13 +379,13 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 ref<WorkProcessor> CapturePhotonWorker::clone() const {
 	return new CapturePhotonWorker(m_maxDepth,
 		m_maxPathDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts, m_hasUpDownProducts, m_virtualDirections,
-		m_numberOfDirections,m_virtualDetectorDirection);
+		m_numberOfDirections,m_virtualDetectorDirection, m_hasfPARProducts,m_layerDefinition);
 }
 
 ref<WorkResult> CapturePhotonWorker::createWorkResult() const {
 	const Film *film = m_sensor->getFilm();
 	return new CapturePhotonWorkResult(film->getCropSize(), m_rfilter.get(), m_hasBRFProducts, m_hasUpDownProducts, m_virtualDirections,
-		m_numberOfDirections, m_virtualDetectorDirection);
+		m_numberOfDirections, m_virtualDetectorDirection,m_hasfPARProducts, m_layerDefinition);
 }
 
 void CapturePhotonWorker::handleEmission(const PositionSamplingRecord &pRec,
@@ -391,6 +432,15 @@ void CapturePhotonWorker::handleSurfaceInteraction(int depth, int nullInteractio
 	m_workResult->m_PhtonsEachProcess++;
 }
 
+void CapturePhotonWorker::handleSurfaceInteractionFPAR(int depth, int nullInteractions,
+	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+	const Spectrum &weight, int photoType) {
+	if (m_hasfPARProducts && (photoType & EPhotonType::ETypefPAR)) {
+		if(m_virtualBounds.contains(its.p))
+			m_workResult->m_fPARsWordResult->put(its, weight);
+	}
+
+}
 //扩展版本，可以得到上一个交点的信息
 void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInteractions,
 	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
@@ -506,7 +556,7 @@ void CapturePhotonWorker::handleSurfaceInteractionUpDown(int depth, int nullInte
 
 	int maxInteractions = m_maxPathDepth - depth - 1;
 	//radiation Products
-	if (m_hasUpDownProducts && (photoType & EPhotonType::EtypeBRFUpDown)) {
+	if (m_hasUpDownProducts && (photoType & EPhotonType::ETypeUpDown)) {
 		//1. 第一次直接入射 如果没有交点，那么就直接结束
 		if (its.t == std::numeric_limits<Float>::infinity() && depth == 1)
 			return;
@@ -576,6 +626,9 @@ void CapturePhotonProcess::develop() {
 	//save BRF
 	if(m_hasBRFProducts)
 		m_dirBRFs->develop(1 / (Float)m_receivedResultCount);
+
+	if (m_hasfPARProducts)
+		m_fPARs->develop(1 / (Float)m_receivedResultCount);
 }
 
 void CapturePhotonProcess::processResult(const WorkResult *wr, bool cancelled) {
@@ -595,6 +648,9 @@ void CapturePhotonProcess::processResult(const WorkResult *wr, bool cancelled) {
 	
 	if(m_hasBRFProducts)
 		m_dirBRFs->merge(result->m_dirBRFWorkResult.get());
+
+	if (m_hasfPARProducts)
+		m_fPARs->merge(result->m_fPARsWordResult.get());
 
 	if (m_job->isInteractive() || m_receivedResultCount == m_workCount)
 		develop();
@@ -624,6 +680,13 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 			m_accum_upwell->clear();
 		}
 
+		AABB scene_bound = m_scene->getKDTree()->getAABB();
+		Properties inegratorProps = m_scene->getIntegrator()->getProperties();
+		double sceneBoundX = inegratorProps.getFloat("subSceneXSize", scene_bound.getExtents().x);
+		double scenBoundZ = inegratorProps.getFloat("subSceneZSize", scene_bound.getExtents().z);
+
+		cout << "INFO: Scene Height: " << scene_bound.getExtents().y << endl;
+
 		//*************************BRF******************************
 		if (m_hasBRFProducts) {
 			m_dirBRFs = new DirectionalBRF(m_numberOfDirections);
@@ -640,18 +703,7 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 				m_dirBRFs->setCalculationMode(false);
 			}
 			
-			AABB scene_bound = m_scene->getKDTree()->getAABB();
-
-			Properties inegratorProps = m_scene->getIntegrator()->getProperties();
-
-			double sceneBoundX = inegratorProps.getFloat("subSceneXSize", scene_bound.getExtents().x);
-			double scenBoundZ = inegratorProps.getFloat("subSceneZSize", scene_bound.getExtents().z);
 			m_dirBRFs->setSceneBoundPlaneSize(Vector2(sceneBoundX, scenBoundZ));
-			//read virtual direction
-			m_virtualDirections = m_scene->getIntegrator()->getProperties().getString("virtualDirections", "");
-			m_virtualDetectorDirection = m_scene->getIntegrator()->getProperties().getString("virtualDetectorDirections", "");
-			m_dirBRFs->readVirtualDirections(m_virtualDirections);
-			m_dirBRFs->readVirtualDetectors(m_virtualDetectorDirection);
 			if (inegratorProps.getBoolean("SceneVirtualPlane", false)) {
 				double vSizeX = inegratorProps.getFloat("sizex", sceneBoundX);
 				double vSizeZ = inegratorProps.getFloat("sizez", scenBoundZ);
@@ -661,6 +713,31 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 				m_dirBRFs->setVirtualBoundXZSize(Vector2(sceneBoundX, scenBoundZ));
 			}
 
+			//read virtual direction
+			m_virtualDirections = m_scene->getIntegrator()->getProperties().getString("virtualDirections", "");
+			m_virtualDetectorDirection = m_scene->getIntegrator()->getProperties().getString("virtualDetectorDirections", "");
+			m_dirBRFs->readVirtualDirections(m_virtualDirections);
+			m_dirBRFs->readVirtualDetectors(m_virtualDetectorDirection);
+
+		}
+
+		//*********************************fPAR***************************************
+		//create products for fpar
+		if (m_hasfPARProducts) {
+			m_layerDefinition = m_scene->getIntegrator()->getProperties().getString("LayerDefinition", "0:2:20");
+			m_fPARs = new fPARProduct(m_layerDefinition);
+			m_fPARs->setDestinationFile(m_scene->getDestinationFile().string() + "_Layer_fPAR.txt");
+			m_fPARs->setWavelengths(m_scene->getIntegrator()->getProperties().getSpectrum("wavelengths"));
+
+			m_fPARs->setSceneBoundPlaneSize(Vector2(sceneBoundX, scenBoundZ));
+			if (inegratorProps.getBoolean("SceneVirtualPlane", false)) {
+				double vSizeX = inegratorProps.getFloat("sizex", sceneBoundX);
+				double vSizeZ = inegratorProps.getFloat("sizez", scenBoundZ);
+				m_fPARs->setVirtualBoundXZSize(Vector2(vSizeX, vSizeZ));
+			}
+			else {
+				m_fPARs->setVirtualBoundXZSize(Vector2(sceneBoundX, scenBoundZ));
+			}
 		}
 		
 	}
@@ -669,7 +746,7 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 
 ref<WorkProcessor> CapturePhotonProcess::createWorkProcessor() const {
 	return new CapturePhotonWorker(m_maxDepth, m_maxPathDepth,
-		m_rrDepth, m_bruteForce, m_hasBRFProducts,m_hasUpDownProducts, m_virtualDirections,m_numberOfDirections, m_virtualDetectorDirection);
+		m_rrDepth, m_bruteForce, m_hasBRFProducts,m_hasUpDownProducts, m_virtualDirections,m_numberOfDirections, m_virtualDetectorDirection,m_hasfPARProducts, m_layerDefinition);
 }
 
 

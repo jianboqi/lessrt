@@ -8,6 +8,36 @@ import math
 from RasterHelper import *
 # sys.path.append(os.getcwd()+'/rt/dist-rgb/python/2.7')
 
+
+def do_ats_simulation(cores):
+    currdir = os.path.split(os.path.realpath(__file__))[0]
+    rt_dir = os.path.join(currdir + '/bin/rt/' + current_rt_program)
+    os.environ['PATH'] = rt_dir + os.pathsep + os.environ['PATH']
+    cfgfile = session.get_config_file()
+    f = open(cfgfile, 'r')
+    cfg = json.load(f)
+    excuable = "lessrt"
+
+    distFile = os.path.join(session.get_output_dir(), "atsIllumination")
+    scene_file_path = os.path.join(session.get_scenefile_path(), atmosphere_scene_file)
+
+    server_file = os.path.join(session.get_input_dir(), "server.txt")
+    current_working_dir = os.getcwd()
+    os.chdir(rt_dir)
+    if cfg["Advanced"]["network_sim"]:
+        if cores == -1:
+            subprocess.call([excuable, scene_file_path, "-o", distFile, "-s", server_file])
+        else:
+            subprocess.call(
+                [excuable, scene_file_path, "-o", distFile, "-p", cores, "-s", server_file])
+    else:
+        if cores == -1:
+            subprocess.call([excuable, scene_file_path, "-o", distFile])
+        else:
+            subprocess.call([excuable, scene_file_path, "-o", distFile, "-p", str(cores)])
+    os.chdir(current_working_dir)
+
+
 def do_simulation_multi_spectral(cores):
     currdir = os.path.split(os.path.realpath(__file__))[0]
     rt_dir = os.path.join(currdir + '/bin/rt/'+current_rt_program)

@@ -394,7 +394,7 @@ protected:
 				its.shFrame.n = faceNormal;
 			}
 			its.geoFrame = Frame(faceNormal);
-
+			
 			if (EXPECT_TAKEN(vertexTexcoords)) {
 				const Point2 &t0 = vertexTexcoords[idx0];
 				const Point2 &t1 = vertexTexcoords[idx1];

@@ -6,7 +6,7 @@ from FileHelper import *
 from Constant import current_rt_program
 import math
 
-def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
+def convert_obj_2_serialized(inputobjpath, outputserilizeddir, isNeedCache):
     currdir = os.path.split(os.path.realpath(__file__))[0]
     os.environ['PATH'] = currdir + '/bin/rt/'+ current_rt_program +'/' + os.pathsep + os.environ['PATH']
     rt_dir = os.path.join(currdir + '/bin/rt/' + current_rt_program)
@@ -16,7 +16,7 @@ def convert_obj_2_serialized(inputobjpath, outputserilizeddir):
     outputserilizedpath = combine_file_path(outputserilizeddir, xmlfilename)
     # cmd = "mtsimport " + inputobjpath +" " + outputserilizedpath
     log("INFO: Converting "+ os.path.basename(inputobjpath) + " to binary format.")
-    if os.path.exists(outputserilizedpath+".serialized"):
+    if isNeedCache and os.path.exists(outputserilizedpath+".serialized"):
         log("INFO: Using cached file.")
         return
     current_working_dir = os.getcwd()

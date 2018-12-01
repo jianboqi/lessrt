@@ -8,6 +8,7 @@
 #include <mitsuba/render/renderjob.h>
 #include <mitsuba/core/bitmap.h>
 #include "DirectionalBRF.h"
+#include "fPARProduct.h"
 MTS_NAMESPACE_BEGIN
 
 //结果保存到图像中
@@ -15,7 +16,7 @@ class CapturePhotonWorkResult :public WorkResult {
 public:
 	inline CapturePhotonWorkResult(const Vector2i &res, const ReconstructionFilter *filter, 
 		bool hasBRFProducts, bool hasUpDownProducts, string virtualDirectionStr, int numberOfDirections,
-		string virtualDetectorDirection){
+		string virtualDetectorDirection, bool hasfPARProducts, string layerDefinition){
 		m_range = new RangeWorkUnit();
 
 		m_hasUpDownProducts = hasUpDownProducts;
@@ -31,6 +32,12 @@ public:
 			m_dirBRFWorkResult = new DirectionalBRF(m_numberOfDirections);
 			m_dirBRFWorkResult->readVirtualDirections(virtualDirectionStr);
 			m_dirBRFWorkResult->readVirtualDetectors(virtualDetectorDirection);
+		}
+
+		m_hasfPARProducts = hasfPARProducts;
+		m_layerDefinition = layerDefinition;
+		if (m_hasfPARProducts) {
+			m_fPARsWordResult = new fPARProduct(m_layerDefinition);
 		}
 		
 		m_PhtonsEachProcess = 0;
@@ -68,6 +75,9 @@ public:
 	bool m_hasUpDownProducts;
 	size_t m_PhtonsEachProcess;
 	int m_numberOfDirections;
+	bool m_hasfPARProducts;
+	ref<fPARProduct> m_fPARsWordResult;
+	string m_layerDefinition;
 };
 
 
@@ -84,16 +94,19 @@ public:
 	enum EPhotonType {
 		ETypeNull = 0x0001,
 		ETypeBRF = 0x0002,
-		ETypeUpDown = 0x0004,
-		EtypeBRFUpDown = ETypeBRF | ETypeUpDown
+		ETypefPAR = 0x0004,
+		ETypeUpDown = 0x0008,
+		EtypeAllProducts = ETypeBRF | ETypefPAR | ETypeUpDown
+		//EtypeBRFUpDown = ETypeBRF | ETypeUpDown
 	};
 
 	inline CapturePhotonWorker(int maxDepth, int maxPathDepth,
 		int rrDepth, bool bruteForce, bool hasBRFProducts, bool hasUpDownProducts, string virtualDirections,
-		int numberOfDirections, string virtualDetectorDirection) : PhotonTracer(maxDepth, rrDepth, true),
+		int numberOfDirections, string virtualDetectorDirection, bool hasfPARProducts, string layerDefinition) : PhotonTracer(maxDepth, rrDepth, true),
 		m_maxPathDepth(maxPathDepth), m_bruteForce(bruteForce), m_hasBRFProducts(hasBRFProducts),
 		m_hasUpDownProducts(hasUpDownProducts), m_virtualDirections(virtualDirections),
-		m_numberOfDirections(numberOfDirections), m_virtualDetectorDirection(virtualDetectorDirection){ }
+		m_numberOfDirections(numberOfDirections), m_virtualDetectorDirection(virtualDetectorDirection),
+		m_hasfPARProducts(hasfPARProducts),m_layerDefinition(layerDefinition){ }
 
 	CapturePhotonWorker(Stream *stream, InstanceManager *manager);
 
@@ -132,6 +145,10 @@ public:
 	* and accumulate in the proper pixel of the accumulation buffer.
 	*/
 	void handleSurfaceInteractionBRF(int depth, int nullInteractions,
+		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+		const Spectrum &weight, int photoType);
+
+	void handleSurfaceInteractionFPAR(int depth, int nullInteractions,
 		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
 		const Spectrum &weight, int photoType);
 
@@ -180,6 +197,8 @@ private:
 	string m_virtualDirections;
 	int m_numberOfDirections;
 	string m_virtualDetectorDirection;
+	bool m_hasfPARProducts;
+	string m_layerDefinition;
 };
 
 
@@ -195,13 +214,14 @@ public:
 	CapturePhotonProcess(const RenderJob *job, RenderQueue *queue,
 		size_t sampleCount, size_t granularity, int maxDepth,
 		int maxPathDepth, int rrDepth, bool bruteForce, bool hasBRFProducts, bool hasUpDownProducts,
-		int numberOfDirections)
+		int numberOfDirections, bool hasfPARProducts)
 		: PhotonProcess(PhotonProcess::ETrace, sampleCount,
 			granularity, "Simulating", job), m_job(job), m_queue(queue),
 		m_maxDepth(maxDepth), m_maxPathDepth(maxPathDepth),
 		m_rrDepth(rrDepth), m_bruteForce(bruteForce), m_hasBRFProducts(hasBRFProducts),
 		m_hasUpDownProducts(hasUpDownProducts),
-		m_numberOfDirections(numberOfDirections){
+		m_numberOfDirections(numberOfDirections),
+		m_hasfPARProducts(hasfPARProducts){
 	}
 
 	void develop();
@@ -232,6 +252,9 @@ private:
 	ref<Film> m_film_upwell;
 	ref<ImageBlock> m_accum_upwell;
 	ref<DirectionalBRF> m_dirBRFs;
+	ref<fPARProduct> m_fPARs;
+
+	AABB m_virtualBounds;//scene virtual bounds
 
 	//Products
 	bool m_hasBRFProducts;
@@ -239,6 +262,8 @@ private:
 	string m_virtualDirections;
 	string m_virtualDetectorDirection;
 	int m_numberOfDirections;
+	bool m_hasfPARProducts;
+	string m_layerDefinition;
 
 	size_t m_totalPhotons;
 };

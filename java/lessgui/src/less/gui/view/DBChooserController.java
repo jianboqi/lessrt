@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import less.gui.model.FacetOptical;
+import less.gui.utils.Const;
 import less.gui.utils.DBReader;
 
 public class DBChooserController {
@@ -61,7 +62,8 @@ public class DBChooserController {
 				objName,
 				opticalArr.get(0),
 				opticalArr.get(1),
-				opticalArr.get(2)));
+				opticalArr.get(2),
+				Const.LESS_OP_TYPE_DB));
 		this.mwController.terrainOpticalData.add(objName);
 		this.parentStage.close();
 	}

@@ -28,6 +28,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -49,14 +51,19 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import less.LessMainApp;
+import less.gui.model.AtmosphereParams;
 import less.gui.model.PositionXY;
+import less.gui.model.ProspectDParams;
 import less.gui.model.SunPos;
 import less.gui.server.PyServer;
 import less.gui.utils.Const;
+import less.gui.view.AtmosphereEditorController;
 import less.gui.view.BatchController;
+import less.gui.view.DBChooserController;
 import less.gui.view.HelpViewerController;
 import less.gui.view.LAICalculatorController;
 import less.gui.view.LessMainWindowController;
+import less.gui.view.ProspectDController;
 import less.gui.view.RunningOnClusterController;
 import less.gui.view.SunPostionCalculatorController;
 
@@ -97,7 +104,8 @@ public class ProjectManager {
 	public Process p;// 
 	
 	public SunPos sunpos = null;// 
-	
+	public AtmosphereParams atmosphereParams = null;//Atmosphere class for storing atmosphere parameters.
+	public Map<String, ProspectDParams> prospectDParamsMap = new HashMap<String, ProspectDParams>();
 	
 	
 	public ProjectManager(LessMainWindowController mwController){
@@ -319,6 +327,43 @@ public class ProjectManager {
 	        	this.mwController.terrFileField.setText(file.getName());
 	        }
 	}
+	
+	/**
+	 * terrain: land albedo map
+	 */
+	public void selectLandAlbedoBtn() {
+		if(this.mwController.simulation_path == null){
+			this.mwController.outputConsole.log("Please create a simulation first.\n");
+			   return;
+			}
+			Path initPath = Paths.get(this.mwController.simulation_path);
+			FileChooser fileChooser = new FileChooser();
+			File initDirectory = new File(initPath.normalize().toString());
+			fileChooser.setInitialDirectory(initDirectory);
+	        // Set extension filter
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ENVI Standard", "*.*"));
+	        // Show open file dialog
+	        File file = fileChooser.showOpenDialog(this.mwController.mainApp.getPrimaryStage());
+	        if(file !=null)
+	        {
+	        	//copy this to the folder of paramters
+	        	String param_path = this.getParameterDirPath();
+	        	CopyOption[] options = new CopyOption[]{
+	                    StandardCopyOption.REPLACE_EXISTING,
+	                    StandardCopyOption.COPY_ATTRIBUTES
+	            };
+	        	try {
+					Files.copy(file.toPath(), Paths.get(param_path,file.getName()), options);
+					if(fileChooser.getSelectedExtensionFilter().getExtensions().get(0).equals("*.*")){
+						Files.copy(Paths.get(file.toString()+".hdr"), Paths.get(param_path,file.getName()+".hdr"), options);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	        	this.mwController.landAlbedoTextField.setText(file.getName());
+	        }
+	}
+	
 	
 	//�ر���
 	public void handleLandcoverCheckbox(){
@@ -879,6 +924,30 @@ public class ProjectManager {
 	}
 	
 	
+	//Open Atmosphere editor
+	public void OpenAtmosphereEditor() {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(AtmosphereEditorController.class.getResource("AtmosphereEditor.fxml"));
+		try {
+			BorderPane rootLayout = (BorderPane) loader.load();
+			Scene scene = new Scene(rootLayout);
+			Stage atsStage = new Stage();
+			atsStage.setScene(scene);
+			atsStage.setTitle("Atmosphere Editor");
+			AtmosphereEditorController atmosphereEditorController = loader.getController();
+			atmosphereEditorController.setParentStage(atsStage);
+			atmosphereEditorController.setmwController(this.mwController);
+			atmosphereEditorController.initView();			
+			atsStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+			atsStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+			atsStage.initOwner(this.mwController.mainApp.getPrimaryStage());
+			atsStage.setResizable(false);
+			atsStage.show();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void OpenSunPosCalculator(){
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(SunPostionCalculatorController.class.getResource("SunPositionCalculatorView.fxml"));
@@ -955,43 +1024,86 @@ public class ProjectManager {
 		AnchorPane.setTopAnchor(mwController.productBRFCheckbox, 45.0);
 		AnchorPane.setTopAnchor(mwController.productUpDownRadiationCheckbox, 45.0);
 		
+		mwController.productfPARChecbox = new CheckBox("fPAR");
+		mwController.ptConfigPanel.getChildren().add(mwController.productfPARChecbox);
+		AnchorPane.setLeftAnchor(mwController.productfPARChecbox, 430.0);
+		AnchorPane.setTopAnchor(mwController.productfPARChecbox, 45.0);
+		
+		mwController.productfPARChecbox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+		    @Override
+		    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+		        if(newValue) {
+		        	mwController.fPARLayerLabel = new Label("Layer definition:");
+		        	mwController.ptConfigPanel.getChildren().add(mwController.fPARLayerLabel);
+		    		AnchorPane.setLeftAnchor(mwController.fPARLayerLabel, 0.0);
+		    		
+		    		mwController.fPARLayerTextEdit = new TextField();
+		    		mwController.fPARLayerTextEdit.setPromptText("Example: 0:2:20 or 10");
+		    		mwController.ptConfigPanel.getChildren().add(mwController.fPARLayerTextEdit);
+		    		AnchorPane.setLeftAnchor(mwController.fPARLayerTextEdit, 150.0);
+		    		AnchorPane.setRightAnchor(mwController.fPARLayerTextEdit, 20.0);
+		    		
+		    		if(mwController.productBRFCheckbox.isSelected()) {
+		    			AnchorPane.setTopAnchor(mwController.fPARLayerLabel, 210.0);
+		    			AnchorPane.setTopAnchor(mwController.fPARLayerTextEdit, 205.0);
+		    		}else {
+		    			AnchorPane.setTopAnchor(mwController.fPARLayerLabel, 85.0);
+		    			AnchorPane.setTopAnchor(mwController.fPARLayerTextEdit, 80.0);
+		    		}		    		
+		    		
+		        }else {
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.fPARLayerTextEdit);
+		        	mwController.ptConfigPanel.getChildren().remove(mwController.fPARLayerLabel);
+		        	if(mwController.productBRFCheckbox.isSelected()) {
+		        		mwController.productBRFCheckbox.setSelected(false);
+		        		mwController.productBRFCheckbox.setSelected(true);
+		        	}
+		        }
+		    }
+		});
+		
 		mwController.productBRFCheckbox.selectedProperty().addListener(new ChangeListener<Boolean>() {
 		    @Override
 		    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		        if(newValue) {
+		        	double offset = 0.0;
+		        	if(mwController.productfPARChecbox.isSelected()) {
+		        		offset = 40.0;
+		        	}
+		        	
 		        	//number of directions
 		    		mwController.numOfDirectionLabel = new Label("Number of Directions:");
 		    		mwController.ptConfigPanel.getChildren().add(mwController.numOfDirectionLabel);
 		    		AnchorPane.setLeftAnchor(mwController.numOfDirectionLabel, 0.0);
-		    		AnchorPane.setTopAnchor(mwController.numOfDirectionLabel, 85.0);
+		    		AnchorPane.setTopAnchor(mwController.numOfDirectionLabel, offset+85.0);
 		    		mwController.numOfDirectionTextField = new TextField();
 		    		mwController.ptConfigPanel.getChildren().add(mwController.numOfDirectionTextField);
 		    		mwController.numOfDirectionTextField.setText("150");
 		    		AnchorPane.setLeftAnchor(mwController.numOfDirectionTextField, 150.0);
 		    		AnchorPane.setRightAnchor(mwController.numOfDirectionTextField, 20.0);
-		    		AnchorPane.setTopAnchor(mwController.numOfDirectionTextField, 80.0);
+		    		AnchorPane.setTopAnchor(mwController.numOfDirectionTextField, offset+80.0);
 		        	
 		        	mwController.virtualLabel = new Label("Virutal Directions [\u00B0]:");
 		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualLabel);
 		    		AnchorPane.setLeftAnchor(mwController.virtualLabel, 0.0);
-		    		AnchorPane.setTopAnchor(mwController.virtualLabel, 125.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualLabel, offset+125.0);
 		    		mwController.virtualDirTextField = new TextField();
 		    		mwController.virtualDirTextField.setPromptText("zenith:azimuth;zentih:azimuth or zenith1,zenith2;azimuth1,azimuth2");
 		    		mwController.ptConfigPanel.getChildren().add(mwController.virtualDirTextField);
 		    		AnchorPane.setLeftAnchor(mwController.virtualDirTextField, 150.0);
 		    		AnchorPane.setRightAnchor(mwController.virtualDirTextField, 20.0);
-		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, 120.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDirTextField, offset+120.0);
 		    		
 		    		mwController.virtualDetectorLabel = new Label("Virutal Detectors [\u00B0]:");
 		        	mwController.ptConfigPanel.getChildren().add(mwController.virtualDetectorLabel);
 		    		AnchorPane.setLeftAnchor(mwController.virtualDetectorLabel, 0.0);
-		    		AnchorPane.setTopAnchor(mwController.virtualDetectorLabel, 170.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDetectorLabel, offset+170.0);
 		    		mwController.virtualDetectorTextField = new TextField();
 		    		mwController.virtualDetectorTextField.setPromptText("centerZenith,centerAzimuth,angleInterval;centerZenith,centerAzimuth,angleInterval");
 		    		mwController.ptConfigPanel.getChildren().add(mwController.virtualDetectorTextField);
 		    		AnchorPane.setLeftAnchor(mwController.virtualDetectorTextField, 150.0);
 		    		AnchorPane.setRightAnchor(mwController.virtualDetectorTextField, 20.0);
-		    		AnchorPane.setTopAnchor(mwController.virtualDetectorTextField, 165.0);
+		    		AnchorPane.setTopAnchor(mwController.virtualDetectorTextField, offset+165.0);
 		    		
 		        }else {
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualLabel);
@@ -1000,6 +1112,10 @@ public class ProjectManager {
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.numOfDirectionTextField);
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDetectorLabel);
 		        	mwController.ptConfigPanel.getChildren().remove(mwController.virtualDetectorTextField);
+		        	if(mwController.productfPARChecbox.isSelected()) {
+		        		mwController.productfPARChecbox.setSelected(false);
+		        		mwController.productfPARChecbox.setSelected(true);
+		        	}
 		        }
 		    }
 		});
@@ -1088,7 +1204,7 @@ public class ProjectManager {
 					mwController.sensorVbox.getChildren().add(mwController.orthographicPane);
 					mwController.obsVbox.getChildren().remove(mwController.obsPerspectivePane);
 					mwController.obsVbox.getChildren().add(mwController.obsOrthographicPane);
-					mwController.pixelUnitLabel.setText("Samples [m-2]:");
+					mwController.pixelUnitLabel.setText("Samples [/pixel]:");
 					mwController.sensorVbox.getChildren().remove(mwController.ptConfigPanel);
 					mwController.virtualPlaneCheckbox.setSelected(false);
 					handlePlaneCheckbox();
@@ -1222,22 +1338,26 @@ public class ProjectManager {
 					AnchorPane.setTopAnchor(mwController.c4TextField, 265.0);
 					AnchorPane.setTopAnchor(mwController.h1TextField, 305.0);
 					AnchorPane.setTopAnchor(mwController.h2TextField, 345.0);
-					AnchorPane.setLeftAnchor(mwController.albedoTextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.c1TextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.c2TextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.c3TextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.c4TextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.h1TextField, 110.0);
-					AnchorPane.setLeftAnchor(mwController.h2TextField, 110.0);
+					AnchorPane.setLeftAnchor(mwController.albedoTextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.c1TextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.c2TextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.c3TextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.c4TextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.h1TextField, 120.0);
+					AnchorPane.setLeftAnchor(mwController.h2TextField, 120.0);
 					
 					mwController.soilspectHelp = new Label("(\u03C9"+"1,"+"\u03C9"+"2,...[Number of Bands])");
 					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.soilspectHelp);
 					AnchorPane.setLeftAnchor(mwController.soilspectHelp, 300.0);
 					AnchorPane.setTopAnchor(mwController.soilspectHelp, 110.0);
 					
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.landAlbedoTextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.landAlbedoLabel);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.selectLandAlbedoBtn);
 				}
 				if (newVal.equals(Const.LESS_TERRAIN_BRDF_LAMBERTIAN)){
-					mwController.terrainOpticalCombox.getSelectionModel().select(0);;
+					mwController.terrainOpticalCombox.getSelectionModel().select(0);
 					mwController.terrainOpticalCombox.setDisable(false);
 					
 					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.albedoLabel);
@@ -1257,10 +1377,86 @@ public class ProjectManager {
 					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h2TextField);
 					
 					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.soilspectHelp);
+					
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.landAlbedoTextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.landAlbedoLabel);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.selectLandAlbedoBtn);
 				}
+				
+				if(newVal.equals(Const.LESS_TERRAIN_BRDF_LANDALBEDOMAP)) {
+					mwController.terrainOpticalCombox.getSelectionModel().clearSelection();
+					mwController.terrainOpticalCombox.setDisable(true);
+					
+					mwController.landAlbedoTextField = new TextField();
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.landAlbedoTextField);
+					AnchorPane.setTopAnchor(mwController.landAlbedoTextField, 105.0);
+					AnchorPane.setLeftAnchor(mwController.landAlbedoTextField, 120.0);
+					
+					mwController.landAlbedoLabel = new Label("Land Albedo Map: ");
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.landAlbedoLabel);
+					AnchorPane.setTopAnchor(mwController.landAlbedoLabel, 110.0);
+					AnchorPane.setLeftAnchor(mwController.landAlbedoLabel, 0.0);
+					
+					mwController.selectLandAlbedoBtn = new Button("\u2026");
+					mwController.terrainOpticalAnchorPane.getChildren().add(mwController.selectLandAlbedoBtn);
+					AnchorPane.setTopAnchor(mwController.selectLandAlbedoBtn, 105.0);
+					AnchorPane.setLeftAnchor(mwController.selectLandAlbedoBtn, 300.0);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.albedoLabel);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c2Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c3Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c4Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h1Label);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h2Label);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.albedoTextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c2TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c3TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.c4TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h1TextField);
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.h2TextField);
+					
+					mwController.terrainOpticalAnchorPane.getChildren().remove(mwController.soilspectHelp);
+					
+					mwController.selectLandAlbedoBtn.setOnAction(new EventHandler<ActionEvent>() {
+					    @Override public void handle(ActionEvent e) {
+					        selectLandAlbedoBtn();
+					    }
+					});
+				}
+				
 		    } 
 		});
 		
+	}
+	
+	//Open Prospect-D dialog
+	public void OpenProspectD() {
+		try {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(LessMainWindowController.class.getResource("ProspectDView.fxml"));
+			BorderPane rootLayout = (BorderPane) loader.load();
+			Scene scene = new Scene(rootLayout);
+			Stage subStage = new Stage();
+			subStage.setScene(scene);
+			subStage.setTitle("PROSPECT-D");
+			ProspectDController prospectDController = loader.getController();
+			prospectDController.setMainWindowController(this.mwController);
+			prospectDController.setParentStage(subStage);
+			//objController.setOpticalData(this.terrainOpticalData);
+			//objController.setObjectData(objectsList, objectsAndCompomentsMap, opticalcomponentMap);
+			prospectDController.initView();
+			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+			subStage.initOwner(this.mwController.mainApp.getPrimaryStage());
+			subStage.show();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//python interpreter
