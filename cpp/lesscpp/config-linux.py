@@ -4,7 +4,7 @@ BUILDDIR       = '#build/release-linux'
 DISTDIR        = '#dist-linux'
 CXX            = 'g++'
 CC             = 'gcc'
-CXXFLAGS       = ['-O3', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DDOUBLE_PRECISION','-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2']
+CXXFLAGS       = ['-O3','-std=c++11', '-Wall', '-g', '-pipe', '-march=nocona', '-msse2', '-ftree-vectorize', '-mfpmath=sse', '-funsafe-math-optimizations', '-fno-rounding-math', '-fno-signaling-nans', '-fno-math-errno', '-fomit-frame-pointer', '-DMTS_DEBUG', '-DDOUBLE_PRECISION','-fopenmp', '-fvisibility=hidden', '-mtls-dialect=gnu2']
 LINKFLAGS      = ["-Wl,-rpath='$$ORIGIN'"]
 SHLINKFLAGS    = ['-rdynamic', '-shared', '-fPIC', '-lstdc++']
 BASEINCLUDE    = ['#include']
