@@ -301,7 +301,7 @@ public class ProjectManager {
 	        // Set extension filter
 	        if(this.mwController.comboBoxDEMType.getSelectionModel().getSelectedItem().equals(Const.LESS_TERRAIN_RASTER)){
 //	        	fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Geotiff", "*.tif"));
-	        	fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ENVI Standard", "*.*"));
+	        	fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ENVI Standard", "*"));
 	        }
 	        if(this.mwController.comboBoxDEMType.getSelectionModel().getSelectedItem().equals(Const.LESS_TERRAIN_MESH)){
 	        	fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Mesh", "*.obj"));
@@ -318,7 +318,7 @@ public class ProjectManager {
 	            };
 	        	try {
 					Files.copy(file.toPath(), Paths.get(param_path,file.getName()), options);
-					if(fileChooser.getSelectedExtensionFilter().getExtensions().get(0).equals("*.*")){
+					if(fileChooser.getSelectedExtensionFilter().getExtensions().get(0).equals("*")){
 						Files.copy(Paths.get(file.toString()+".hdr"), Paths.get(param_path,file.getName()+".hdr"), options);
 					}
 				} catch (IOException e) {
