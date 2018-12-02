@@ -6,7 +6,11 @@ from SceneParser import *
 from Loger import log
 from Utils import convert_obj_2_serialized, check_if_string_is_zero_and_comma, ensureDirs
 currdir = os.path.split(os.path.realpath(__file__))[0]
-sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/3.6/')
+import platform
+if platform.system() == "Windows":
+    sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/3.6/')
+else:
+    sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/3.5/')
 os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + '/' + os.pathsep + os.environ['PATH']
 import codecs
 

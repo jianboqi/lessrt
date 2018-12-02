@@ -45,7 +45,11 @@ class SceneParser:
     #get boundingSphereAccording object boundbox
     def getBoundingSphereInfoStatic(self, instanceFileName, main_scene_xml_file_prifix,xScale,zScale):
         currdir = os.path.split(os.path.realpath(__file__))[0]
-        sys.path.append(os.path.join(currdir,"bin","rt",current_rt_program,"python","3.6"))
+        import platform
+        if platform.system() == "Windows":
+            sys.path.append(os.path.join(currdir,"bin","rt",current_rt_program,"python","3.6"))
+        else:
+            sys.path.append(os.path.join(currdir, "bin", "rt", current_rt_program, "python", "3.5"))
         os.environ['PATH'] = os.path.join(currdir,"bin","rt",current_rt_program) + os.pathsep + os.environ['PATH']
         from mitsuba.core import AABB,Point
 
@@ -98,7 +102,12 @@ class SceneParser:
     def getTerrainBoundingAABB(self, main_scene_xml_file_prifix):
         # get bounding sphere
         currdir = os.path.split(os.path.realpath(__file__))[0]
-        sys.path.append(os.path.join(currdir, "bin", "rt", current_rt_program, "python", "3.6"))
+        import platform
+        if platform.system() == "Windows":
+            sys.path.append(os.path.join(currdir, "bin", "rt", current_rt_program, "python", "3.6"))
+        else:
+            sys.path.append(os.path.join(currdir, "bin", "rt", current_rt_program, "python", "3.5"))
+
         os.environ['PATH'] = os.path.join(currdir, "bin", "rt", current_rt_program) + os.pathsep + os.environ['PATH']
         import mitsuba
         from mitsuba.core import Vector, Point, Ray, Thread
