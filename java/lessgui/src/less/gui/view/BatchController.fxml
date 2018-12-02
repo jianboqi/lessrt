@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="700.0" prefWidth="928.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.BatchController">
+<BorderPane prefHeight="700.0" prefWidth="928.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.BatchController">
    <center>
       <SplitPane dividerPositions="0.30952380952380953" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>

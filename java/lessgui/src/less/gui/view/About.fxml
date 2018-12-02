@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <AnchorPane maxHeight="424.0" maxWidth="562.0" prefHeight="424.0" prefWidth="562.0" BorderPane.alignment="CENTER">
          <children>
@@ -24,9 +24,9 @@
                </font>
             </Label>
             <Label layoutX="112.0" layoutY="55.0" text="Large-scale Emulation System for forest Simulation" />
-            <Label layoutX="112.0" layoutY="85.0" text="Version: Release 1.6" />
-            <Label layoutX="308.0" layoutY="85.0" text="Date: 2017/08/07" />
-            <TextArea editable="false" layoutX="27.0" layoutY="145.0" prefHeight="184.0" prefWidth="508.0" text="LESS is a ray-tracing based radiative transfer simulation &#10;model, which is mainly designed for radiometric &#10;simulation of forest canopies, but also can simulate &#10;other kinds of scenes (such as cities etc.). A possible &#10;advantage of LESS is that it can simulate relatively large &#10;areas with millions of single trees, thus we named it &#10;as Large-scale Emulation System for forest Simulation (LESS). " />
+            <Label layoutX="112.0" layoutY="85.0" text="Version: Release 1.8.6" />
+            <Label layoutX="308.0" layoutY="85.0" text="Date: 2018/012/02" />
+            <TextArea editable="false" layoutX="27.0" layoutY="145.0" prefHeight="184.0" prefWidth="508.0" text="LESS is a ray-tracing based 3D radiative transfer model, which can simulate remote sensing data and images over large-scale and realistic 3D scenes. LESS employs a weighted forward photon tracing (FPT) method to simulate multispectral bidirectional reflectance factor (BRF) or flux-related data (e.g., downwelling radiation) and a backward path tracing (BPT) method to generate sensor images (e.g., fisheye images) or large-scale (e.g. 1 km2) spectral images. The BPT also has been extended to simulate thermal infrared radiation by using an on-the-fly computation of the sunlit and shaded scene components. It also provides a user-friendly graphic user interface (GUI) and a set of tools to help construct the landscape and set parameters. The accuracy of LESS is evaluated with other models as well as field measurements in terms of directional BRFs and pixel-wise simulated image comparisons, which shows very good agreement. LESS can work on both single computer and computing clusters. LESS is developed with Java, Python and C++." wrapText="true" />
             <Hyperlink layoutX="172.0" layoutY="112.0" text="http://ramm.bnu.edu.cn/projects/less/" />
             <Label layoutX="29.0" layoutY="116.0" text="Documentation:" />
             <Label layoutX="27.0" layoutY="338.0" text="Designed by Jianbo Qi        Email: jianboqi@gmail.com" />

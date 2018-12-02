@@ -5,7 +5,7 @@
 <?import javafx.scene.web.WebView?>
 
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111" fx:controller="less.gui.view.HelpViewerController">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx" fx:controller="less.gui.view.HelpViewerController">
    <center>
       <AnchorPane prefHeight="600.0" prefWidth="800.0" BorderPane.alignment="CENTER">
          <children>

@@ -1,7 +1,5 @@
 package less.gui.helper;
 
-import java.awt.Checkbox;
-import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -128,6 +126,8 @@ public class ProjectManager {
 		if (this.mwController.simulation_path == null){
 			return;
 		}
+		this.mwController.mainApp.getHostServices().showDocument(getResultsDirPath());
+/*		
 		if (Desktop.isDesktopSupported()) {
 		    try {
 				Desktop.getDesktop().open(new File(getResultsDirPath()));
@@ -135,7 +135,7 @@ public class ProjectManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 	
 	public void OpenBatchTool(){
