@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="471.0" prefWidth="531.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.display3D.DisplaySingleObject3DController">
+<BorderPane prefHeight="471.0" prefWidth="531.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.display3D.DisplaySingleObject3DController">
    <center>
       <SplitPane dividerPositions="0.6166281755196305" prefHeight="396.0" prefWidth="435.0" BorderPane.alignment="CENTER">
         <items>
