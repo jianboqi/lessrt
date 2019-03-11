@@ -168,7 +168,7 @@ public:
 		Point p = its.p;
 		string compName = its.shape->getID();
 		double step = m_layerUpperBounds[0] - m_layerLowerBounds[0];
-		int index = (int)((p.y - m_layerUpperBounds[0]) / step);
+		int index = (int)((p.y - m_layerLowerBounds[0]) / step);
 		if (index >= 0 && index <= m_mumberOfLayers - 1) {
 
 			//tmp

@@ -178,9 +178,9 @@ public:
 
 						/* Evaluate the phase function */
 						PhaseFunctionSamplingRecord pRec(mRec, -ray.d, dRec.d);
-						Float phaseVal = phase->eval(pRec);
+						Spectrum phaseVal = phase->eval(pRec);
 
-						if (phaseVal != 0) {
+						if (!phaseVal.isZero()) {
 							/* Calculate prob. of having sampled that direction using
 							   phase function sampling */
 							Float phasePdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)

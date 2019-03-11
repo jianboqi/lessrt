@@ -116,12 +116,10 @@ public:
 		PhaseFunction::configure();
 	}
 
-	Float eval(const PhaseFunctionSamplingRecord &pRec) const {
-		Float result = 0.0f;
-
+	Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const {
+		Spectrum result = Spectrum(0.0f);
 		for (size_t i=0; i<m_phaseFunctions.size(); ++i)
 			result += m_phaseFunctions[i]->eval(pRec) * m_weights[i];
-
 		return result;
 	}
 
@@ -150,7 +148,7 @@ public:
 			if (entry == i)
 				continue;
 			pdf += m_phaseFunctions[i]->pdf(pRec) * m_pdf[i];
-			result += m_phaseFunctions[i]->eval(pRec) * m_weights[i];
+			result += m_phaseFunctions[i]->eval(pRec)[m_sampleSpecIndex] * m_weights[i];
 		}
 
 		return result / pdf;
@@ -171,7 +169,7 @@ public:
 			if (entry == i)
 				continue;
 			pdf += m_phaseFunctions[i]->pdf(pRec) * m_pdf[i];
-			result += m_phaseFunctions[i]->eval(pRec) * m_weights[i];
+			result += m_phaseFunctions[i]->eval(pRec)[m_sampleSpecIndex] * m_weights[i];
 		}
 
 		return result/pdf;

@@ -21,6 +21,7 @@ import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableFloatArray;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -41,6 +42,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -597,6 +599,36 @@ public class ObjectsDefineWindowViewController {
 	    		String objName = this.objectsLV.getSelectionModel().getSelectedItem();
 	    		
 	    		
+	    		//determine boundingbox
+	    		for (Map.Entry<String, MeshView> entry : importedGroupsMap.entrySet()) {
+	    			TriangleMesh compMesh = (TriangleMesh)entry.getValue().getMesh();
+	    			LSBoundingbox lsBoundingbox = new LSBoundingbox();
+	    			ObservableFloatArray pointarray =  compMesh.getPoints();
+	    			for(int i=0;i<pointarray.size();i += 3){
+	    				double x = pointarray.get(i)*fx;
+	    				double y = -pointarray.get(i+1)*fy;
+	    				double z = -pointarray.get(i+2)*fz;
+	    				if(x < lsBoundingbox.minX) lsBoundingbox.minX = x;
+	    				if(y < lsBoundingbox.minY) lsBoundingbox.minY = y;
+	    				if(z < lsBoundingbox.minZ) lsBoundingbox.minZ = z;
+	    				if(x > lsBoundingbox.maxX) lsBoundingbox.maxX = x;
+	    				if(y > lsBoundingbox.maxY) lsBoundingbox.maxY = y;
+	    				if(z > lsBoundingbox.maxZ) lsBoundingbox.maxZ = z;
+	    			}
+	    			if(this.mwController.objectAndBoundingboxMap.containsKey(objName)){
+		    			this.mwController.objectAndBoundingboxMap.get(objName).addChild(lsBoundingbox);;
+		    		}else{
+		    			LSBoundingbox objBoundingbox = new LSBoundingbox();
+		    			objBoundingbox.addChild(lsBoundingbox);
+		    			this.mwController.objectAndBoundingboxMap.put(objName, objBoundingbox);
+		    		}
+	    		}
+	    		
+	    		LSBoundingbox totalBounds = this.mwController.objectAndBoundingboxMap.get(objName);
+	    		double lower_center_x = 0.5*(totalBounds.minX + totalBounds.maxX);
+	    		double lower_center_z = 0.5*(totalBounds.minZ + totalBounds.maxZ);
+	    		double lower_center_y = totalBounds.minY;
+	    		
 	    		for (Map.Entry<String, MeshView> entry : importedGroupsMap.entrySet())
 	    		{
 	    			String targetFileName = objName+"_"+entry.getKey();
@@ -605,14 +637,9 @@ public class ObjectsDefineWindowViewController {
 		        	mwController.objectsAndCompomentsMap.get(objName).add(targetFileName);
 		        	String param_path = this.mwController.projManager.getParameterDirPath();
 		        	String targetFilePath = Paths.get(param_path, targetFileName).toString();
-		        	LSBoundingbox lsBoundingbox = Filehelper.write_mesh_to_obj(targetFilePath, (TriangleMesh)entry.getValue().getMesh(),fx,fy,fz);
-		        	if(this.mwController.objectAndBoundingboxMap.containsKey(objName)){
-		    			this.mwController.objectAndBoundingboxMap.get(objName).addChild(lsBoundingbox);;
-		    		}else{
-		    			LSBoundingbox objBoundingbox = new LSBoundingbox();
-		    			objBoundingbox.addChild(lsBoundingbox);
-		    			this.mwController.objectAndBoundingboxMap.put(objName, objBoundingbox);
-		    		}
+		        	Filehelper.write_mesh_to_obj(targetFilePath, (TriangleMesh)entry.getValue().getMesh(),fx,fy,fz,
+		        			lower_center_x, lower_center_y,lower_center_z);
+		        	
 		        	//set color according to possible name
 		        	if(CommonUitls.contain_branch_names(targetFileName)){
 		        		String key = objName+"_"+targetFileName;

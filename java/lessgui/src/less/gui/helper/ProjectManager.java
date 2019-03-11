@@ -50,6 +50,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import less.LessMainApp;
 import less.gui.model.AtmosphereParams;
+import less.gui.model.FacetOptical;
 import less.gui.model.PositionXY;
 import less.gui.model.ProspectDParams;
 import less.gui.model.SunPos;
@@ -61,6 +62,7 @@ import less.gui.view.DBChooserController;
 import less.gui.view.HelpViewerController;
 import less.gui.view.LAICalculatorController;
 import less.gui.view.LessMainWindowController;
+import less.gui.view.PlotSpectraController;
 import less.gui.view.ProspectDController;
 import less.gui.view.RunningOnClusterController;
 import less.gui.view.SunPostionCalculatorController;
@@ -971,6 +973,35 @@ public class ProjectManager {
 		}
 	}
 	
+	public void PlotSpectra() {
+		FacetOptical facetOptical = (FacetOptical) this.mwController.opticalTable.getSelectionModel().getSelectedItem();
+		if(facetOptical != null) {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(PlotSpectraController.class.getResource("PlotSpectraView.fxml"));
+			try {
+				BorderPane rootLayout = (BorderPane) loader.load();
+				Scene scene = new Scene(rootLayout);
+				Stage spectraStage = new Stage();
+				spectraStage.setScene(scene);
+				spectraStage.setTitle("Spectra");
+				PlotSpectraController plotspectraController = loader.getController();
+				plotspectraController.setParentStage(spectraStage);
+				plotspectraController.setmwController(this.mwController);
+				plotspectraController.initView();
+				spectraStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+				spectraStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+				//spectraStage.initOwner(this.mwController.mainApp.getPrimaryStage());
+				//spectraStage.setResizable(false);
+				spectraStage.show();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else {
+			System.out.println("ERROR: Please Choose a optical property!");
+		}
+		
+	}
+	
 	//start helpviwer
 	public void startHelpViewer(){
 		
@@ -1209,6 +1240,9 @@ public class ProjectManager {
 					mwController.virtualPlaneCheckbox.setSelected(false);
 					handlePlaneCheckbox();
 					mwController.virtualPlaneCheckbox.setDisable(false);
+					mwController.sensorWidthField.setDisable(false);
+					mwController.sensorHeightField.setDisable(false);
+					mwController.sensorSampleField.setDisable(false);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PER)){
@@ -1223,6 +1257,9 @@ public class ProjectManager {
 					mwController.virtualPlaneCheckbox.setSelected(false);
 					handlePlaneCheckbox();
 					mwController.virtualPlaneCheckbox.setDisable(true);
+					mwController.sensorWidthField.setDisable(false);
+					mwController.sensorHeightField.setDisable(false);
+					mwController.sensorSampleField.setDisable(false);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_CF)){
@@ -1239,6 +1276,9 @@ public class ProjectManager {
 					mwController.virtualPlaneCheckbox.setSelected(false);
 					handlePlaneCheckbox();
 					mwController.virtualPlaneCheckbox.setDisable(true);
+					mwController.sensorWidthField.setDisable(false);
+					mwController.sensorHeightField.setDisable(false);
+					mwController.sensorSampleField.setDisable(false);
 					mwController.reDrawAll();
 				}
 				if(newVal.equals(Const.LESS_SENSOR_TYPE_PT)){
@@ -1253,6 +1293,9 @@ public class ProjectManager {
 					handlePlaneCheckbox();
 					mwController.virtualPlaneCheckbox.setDisable(false);
 					VBox.setMargin(mwController.ptConfigPanel, new Insets(15,0,0,0));
+					mwController.sensorWidthField.setDisable(true);
+					mwController.sensorHeightField.setDisable(true);
+					mwController.sensorSampleField.setDisable(true);
 					mwController.reDrawAll();
 				}
 			}

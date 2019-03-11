@@ -221,6 +221,58 @@ public:
 		return value;
 	}
 
+	//Test the ray repetitive nature for the first time, if the ray is not intersected within the
+	//scene top bounding plane, it should be moved to the top scene bouding plane
+	void rayRepetitiveInit(RayDifferential &ray, Intersection &its, const Scene *scene) const{
+		if (m_repetitiveSceneNum == 0)
+			return;
+
+		//ray plane test
+		double H = ray.o[1] - m_sceneBounds.max.y;
+		double a = ray.d.x;
+		double b = ray.d.y;
+		double c = ray.d.z;
+		Point its_p = ray.o + Point(-a / b * H, -H, -c / b * H);
+		double offsetX=0, offsetZ=0;
+		bool isOffseted = false;
+		if (its_p.x > m_sceneBounds.max.x) {
+			int numberOfX = (int)((its_p.x - m_sceneBounds.min.x) / m_sceneXSize);
+			if (numberOfX <= m_repetitiveSceneNum) {
+				offsetX =  - numberOfX * m_sceneXSize;
+				isOffseted = true;
+			}
+		}
+		if (its_p.x < m_sceneBounds.min.x) {
+			int numberOfX = (int)((m_sceneBounds.max.x - its_p.x) / m_sceneXSize);
+			if (numberOfX <= m_repetitiveSceneNum) {
+				offsetX =  numberOfX * m_sceneXSize;
+				isOffseted = true;
+			}
+		}
+
+		if (its_p.z > m_sceneBounds.max.z) {
+			int numberOfZ = (int)((its_p.z - m_sceneBounds.min.z) / m_sceneZSize);
+			if (numberOfZ <= m_repetitiveSceneNum) {
+				offsetZ =  - numberOfZ * m_sceneZSize;
+				isOffseted = true;
+			}
+		}
+
+		if (its_p.z < m_sceneBounds.min.z) {
+			int numberOfZ = (int)((m_sceneBounds.max.z - its_p.z) / m_sceneZSize);
+			if (numberOfZ <= m_repetitiveSceneNum) {
+				offsetZ =  numberOfZ * m_sceneZSize;
+				isOffseted = true;
+			}
+		}
+
+		if (isOffseted) {
+			ray.o.x += offsetX;
+			ray.o.z += offsetZ;
+		}
+		scene->rayIntersect(ray, its);
+	}
+
 	void rayRepetitive(RayDifferential &ray, Intersection &its, const Scene *scene) const{
 			if (!its.isValid()) {
 				for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
@@ -300,6 +352,7 @@ public:
 		   intersection has already been provided). */
 		rRec.rayIntersect(ray);
 		ray.mint = Epsilon;
+		rayRepetitiveInit(ray, its, scene);
 		rayRepetitive(ray, its, scene);
 
 		Spectrum throughput(1.0f);

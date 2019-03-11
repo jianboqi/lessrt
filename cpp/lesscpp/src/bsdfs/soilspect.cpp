@@ -76,13 +76,15 @@ public:
 
 	Spectrum B(Spectrum &h1, Spectrum &h2, const BSDFSamplingRecord &bRec) const {
 		double cosPhisv = dot(bRec.wi, bRec.wo);
-		double angle = acos(cosPhisv);
+		double angle = math::safe_acos(cosPhisv);
 		return h1 / (Spectrum(1.0) + (1 / h2) * tan(0.5*angle));
 	}
 
 	Spectrum P(Spectrum &c1, Spectrum &c2, Spectrum &c3, Spectrum &c4, const BSDFSamplingRecord &bRec) const{
-		double cosPhisv = dot(bRec.wi, bRec.wo);
-		double cosPhissv = dot(Vector(-bRec.wi.x, -bRec.wi.y, bRec.wi.z), bRec.wo);
+		Vector wi = Vector(bRec.wi);
+		Vector wo = Vector(bRec.wo);
+		double cosPhisv = dot(wi, wo);
+		double cosPhissv = dot(Vector(-wi.x, -wi.y, wi.z), wo);
 		return Spectrum(1.0) + c1 * cosPhisv + c2 * (3 * cosPhisv*cosPhisv - 1)*0.5 +
 			c3 * cosPhissv + c4 * (3 * cosPhissv*cosPhissv - 1)*0.5;
 	}
@@ -97,7 +99,9 @@ public:
 		Spectrum h1 = m_h1->eval(bRec.its);
 		Spectrum h2 = m_h2->eval(bRec.its);
 
-		Spectrum reflectance = Frame::cosTheta(bRec.wi) * albedo / 4.0 / (Frame::cosTheta(bRec.wi) + Frame::cosTheta(bRec.wo));
+		//tmp
+		//Spectrum reflectance = Frame::cosTheta(bRec.wi) * albedo / 4.0 / (Frame::cosTheta(bRec.wi) + Frame::cosTheta(bRec.wo));
+		Spectrum reflectance = albedo / 4.0 / (Frame::cosTheta(bRec.wi) + Frame::cosTheta(bRec.wo));
 		reflectance *= (Spectrum(1.0) + B(h1, h2, bRec))*P(c1, c2, c3, c4, bRec) + H(albedo, Frame::cosTheta(bRec.wi))*H(albedo, Frame::cosTheta(bRec.wo)) - Spectrum(1.0);
 		return reflectance;
 	}
@@ -107,7 +111,6 @@ public:
 			|| Frame::cosTheta(bRec.wi) <= 0
 			|| Frame::cosTheta(bRec.wo) <= 0)
 			return Spectrum(0.0f);
-
 		return computeDirectinalRelectance(bRec) * (INV_PI * Frame::cosTheta(bRec.wo));
 	}
 
@@ -116,7 +119,6 @@ public:
 			|| Frame::cosTheta(bRec.wi) <= 0
 			|| Frame::cosTheta(bRec.wo) <= 0)
 			return 0.0f;
-
 		return warp::squareToCosineHemispherePdf(bRec.wo);
 	}
 
@@ -135,7 +137,6 @@ public:
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &sample) const {
 		if (!(bRec.typeMask & EGlossyReflection) || Frame::cosTheta(bRec.wi) <= 0)
 			return Spectrum(0.0f);
-
 		bRec.wo = warp::squareToCosineHemisphere(sample);
 		bRec.eta = 1.0f;
 		bRec.sampledComponent = 0;

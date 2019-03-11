@@ -88,6 +88,10 @@
 			</fileset>
 		</copy>
 		
+		<mkdir dir="dist/Database" />
+		<copy todir="dist/Database" >
+		    <fileset dir="${basedir}/../../../Utility/Database"/>
+		</copy>
 		
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
@@ -106,6 +110,7 @@
 			<fx:fileset dir="dist" includes="LessGUI.jar"/>
 			<fx:fileset dir="dist" includes="libs/**"/>
 			<fx:fileset dir="dist" includes="bin/**"/>
+			<fx:fileset dir="dist" includes="Database/**"/>
 		</fx:resources>
 	
 		<fx:application id="fxApplication"

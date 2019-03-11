@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.DBChooserController">
+<BorderPane prefHeight="570.0" prefWidth="1044.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.DBChooserController">
    <center>
       <SplitPane dividerPositions="0.32608695652173914" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
@@ -17,7 +21,25 @@
                   <Button layoutX="95.0" layoutY="14.0" mnemonicParsing="false" onAction="#cancel" prefHeight="35.0" prefWidth="78.0" text="Cancel" AnchorPane.rightAnchor="17.0" />
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+          <AnchorPane fx:id="FigureAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <CheckBox fx:id="FrontCheckBox" layoutX="46.0" layoutY="25.0" mnemonicParsing="false" selected="true" text="Front Reflectance" AnchorPane.leftAnchor="46.0" AnchorPane.topAnchor="25.0" />
+                  <CheckBox fx:id="BackCheckBox" layoutX="188.0" layoutY="25.0" mnemonicParsing="false" selected="true" text="Back Reflectance" AnchorPane.leftAnchor="188.0" AnchorPane.topAnchor="25.0" />
+                  <CheckBox fx:id="TransCheckBox" layoutX="324.0" layoutY="25.0" mnemonicParsing="false" selected="true" text="Transmittance" AnchorPane.leftAnchor="324.0" AnchorPane.topAnchor="25.0" />
+                  <CheckBox fx:id="ShowFigureCheckBox" layoutX="480.0" layoutY="24.0" mnemonicParsing="false" selected="true" text="Show Figure" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
+                  <StackPane fx:id="chartStackPane" layoutX="214.0" layoutY="119.0" prefHeight="296.0" prefWidth="339.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
+                     <children>
+                        <LineChart fx:id="DBSpectraLineChart" prefHeight="164.0" prefWidth="260.0">
+      		          <xAxis>
+      		            <NumberAxis side="BOTTOM" />
+      		          </xAxis>
+      		          <yAxis>
+      		            <NumberAxis layoutX="10.0" side="LEFT" />
+      		          </yAxis>
+                        </LineChart>
+                     </children>
+                  </StackPane>
+               </children></AnchorPane>
         </items>
       </SplitPane>
    </center>

@@ -59,9 +59,6 @@ public:
 		Point2 sample(sampler->next2D());
 
 		Float z = 2 * (2*sample.x - 1),
-
-
-
 			  tmp = std::sqrt(z*z+1),
 			  A = cuberoot(z+tmp),
 			  B = cuberoot(z-tmp),
@@ -83,14 +80,14 @@ public:
 	Float sample(PhaseFunctionSamplingRecord &pRec,
 			Float &pdf, Sampler *sampler) const {
 		RayleighPhaseFunction::sample(pRec, sampler);
-		pdf = RayleighPhaseFunction::eval(pRec);
+		pdf = RayleighPhaseFunction::eval(pRec)[m_sampleSpecIndex];
 		return 1.0f;
 	}
 
 
-	Float eval(const PhaseFunctionSamplingRecord &pRec) const {
+	Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const {
 		Float mu = dot(pRec.wi, pRec.wo);
-		return (3.0f/(16.0f*M_PI)) * (1+mu*mu);
+		return Spectrum((3.0f/(16.0f*M_PI)) * (1+mu*mu));
 	}
 
 	std::string toString() const {

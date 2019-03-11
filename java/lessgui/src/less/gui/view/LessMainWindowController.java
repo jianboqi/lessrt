@@ -1171,6 +1171,11 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
+	private void PlotSpectra() {
+		this.projManager.PlotSpectra();
+	}
+	
+	@FXML
 	private void showCameraPos() {
 		this.reDrawAll();
 	}

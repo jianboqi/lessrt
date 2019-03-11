@@ -73,8 +73,8 @@ public:
 		return 1.0f;
 	}
 
-	Float eval(const PhaseFunctionSamplingRecord &pRec) const {
-		return warp::squareToUniformSpherePdf();
+	Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const {
+		return Spectrum(warp::squareToUniformSpherePdf());
 	}
 
 	Float getMeanCosine() const {

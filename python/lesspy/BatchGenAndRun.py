@@ -182,7 +182,7 @@ class BatchGenAndRun:
             scene_path = session.get_scenefile_path()
 
             distFile = os.path.join(session.get_output_dir(), prifix)
-            parameter = " -o " + distFile
+            # parameter = " -o " + distFile
             scene_file_path = os.path.join(scene_path, prifix + "_" + main_scene_xml_file)
             # cmd = excuable + " " + os.path.join(scene_path, prifix+"_"+main_scene_xml_file) + parameter
             # os.system(cmd)
@@ -202,6 +202,14 @@ class BatchGenAndRun:
                     self.convert_npy_to_envi(cfg, distFile + "_downwelling", output_format)
                 if os.path.exists(distFile + "_upwelling.npy"):
                     self.convert_npy_to_envi(cfg, distFile + "_upwelling", output_format)
+                if os.path.exists(distFile+"_4Components.npy"):
+                    data = np.load(distFile+"_4Components.npy")
+                    dshape = data.shape
+                    if len(dshape) == 3:
+                        data = data[:,:,0]
+                    bandlist = []
+                    RasterHelper.saveToHdr_no_transform(data, distFile+"_4Components", bandlist, output_format)
+                    os.remove(distFile+"_4Components.npy")
 
     def clear_json_file(self):
         self.readParameterFileList()

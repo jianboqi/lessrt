@@ -143,7 +143,7 @@ public:
 	 * \brief Evaluate the phase function for an outward-pointing
 	 * pair of directions (wi, wo)
 	 */
-	virtual Float eval(const PhaseFunctionSamplingRecord &pRec) const = 0;
+	virtual Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const = 0;
 
 	/**
 	 * \brief Sample the phase function and return the importance weight (i.e. the
@@ -227,17 +227,28 @@ public:
 protected:
 	/// Create a new phase function instance
 	inline PhaseFunction(const Properties &props) :
-		ConfigurableObject(props) { }
+		ConfigurableObject(props) {
+		m_sampleSpecIndex = props.getInteger("sampledSpecIndex", 0);
+	}
 
 	/// Unserialize a phase function
 	inline PhaseFunction(Stream *stream, InstanceManager *manager) :
-		ConfigurableObject(stream, manager) { }
+		ConfigurableObject(stream, manager) {
+		m_sampleSpecIndex = stream->readInt();
+	}
+
+	void serialize(Stream *stream, InstanceManager *manager) const {
+		ConfigurableObject::serialize(stream, manager);
+		stream->writeInt(m_sampleSpecIndex);
+	}
 
 	/// Virtual destructor
 	virtual ~PhaseFunction() { }
 protected:
 	unsigned int m_type;
+	int m_sampleSpecIndex;//依据哪一个波段进行采样
 };
+
 
 MTS_NAMESPACE_END
 

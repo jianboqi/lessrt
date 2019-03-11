@@ -52,7 +52,7 @@ def readParametersFromDartMaketFile(dart_maket_file):
 
         if is_g_started:
             arr = line.split("\t")
-            g_params.append(float(arr[7]))
+            g_params.append(float(arr[9]))
 
         if is_layer_started:
             arr = line.split("\t")
@@ -60,8 +60,8 @@ def readParametersFromDartMaketFile(dart_maket_file):
             ext_coeff_mol[band_index].append(float(arr[2]))
             # ext_coeff_mol[band_index].append(0)
             single_albedo_mol[band_index].append(float(arr[3]))
-            # ext_coeff_aerosol[band_index].append(float(arr[4]))
-            ext_coeff_aerosol[band_index].append(0)
+            ext_coeff_aerosol[band_index].append(float(arr[4]))
+            # ext_coeff_aerosol[band_index].append(0)
             single_albedo_aerosol[band_index].append(float(arr[5]))
 
     f.close()
@@ -87,7 +87,48 @@ def weighted_albedo(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_
                 total_albedo[row][col] = (ext_mol*albedo_mol+ext_aerosol*albedo_aerosl)/(ext_mol + ext_aerosol)
     return total_albedo
 
-def weights_for_phase_function(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol):
+def getSampledIndexForEachLayer(ext_coeff_mol, ext_coeff_aerosol):
+    rows, cols = ext_coeff_mol.shape
+
+    total_ext = ext_coeff_mol + ext_coeff_aerosol
+    maxExtBandIndexForEachLayer = [0 for i in range(0, rows)]
+    for row in range(0, rows):  # for each layer
+        totExtTemp = -999
+        for bandindex in range(0, len(total_ext[0])):  # for each band
+            if total_ext[row][bandindex] > totExtTemp:
+                totExtTemp = total_ext[row][bandindex]
+                maxExtBandIndexForEachLayer[row] = bandindex
+    return maxExtBandIndexForEachLayer
+
+# 根据extinction值最大的波段来计算phase function之间的比例
+def weights_for_phase_function_maximum(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol):
+    rows, cols = ext_coeff_mol.shape
+    weights = np.zeros((rows, 2))  # for mol and aerosol
+
+    total_ext = ext_coeff_mol + ext_coeff_aerosol
+    maxExtBandIndexForEachLayer = [0 for i in range(0,rows)]
+    for row in range(0, rows):  # for each layer
+        totExtTemp = -999
+        for bandindex in range(0, len(total_ext[0])):  # for each band
+            if total_ext[row][bandindex] > totExtTemp:
+                totExtTemp = total_ext[row][bandindex]
+                maxExtBandIndexForEachLayer[row] = bandindex
+
+    for row in range(rows):
+        ext_mol = ext_coeff_mol[row][maxExtBandIndexForEachLayer[row]]
+        ext_aerosol = ext_coeff_aerosol[row][maxExtBandIndexForEachLayer[row]]
+        albedo_mol = single_albedo_mol[row][maxExtBandIndexForEachLayer[row]]
+        albedo_aerosl = single_albedo_aerosol[row][maxExtBandIndexForEachLayer[row]]
+        total_weights = ext_mol*albedo_mol+ext_aerosol*albedo_aerosl
+        if total_weights == 0:
+            weights[row][0] = 1
+            weights[row][1] = 1
+        else:
+            weights[row][0] = (ext_mol*albedo_mol)/(ext_mol*albedo_mol+ext_aerosol*albedo_aerosl)
+            weights[row][1] = (ext_aerosol * albedo_aerosl) / (ext_mol * albedo_mol + ext_aerosol * albedo_aerosl)
+    return weights
+
+def weights_for_phase_function_mean(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol):
     rows, cols = ext_coeff_mol.shape
     weights = np.zeros((rows, 2))  # for mol and aerosol
     for row in range(rows):
@@ -112,7 +153,7 @@ def generateAtsXmlNFTwoStepMode(dart_maket_path, output_xml_path):
 
     total_ext_coeff = ext_coeff_mol + ext_coeff_aerosol
     total_albedo = weighted_albedo(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol)
-    weightsForPhase = weights_for_phase_function(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol,
+    weightsForPhase = weights_for_phase_function_maximum(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol,
                                                  single_albedo_aerosol)
 
     f = codecs.open(output_xml_path, "w", "utf-8-sig")
@@ -154,7 +195,7 @@ def generateAtsXmlNFTwoStepMode(dart_maket_path, output_xml_path):
             floatNode = doc.createElement("float")
             mediumNode.appendChild(floatNode)
             floatNode.setAttribute("name", "phasefunc_g_value_layer" + str(layer_index))
-            floatNode.setAttribute("value", str(g_params.mean()))
+            floatNode.setAttribute("value", str(g_params.max()))
             layer_index += 1
 
     # ingegrator Node
@@ -186,8 +227,10 @@ def generateAtsXmlNF(dart_maket_path, output_xml_path, width, height):
 
     total_ext_coeff = ext_coeff_mol + ext_coeff_aerosol
     total_albedo = weighted_albedo(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol, single_albedo_aerosol)
-    weightsForPhase = weights_for_phase_function(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol,
+    weightsForPhase = weights_for_phase_function_maximum(ext_coeff_mol, single_albedo_mol, ext_coeff_aerosol,
                                                  single_albedo_aerosol)
+
+    sampledBandIndexForEachLayer = getSampledIndexForEachLayer(ext_coeff_mol, ext_coeff_aerosol)
 
     f = codecs.open(output_xml_path, "w", "utf-8-sig")
     doc = minidom.Document()
@@ -240,10 +283,17 @@ def generateAtsXmlNF(dart_maket_path, output_xml_path, width, height):
             mediumNode.appendChild(strNode)
             strNode.setAttribute("name","phasefunc_weights_layer"+str(layer_index))
             strNode.setAttribute("value",",".join([str(t) for t in weightsForPhase[i]]))
-            floatNode = doc.createElement("float")
-            mediumNode.appendChild(floatNode)
-            floatNode.setAttribute("name","phasefunc_g_value_layer"+str(layer_index))
-            floatNode.setAttribute("value",str(g_params.mean()))
+            specNode = doc.createElement("spectrum")
+            mediumNode.appendChild(specNode)
+            specNode.setAttribute("name","phasefunc_g_value_layer"+str(layer_index))
+            specNode.setAttribute("value",",".join([str(t) for t in g_params]))
+
+            intNode = doc.createElement("integer")
+            mediumNode.appendChild(intNode)
+            intNode.setAttribute("name","phasefunc_sampledBandIndex_layer"+str(layer_index))
+            # intNode.setAttribute("value",str(sampledBandIndexForEachLayer[i]))
+            intNode.setAttribute("value", str(1))
+
             layer_index += 1
 
 

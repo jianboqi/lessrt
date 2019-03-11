@@ -95,7 +95,7 @@ public class Display3DController {
     private static final double CAMERA_INITIAL_DISTANCE = -300;
     private static final double CAMERA_INITIAL_X_ANGLE = 70.0;
     private static final double CAMERA_INITIAL_Y_ANGLE = 320.0;
-    private static final double CAMERA_NEAR_CLIP = 0.1;
+    private static final double CAMERA_NEAR_CLIP = 0.01;
     private static final double CAMERA_FAR_CLIP = 10000.0;
     
     private  double AXIS_LENGTH = 15.0;
@@ -111,7 +111,7 @@ public class Display3DController {
     //view control
     private static final double CONTROL_MULTIPLIER = 2;    
     private static final double SHIFT_MULTIPLIER = 10.0;    
-    private static final double MOUSE_SPEED = 0.1;    
+    private static final double MOUSE_SPEED = 0.01;    
     private static final double ROTATION_SPEED = 2.0;    
     private static final double TRACK_SPEED = 0.3;
     

@@ -42,7 +42,9 @@ public class Filehelper {
 	 * @param filepath
 	 * @param triangleMesh
 	 */
-	public static LSBoundingbox write_mesh_to_obj(String filepath, TriangleMesh triangleMesh, double fx, double fy, double fz){
+	public static void write_mesh_to_obj(String filepath, TriangleMesh triangleMesh, 
+			double fx, double fy, double fz,
+			double offsetX, double offsetY, double offsetZ){
 		BufferedWriter writer=null;
 		try {
 			writer = new BufferedWriter( new FileWriter(filepath));
@@ -50,24 +52,13 @@ public class Filehelper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//boundingbox [(minx,miny,minz,maxx,maxy,maxz)]
-		LSBoundingbox lsBoundingbox = new LSBoundingbox();
 		 
 		ObservableFloatArray pointarray =  triangleMesh.getPoints();
 		ObservableFaceArray faces = triangleMesh.getFaces();
 		for(int i=0;i<pointarray.size();i += 3){
-			double x = pointarray.get(i)*fx;
-			double y = -pointarray.get(i+1)*fy;
-			double z = -pointarray.get(i+2)*fz;
-			
-			if(x < lsBoundingbox.minX) lsBoundingbox.minX = x;
-			if(y < lsBoundingbox.minY) lsBoundingbox.minY = y;
-			if(z < lsBoundingbox.minZ) lsBoundingbox.minZ = z;
-			if(x > lsBoundingbox.maxX) lsBoundingbox.maxX = x;
-			if(y > lsBoundingbox.maxY) lsBoundingbox.maxY = y;
-			if(z > lsBoundingbox.maxZ) lsBoundingbox.maxZ = z;
-			
+			double x = pointarray.get(i)*fx-offsetX;
+			double y = -pointarray.get(i+1)*fy-offsetY;
+			double z = -pointarray.get(i+2)*fz-offsetZ;
 			
 			String out = "v ";
 			out +=  Double.toString(x) + " " +
@@ -100,6 +91,5 @@ public class Filehelper {
 			e.printStackTrace();
 		}
 		
-	return lsBoundingbox;
 	}
 }

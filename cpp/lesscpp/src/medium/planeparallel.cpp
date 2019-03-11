@@ -46,21 +46,30 @@ public:
 			std::string sigmaT_layerName = "singmaT_layer" + std::to_string(i+1);
 			std::string albedo_layerName = "albedo_layer" + std::to_string(i + 1);
 			Spectrum singmaT = props.getSpectrum(sigmaT_layerName, Spectrum(0.0));
+			if (singmaT.isZero())
+				singmaT = Spectrum(1e-12);
 			m_layerSigmaT.push_back(singmaT);
 			Spectrum albedo = props.getSpectrum(albedo_layerName, Spectrum(0.0));
+			if (albedo.isZero())
+				albedo = Spectrum(1e-12);
 			m_layerAlbedo.push_back(albedo);
 			m_layerSigmaS.push_back(singmaT*albedo);
 
 			string phaseweightName = "phasefunc_weights_layer" + std::to_string(i + 1);
 			string layerPhaseWeights = props.getString(phaseweightName, "0.5,0.5");
 			string phasegName = "phasefunc_g_value_layer" + std::to_string(i + 1);
-			double phase_g = props.getFloat(phasegName, 0);
+			Spectrum phase_g = props.getSpectrum(phasegName, Spectrum(0.0));
+
+			string phaseSampledIndexName = "phasefunc_sampledBandIndex_layer" + std::to_string(i + 1);
+			int layerPhaseSampledIndex = props.getInteger(phaseSampledIndexName, 0);
+			cout << "layerPhaseSampledIndex: " << layerPhaseSampledIndex << endl;
 			//create phase function
 			Properties phaseProp("mixturephase");
 			phaseProp.setString("weights", layerPhaseWeights);
 			Properties rayleighProp("rayleigh");
 			Properties hgProps("hg");
-			hgProps.setFloat("g", phase_g);
+			hgProps.setSpectrum("g", phase_g);
+			hgProps.setInteger("sampledSpecIndex", layerPhaseSampledIndex);
 			ref<PhaseFunction> mixturePhaseFunc = static_cast<PhaseFunction *>(
 				PluginManager::getInstance()->createObject(MTS_CLASS(PhaseFunction), phaseProp));
 
@@ -115,13 +124,29 @@ public:
 			m_thicknessCDF.push_back(m_thicknessCDF[i] + m_layerThickness[i]);
 		}
 
-		m_layerMaxSigmaT.resize(m_numLayers);
-		for (int i = 0; i < m_numLayers; i++) {
-			m_layerMaxSigmaT[i] = 0.0;
-			for (int j = 0; j<SPECTRUM_SAMPLES; ++j) {
-				m_layerMaxSigmaT[i] = std::max(m_layerMaxSigmaT[i], m_layerSigmaT[i][j]);
-			}
+		for (int i = 0; i < m_numLayers+1; i++) {
+			cout << "Layer: " << i << " " << m_thicknessCDF[i] << endl;
 		}
+
+		m_layerMaxSigmaT.resize(m_numLayers);
+		//for (int i = 0; i < m_numLayers; i++) {
+		//	m_layerMaxSigmaT[i] = 0.0;
+		//	for (int j = 0; j<SPECTRUM_SAMPLES; ++j) {
+		//		m_layerMaxSigmaT[i] = std::max(m_layerMaxSigmaT[i], m_layerSigmaT[i][j]);
+		//	}
+		//}
+
+		//固定波段
+		for (int i = 0; i < m_numLayers; i++) {
+			m_layerMaxSigmaT[i] = m_layerSigmaT[i][0];
+		}
+
+		for (int i = 0; i < m_layerMaxSigmaT.size(); i++) {
+			if (m_layerMaxSigmaT[i] == 0)
+				m_layerMaxSigmaT[i] = 1e-12;
+		}
+
+
 		std::vector<double> verticalOpticalDepthPerLayerAtMaxSigmaT;
 		for (int i = 0; i < m_numLayers; i++) {
 			verticalOpticalDepthPerLayerAtMaxSigmaT.push_back(m_layerThickness[i] * m_layerMaxSigmaT[i]);
@@ -129,6 +154,10 @@ public:
 		m_MaxOpticalDepthCDF.push_back(0);
 		for (int i = 0; i < m_numLayers; i++) {
 			m_MaxOpticalDepthCDF.push_back(m_MaxOpticalDepthCDF[i] + verticalOpticalDepthPerLayerAtMaxSigmaT[i]);
+		}
+
+		for (int i = 0; i < m_numLayers + 1; i++) {
+			cout << "Optical: " << i << " " << m_MaxOpticalDepthCDF[i] << endl;
 		}
 
 	}
@@ -173,6 +202,52 @@ public:
 			}
 		}
 		return EUpperMedium;
+	}
+
+	// Integral the maxmium optical depth between ray.mint and ray.maxt
+	//用每一层的消光系数最大的波段来进行积分采样
+	Float opticalDepthIntegralMaximum(const Ray &ray) const {
+		Point3d mintPos = ray.o + ray.mint*ray.d;
+		Point3d maxPos = ray.o + ray.maxt*ray.d;
+		double h1 = mintPos.y, h2 = maxPos.y;
+		if (h1 > h2) swap(h1, h2);
+		int lowerIndex = determineLayerIndexAccordingHeight(h1);
+		int upperIndex = determineLayerIndexAccordingHeight(h2);
+#ifdef QI_DEBUG
+		cout << " opticalIntegral lowerIndex: " << lowerIndex << endl;
+		cout << " opticalIntegral upperIndex: " << upperIndex << endl;
+#endif
+		if ((lowerIndex == upperIndex) && (lowerIndex == EBelowMedium || lowerIndex == EUpperMedium))
+			return 0.0;
+		if ((lowerIndex == upperIndex) && lowerIndex >= 0)
+			return (ray.maxt - ray.mint)*m_layerMaxSigmaT[lowerIndex];
+
+		int newLowerIndex, newUpperIndex;
+		double remainLowerLength, remainUpperLength;
+		Float totalOpticalDepth =0.0;
+		if (lowerIndex < 0) {
+			newLowerIndex = 0;
+			remainLowerLength = 0;
+		}
+		else {
+			newLowerIndex = lowerIndex + 1;
+			remainLowerLength = m_thicknessCDF[lowerIndex + 1] - (h1 - m_startAltitude);
+			totalOpticalDepth += remainLowerLength * m_layerMaxSigmaT[lowerIndex];
+		}
+		if (upperIndex < 0) {
+			newUpperIndex = (int)m_numLayers - 1;
+			remainUpperLength = 0;
+		}
+		else {
+			newUpperIndex = upperIndex - 1;
+			remainUpperLength = (h2 - m_startAltitude) - m_thicknessCDF[upperIndex];
+			totalOpticalDepth += remainUpperLength * m_layerMaxSigmaT[upperIndex];
+		}
+
+		for (int i = newLowerIndex; i <= newUpperIndex; i++) {
+			totalOpticalDepth += m_layerThickness[i] * m_layerMaxSigmaT[i];
+		}
+		return totalOpticalDepth / abs(ray.d.y);
 	}
 
 	// Integral the optical depth between ray.mint and ray.maxt
@@ -269,8 +344,11 @@ public:
 			double relativeOp = currentRelativeOpticalDepth + verticalOpticalDepth;
 			int layerIndex = determineLayerIndexAccordingOpticalDepth(relativeOp);
 			sampledLayerIndex = layerIndex;
-			if(layerIndex < 0)
+			if (layerIndex < 0) {
 				return std::numeric_limits<Float>::infinity();
+				//totalVerticalLength += m_thicknessCDF[m_thicknessCDF.size() - 1] - (mintPos.y-m_startAltitude);
+				//sampledLayerIndex = m_layerThickness.size() - 1;
+			}			
 			else if (layerIndex == currentLayerIndex) {
 				double sampleDistance = opticalDepth / m_layerMaxSigmaT[currentLayerIndex];
 				//calculate the optical depth for each band at the sampled position
@@ -294,8 +372,11 @@ public:
 			double relativeOp = currentRelativeOpticalDepth - verticalOpticalDepth;
 			int layerIndex = determineLayerIndexAccordingOpticalDepth(relativeOp);
 			sampledLayerIndex = layerIndex;
-			if (layerIndex < 0)
+			if (layerIndex < 0) {
 				return std::numeric_limits<Float>::infinity();
+				///totalVerticalLength += mintPos.y - m_startAltitude;
+			//	sampledLayerIndex = 0;
+			}				
 			else if (layerIndex == currentLayerIndex) {
 				double sampleDistance = opticalDepth / m_layerMaxSigmaT[currentLayerIndex];
 				//calculate the optical depth for each band at the sampled position
@@ -328,11 +409,13 @@ public:
 		double rand = sampler->next1D(), sampledDistance;
 		double randomOpticalDepth = -math::fastlog(1 - rand);
 		//cumulate optical depth until it reaches randomOpticalDepth, starting form ray.o
+		//cout <<"rand:"<< rand<< " randomOpticalDepth: " << randomOpticalDepth << endl;
 		int sampledLayerIndex;
 		sampledDistance = freePathAccordingAccumulateOpticalDepth(ray, randomOpticalDepth, sampledLayerIndex);
+		//if(sampledLayerIndex > 1)
 		Float distSurf = ray.maxt - ray.mint;
 		bool success = true;
-		if (sampledDistance < distSurf) {
+		if (sampledDistance != std::numeric_limits<Float>::infinity() && sampledDistance < distSurf) {
 			mRec.t = sampledDistance + ray.mint;
 			mRec.p = ray(mRec.t);
 			mRec.time = ray.time;
@@ -343,6 +426,9 @@ public:
 				mRec.sampledPhaseFun = m_layerPhaseFunctions[sampledLayerIndex];
 				m_currentSampledLayer = sampledLayerIndex;
 				mRec.pdfSuccessRev = mRec.pdfSuccess = m_layerMaxSigmaT[sampledLayerIndex] * math::fastexp(-randomOpticalDepth);
+			}
+			else {
+				success = false;
 			}
 			/* Fail if there is no forward progress
 			(e.g. due to roundoff errors) */
@@ -358,7 +444,7 @@ public:
 		Ray tmpray(ray);
 		tmpray.maxt = sampledDistance;
 		mRec.transmittance = evalTransmittance(tmpray, sampler);
-		mRec.pdfFailure = math::fastexp(-opticalDepthIntegral(tmpray)[0]);
+		mRec.pdfFailure = math::fastexp(-opticalDepthIntegralMaximum(tmpray));
 		mRec.medium = this;
 		if (mRec.transmittance.max() < 1e-20)
 			mRec.transmittance = Spectrum(0.0f);
@@ -371,8 +457,8 @@ public:
 
 		Float distance = ray.maxt - ray.mint;
 		mRec.transmittance = evalTransmittance(ray, NULL);
-		Spectrum opticalDepth = opticalDepthIntegral(ray);
-		mRec.pdfFailure = math::fastexp(-opticalDepth.max());
+		Float opticalDepth = opticalDepthIntegralMaximum(ray);
+		mRec.pdfFailure = math::fastexp(-opticalDepth);
 		mRec.pdfSuccess = mRec.pdfSuccessRev = m_layerMaxSigmaT[layerIndex] * mRec.pdfFailure;
 		mRec.sigmaS = m_layerSigmaT[layerIndex] * m_layerAlbedo[layerIndex];
 		mRec.sigmaA = m_layerSigmaT[layerIndex] - mRec.sigmaS;;
@@ -402,7 +488,7 @@ private:
 
 	std::vector<Spectrum> m_layerSigmaS; //scattering coefficient of each layer
 	std::vector<double> m_thicknessCDF;
-	std::vector<double> m_layerMaxSigmaT; // maximum sigmaT per layer
+	std::vector<double> m_layerMaxSigmaT; // maximum sigmaT of each layer
 	std::vector<double> m_MaxOpticalDepthCDF;
 	mutable int m_currentSampledLayer;
 };

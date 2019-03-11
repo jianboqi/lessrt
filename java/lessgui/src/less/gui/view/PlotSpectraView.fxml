@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.PlotSpectraController">
+   <center>
+      <LineChart fx:id="spectraLineChart" prefHeight="400.0" prefWidth="966.0" BorderPane.alignment="CENTER">
+        <xAxis>
+            <NumberAxis side="BOTTOM" />
+          </xAxis>
+          <yAxis>
+            <NumberAxis layoutX="10.0" side="LEFT" />
+          </yAxis>
+      </LineChart>
+   </center>
+   <top>
+      <AnchorPane prefHeight="88.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+         <children>
+            <CheckBox fx:id="FrontCheckBox" layoutX="50.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="Front Reflectance" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="14.0" />
+            <CheckBox fx:id="BackCheckBox" layoutX="232.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="Back Reflectance" AnchorPane.leftAnchor="232.0" AnchorPane.topAnchor="14.0" />
+            <CheckBox fx:id="TransCheckBox" layoutX="418.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="Transmittance" AnchorPane.leftAnchor="418.0" AnchorPane.topAnchor="14.0" />
+         </children></AnchorPane>
+   </top>
+</BorderPane>

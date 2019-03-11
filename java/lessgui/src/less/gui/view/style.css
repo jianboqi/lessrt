@@ -3,7 +3,7 @@
 }
 
 BorderPane{
-	-fx-font-size:13px;
+	-fx-font-size:12px;
 }
 
 #canvasScrollPane:focused {
@@ -19,5 +19,15 @@ BorderPane{
 }
 
 .scroll-pane {
+    -fx-background-color:transparent;
+}
+
+.chart {
+    -fx-padding: 10px;
+    -fx-background-color: #fff;
+    -fx-legend-visible: true;
+}
+
+.chart-plot-background {
     -fx-background-color:transparent;
 }

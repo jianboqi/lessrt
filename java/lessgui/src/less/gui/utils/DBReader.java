@@ -62,6 +62,53 @@ public class DBReader {
 	}
 	
 	/**
+	 * Get the full spectrum of a optical property
+	 * @param opticalName
+	 * @return
+	 */
+	public ArrayList<ArrayList<Double>> getFullSpectraByName1(String opticalName){
+		ArrayList<ArrayList<Double>> re = new ArrayList<ArrayList<Double>>();
+		re.add(new ArrayList<Double>());
+		re.add(new ArrayList<Double>());
+		re.add(new ArrayList<Double>());
+		re.add(new ArrayList<Double>());
+		try {
+			String sql = "SELECT wavelength, front_ref,back_ref,transmittance FROM "+opticalName+";";
+			ResultSet rs = stmt.executeQuery(sql);
+			while ( rs.next() ) {
+				double front_ref = rs.getDouble("front_ref");
+				re.get(0).add(front_ref);
+				double back_ref = rs.getDouble("back_ref");
+				re.get(1).add(back_ref);
+				double transmittance = rs.getDouble("transmittance");
+				re.get(2).add(transmittance);
+				double wavelengths = rs.getDouble("wavelength");
+				re.get(3).add(wavelengths);
+			}
+			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return re;
+	}
+	
+	/**
+	 * Get the full spectrum of a optical property
+	 * @param opticalName
+	 * @return
+	 */
+	public ResultSet getFullSpectraByName(String opticalName){
+		ResultSet rs=null;
+		try {
+			String sql = "SELECT wavelength, front_ref,back_ref,transmittance FROM "+opticalName+";";
+			rs = stmt.executeQuery(sql);			
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	/**
 	 * 
 	 * @param opticalName 
 	 * @return

@@ -1,5 +1,7 @@
 package less.gui.model;
 
+import java.util.ArrayList;
+
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -64,6 +66,33 @@ public class FacetOptical {
 	
 	public void setOpType(int optype) {
 		this.opType.set(optype);
+	}
+	
+	public ArrayList<Double> getReflectanceFrontAsList() {
+		ArrayList<Double> arr = new ArrayList<Double>();
+		String [] splitarr = reflectanceFront.get().split(",");
+		for(int i=0;i<splitarr.length;i++) {
+			arr.add(Double.parseDouble(splitarr[i]));
+		}
+		return  arr;
+	}
+	
+	public ArrayList<Double> getReflectanceBackAsList() {
+		ArrayList<Double> arr = new ArrayList<Double>();
+		String [] splitarr = reflectanceBack.get().split(",");
+		for(int i=0;i<splitarr.length;i++) {
+			arr.add(Double.parseDouble(splitarr[i]));
+		}
+		return  arr;
+	}
+	
+	public ArrayList<Double> getTransmittanceAsList() {
+		ArrayList<Double> arr = new ArrayList<Double>();
+		String [] splitarr = transmittance.get().split(",");
+		for(int i=0;i<splitarr.length;i++) {
+			arr.add(Double.parseDouble(splitarr[i]));
+		}
+		return  arr;
 	}
 
 	

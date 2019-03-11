@@ -8,6 +8,7 @@ plugins += env.SharedLibrary('envmap', ['envmap.cpp'])
 plugins += env.SharedLibrary('sky', ['sky.cpp', 'sunsky/skymodel.cpp'])
 plugins += env.SharedLibrary('sun', ['sun.cpp'])
 plugins += env.SharedLibrary('sunsky', ['sunsky.cpp'])
+plugins += env.SharedLibrary('horizontalplane', ['HorizontalPlane.cpp'])
 
 # self added
 plugins += env.SharedLibrary('hemisphere', ['hemisphere.cpp'])

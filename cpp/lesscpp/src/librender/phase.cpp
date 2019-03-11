@@ -19,7 +19,7 @@ void PhaseFunction::configure() {
 }
 
 Float PhaseFunction::pdf(const PhaseFunctionSamplingRecord &pRec) const {
-	return eval(pRec);
+	return eval(pRec)[m_sampleSpecIndex];
 }
 
 bool PhaseFunction::needsDirectionallyVaryingCoefficients() const {
@@ -45,4 +45,5 @@ Float PhaseFunction::getMeanCosine() const {
 }
 
 MTS_IMPLEMENT_CLASS(PhaseFunction, true, ConfigurableObject)
+
 MTS_NAMESPACE_END

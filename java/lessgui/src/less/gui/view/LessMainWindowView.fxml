@@ -40,7 +40,7 @@
 <?import javafx.scene.shape.Polygon?>
 <?import javafx.scene.shape.Rectangle?>
 
-<BorderPane prefHeight="1000.0" prefWidth="1350.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LessMainWindowController">   
+<BorderPane prefHeight="1000.0" prefWidth="1350.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LessMainWindowController">   
    <top>
       <VBox BorderPane.alignment="CENTER">
          <children>
@@ -452,11 +452,12 @@
                                     <TextField fx:id="opticalRefFrantField" layoutX="127.6" layoutY="30.6" prefHeight="35.0" prefWidth="98.0" promptText="Ref (Front)" AnchorPane.leftAnchor="105.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalRefBackField" layoutX="229.0" layoutY="16.0" prefHeight="35.0" prefWidth="103.0" promptText="Ref (Back)" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="3.0" />
                                     <TextField fx:id="opticalTransField" layoutX="390.6" layoutY="58.6" prefHeight="35.0" prefWidth="98.0" promptText="Transmittance" AnchorPane.leftAnchor="330.0" AnchorPane.topAnchor="3.0" />
-                                    <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="511.0" AnchorPane.topAnchor="7.0" />
+                                    <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="513.0" AnchorPane.topAnchor="7.0" />
                                     <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="From database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="213.4000000000001" layoutY="381.5999999999999" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="340.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="588.0" layoutY="27.4" mnemonicParsing="false" onAction="#copyOptical" prefHeight="28.0" prefWidth="56.0" text="Copy" AnchorPane.topAnchor="7.0" />
-                                    <Button layoutX="357.0" layoutY="350.0" mnemonicParsing="false" onAction="#OpenProspectD" prefHeight="28.0" prefWidth="149.0" text="From PROSPECT-D..." AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="340.0" />
+                                    <Button layoutX="173.0" layoutY="350.0" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="340.0" />
+                                    <Button layoutX="592.0" layoutY="19.0" mnemonicParsing="false" onAction="#copyOptical" prefHeight="18.0" prefWidth="56.0" text="Copy" AnchorPane.topAnchor="7.0" />
+                                    <Button layoutX="363.0" layoutY="350.0" mnemonicParsing="false" onAction="#OpenProspectD" prefHeight="21.0" prefWidth="149.0" text="From PROSPECT-D..." AnchorPane.rightAnchor="145.0" AnchorPane.topAnchor="340.0" />
+                                    <Button layoutX="254.0" layoutY="359.6" mnemonicParsing="false" onAction="#PlotSpectra" prefHeight="23.0" prefWidth="64.0" text="Plot" AnchorPane.rightAnchor="330.0" AnchorPane.topAnchor="340.0" />
                                  </children>
                               </AnchorPane>
                           </content>

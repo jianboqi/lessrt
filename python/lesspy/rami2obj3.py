@@ -484,21 +484,21 @@ if args.phase == "RAMI-IV" and args.sceneID == "HET07_JPS_SUM":
     # print tree_file
     # f.to_position_file(tree_file)
 
-    for i in range(9, 11):
-        print("PISY" + str(i))
-        foliage_file = combine_file_path(template_folder,"PISY"+str(i)+"_foliage.dat")
-        stem_file = combine_file_path(template_folder, "PISY"+str(i)+"_stem.dat")
-        branch_file = combine_file_path(template_folder, "PISY"+str(i)+"_branches.dat")
+    # for i in range(9, 11):
+    #     print("PISY" + str(i))
+    #     foliage_file = combine_file_path(template_folder,"PISY"+str(i)+"_foliage.dat")
+    #     stem_file = combine_file_path(template_folder, "PISY"+str(i)+"_stem.dat")
+    #     branch_file = combine_file_path(template_folder, "PISY"+str(i)+"_branches.dat")
 
-        needle = Needle()
-        shoot = Shoot(needle)
-        shoot.generate_twig_from_file(shoot_file)
+    #     needle = Needle()
+    #     shoot = Shoot(needle)
+    #     shoot.generate_twig_from_file(shoot_file)
 
-        psitree = PISYTree(shoot, foliage_file, stem_file, branch_file)
-        psitree.generate_tree()
-        leaf_path = combine_file_path(distDir, "PISY"+str(i)+"_foliage.obj")
-        branch_path = combine_file_path(distDir, "PISY"+str(i)+"_branch_stem.obj")
-        psitree.toObj(leaf_path, branch_path)
+    #     psitree = PISYTree(shoot, foliage_file, stem_file, branch_file)
+    #     psitree.generate_tree()
+    #     leaf_path = combine_file_path(distDir, "PISY"+str(i)+"_foliage.obj")
+    #     branch_path = combine_file_path(distDir, "PISY"+str(i)+"_branch_stem.obj")
+    #     psitree.toObj(leaf_path, branch_path)
 
 
 

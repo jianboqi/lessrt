@@ -196,7 +196,7 @@ class SceneParser:
                 strNode.setAttribute("value", cfg["sensor"]["PhotonTracing"]["LayerDefinition"])
 
         else:
-            integratorNode.setAttribute("type", "path")
+            integratorNode.setAttribute("type", "volpath_simple")
         rootNode.appendChild(integratorNode)
 
         # integrator
@@ -582,10 +582,10 @@ class SceneParser:
 
         if cfg["illumination"]["atmosphere"]["ats_type"] == "ATMOSPHERE":
             # Only two-step calculation mode needs this
-            if cfg["illumination"]["atmosphere"]["AtsParams"]["atsCalMode"] == "Two-Step Mode":
-                refNode = doc.createElement("ref")
-                sensor_node.appendChild(refNode)
-                refNode.setAttribute("id","ats_medium")
+            # if cfg["illumination"]["atmosphere"]["AtsParams"]["atsCalMode"] == "Two-Step Mode":
+            refNode = doc.createElement("ref")
+            sensor_node.appendChild(refNode)
+            refNode.setAttribute("id","ats_medium")
 
         #emitters
         #direct

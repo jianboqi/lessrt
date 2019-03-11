@@ -8,8 +8,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="481.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.ProspectDController">
-   <top>
+<BorderPane prefHeight="481.0" prefWidth="520.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.ProspectDController">
+   <center>
       <AnchorPane prefHeight="441.0" prefWidth="520.0" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="-12.0" layoutY="23.0" text="Optical Property Name*:" AnchorPane.leftAnchor="10.0" />
@@ -29,29 +29,29 @@
             <TextField fx:id="textFieldAnth" layoutX="280.0" layoutY="332.0" text="1.0" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="10.0" />
             <Label layoutX="10.0" layoutY="385.0" text="Water Thickness (Cw-cm) [0-0.05]:" AnchorPane.leftAnchor="10.0" />
             <TextField fx:id="textFieldCw" layoutX="280.0" layoutY="380.0" text="0.015" AnchorPane.leftAnchor="280.0" AnchorPane.rightAnchor="10.0" />
-            <Button layoutX="352.0" layoutY="419.0" mnemonicParsing="false" onAction="#onOK" prefHeight="30.0" prefWidth="68.0" text="OK" AnchorPane.rightAnchor="100.0" />
-            <Button layoutX="442.0" layoutY="419.0" mnemonicParsing="false" onAction="#onCancel" text="Cancel" AnchorPane.rightAnchor="10.0" />
-            <Label layoutX="184.0" layoutY="144.0" text="2" AnchorPane.leftAnchor="164.0" AnchorPane.topAnchor="144.0">
+            <Button layoutX="361.0" layoutY="419.0" mnemonicParsing="false" onAction="#onOK" prefHeight="14.0" prefWidth="68.0" text="OK" AnchorPane.rightAnchor="91.0" />
+            <Button layoutX="442.0" layoutY="419.0" mnemonicParsing="false" onAction="#onCancel" prefHeight="23.0" prefWidth="62.0" text="Cancel" AnchorPane.rightAnchor="10.0" />
+            <Label layoutX="135.0" layoutY="144.0" text="2" AnchorPane.leftAnchor="135.0" AnchorPane.topAnchor="144.0">
                <font>
                   <Font size="13.0" />
                </font>
             </Label>
-            <Label layoutX="165.0" layoutY="234.0" text="2" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="235.0">
+            <Label layoutX="149.0" layoutY="235.0" text="2" AnchorPane.leftAnchor="149.0" AnchorPane.topAnchor="235.0">
                <font>
                   <Font size="13.0" />
                </font>
             </Label>
-            <Label layoutX="184.0" layoutY="285.0" text="2" AnchorPane.leftAnchor="184.0" AnchorPane.topAnchor="285.0">
+            <Label layoutX="149.0" layoutY="283.0" text="2" AnchorPane.leftAnchor="149.0" AnchorPane.topAnchor="283.0">
                <font>
                   <Font size="13.0" />
                </font>
             </Label>
-            <Label layoutX="199.0" layoutY="327.0" text="2" AnchorPane.leftAnchor="198.0" AnchorPane.topAnchor="330.0">
+            <Label layoutX="160.0" layoutY="330.0" text="2" AnchorPane.leftAnchor="160.0" AnchorPane.topAnchor="330.0">
                <font>
                   <Font size="13.0" />
                </font>
             </Label>
             <Label layoutX="10.0" layoutY="65.0" text="Is Prospect-5?" AnchorPane.leftAnchor="10.0" />
          </children></AnchorPane>
-   </top>
+   </center>
 </BorderPane>
