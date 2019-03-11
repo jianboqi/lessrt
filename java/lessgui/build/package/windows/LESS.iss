@@ -4,7 +4,7 @@
 AppId={{fxApplication}}
 AppName=LESS
 AppVersion=1.8.6       
-AppVerName=LESS 1.8.7
+AppVerName=LESS 1.8.6
 AppPublisher=Jianbo Qi
 AppComments=LessGUI
 AppCopyright=Copyright (C) 2018
@@ -24,7 +24,7 @@ DefaultGroupName=Jianbo Qi
 LicenseFile=
 ;WinXP or above
 MinVersion=0,5.1 
-OutputBaseFilename=LESS-1.8
+OutputBaseFilename=LESS-1.8.6
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
