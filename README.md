@@ -29,8 +29,8 @@ but the packaging into a simple installer is not finished. We are working on tha
 * [ ] Integrate a plane-parallel atmosphere model
   * [x] A plane-parallel medium has been implemented.
   * [ ] Need a atmosphere database which stores parameters of different type of atmosphere (maybe from Modtran)
-* [ ] Release under linux
-  * [ ] Find a solution to package all into a installer for different linux distributions.
+* [x] Release under linux
+  * [x] Find a solution to package all into a installer for different linux distributions.
 
 
 ## For developers
