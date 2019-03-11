@@ -3,8 +3,8 @@
 	<target name="init-fx-tasks">
 		<path id="fxant">
 			<filelist>
-				<file name="C:\Program Files\Java\jdk1.8.0\lib\ant-javafx.jar"/>
-				<file name="C:\Program Files\Java\jdk1.8.0\jre\lib\ext\jfxrt.jar"/>
+				<file name="${java.home}\lib\ant-javafx.jar"/>
+				<file name="${java.home}\jre\lib\ext\jfxrt.jar"/>
 				<file name="${basedir}"/>
 			</filelist>
 		</path>
@@ -151,7 +151,7 @@
 			outfile="LessGUI" nativeBundles="exe"
 			updatemode="background" >
 	
-			<fx:platform basedir="C:\Program Files\Java\jdk1.8.0"/>
+			<fx:platform basedir="${java.home}"/>
 			<fx:info title="LessGUI" vendor="Jianbo Qi"/>
 	
 			<fx:application refId="fxApplication"/>
