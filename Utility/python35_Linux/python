@@ -1,0 +1,40 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB="${DIR}/lib"
+
+export PYTHONHOME="${DIR}"
+export PYTHONPATH="${DIR}:${LIB}"
+export MATPLOTLIBRC="${DIR}"
+export MATPLOTLIBDATA="${DIR}/matplotlib/mpl-data"
+
+export PATH=${DIR}/bin:$PATH
+export LD_LIBRARY_PATH=${DIR}/lib:$LD_LIBRARY_PATH
+
+# build path string containing local lib(s) to be preloaded
+function getPRELOAD(){
+    libs=( `cat ${DIR}/liblist` )
+    for (( i=0; i < ${#libs[*]}; i++ ))
+    do
+        lib="${libs[$i]}"
+        [[ -z "${lib}" || "${lib:0:1}" == "#" ]] && continue
+        [ $i -gt 0 ] && echo -n ":"
+        echo -n "${LIB}/${libs[$i]}"
+    done
+}
+
+# DO NOT MODIFY: please let this to empty string
+export LD_BIND_NOW=""
+
+# export embedded shared libraries for preloading
+export LD_PRELOAD="$(getPRELOAD)"
+
+# the two cases, with and without arguments, need to be treated separetely
+if [ $# -gt 0 ]
+then
+    # with arguments, double quotes around $@ are mandatory to handle special characters
+    OPENBLAS_MAIN_FREE=1 "${DIR}"/bin/python3.5 "$@"
+else
+    # whereas without parameters, "$@" would generate an invalid blank argument ""
+    OPENBLAS_MAIN_FREE=1 "${DIR}"/bin/python3.5
+fi

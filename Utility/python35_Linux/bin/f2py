@@ -1,0 +1,4 @@
+#!/home/jim/Documents/Coding/LessProject/Deploy/LESS-1.8.6/bin/python/bin/python3.5
+# EASY-INSTALL-SCRIPT: 'numpy==1.14.0.dev0+f5eb5af','f2py'
+__requires__ = 'numpy==1.14.0.dev0+f5eb5af'
+__import__('pkg_resources').run_script('numpy==1.14.0.dev0+f5eb5af', 'f2py')

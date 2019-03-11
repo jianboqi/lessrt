@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: OpenEXR
+Version: 1.3.2
+Summary: Python bindings for ILM's OpenEXR image file format
+Home-page: http://www.excamera.com/sphinx/articles-openexr.html
+Author: James Bowman
+Author-email: jamesb@excamera.com
+License: UNKNOWN
+Description: Python bindings for ILM's OpenEXR image file format
+Platform: UNKNOWN

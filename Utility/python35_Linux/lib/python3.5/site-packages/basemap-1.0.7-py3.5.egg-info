@@ -1,0 +1,24 @@
+Metadata-Version: 1.1
+Name: basemap
+Version: 1.0.7
+Summary: Plot data on map projections with matplotlib
+Home-page: http://matplotlib.sourceforge.net/toolkits.html
+Author: Jeff Whitaker
+Author-email: jeffrey.s.whitaker@noaa.gov
+License: OSI Approved
+Download-URL: http://sourceforge.net/projects/matplotlib
+Description: 
+          An add-on toolkit for matplotlib that lets you plot data
+          on map projections with coastlines, lakes, rivers and political boundaries.
+          See http://www.scipy.org/wikis/topical_software/Maps for an
+          example of what it can do.
+Keywords: python,plotting,plots,graphs,charts,GIS,mapping,map projections,maps
+Platform: any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Visualization
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Operating System :: OS Independent
