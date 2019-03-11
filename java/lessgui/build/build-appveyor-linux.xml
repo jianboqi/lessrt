@@ -3,8 +3,8 @@
 	<target name="init-fx-tasks">
 		<path id="fxant">
 			<filelist>
-				<file name="C:\Program Files\Java\jdk1.8.0\lib\ant-javafx.jar"/>
-				<file name="C:\Program Files\Java\jdk1.8.0\jre\lib\ext\jfxrt.jar"/>
+				<file name="${java.home}\..\lib\ant-javafx.jar"/>
+				<file name="${java.home}\lib\jfxrt.jar"/>
 				<file name="${basedir}"/>
 			</filelist>
 		</path>
@@ -14,26 +14,8 @@
 			classpathref="fxant"/>
 	</target>
 	<target name="setup-staging-area">
-		<delete dir="externalLibs" />
-		<delete dir="project" />
-		<delete dir="projectRefs" />
-	
-		<mkdir dir="externalLibs" />
-	
-		<copy todir="externalLibs">
-			<fileset dir="${basedir}/../libs">
-				<filename name="**/*"/>
-			</fileset>
-		</copy>
-	
-		<mkdir dir="project" />
-		<copy todir="project">
-			<fileset dir="${basedir}/../">
-				<include name="src/**" />
-			</fileset>
-		</copy>
-	
-		<mkdir dir="projectRefs" />
+           <delete dir="deploy" />
+	   <delete dir="dist" />
 	</target>
 	<target name='do-compile'>
 		<delete dir="build" />
@@ -43,17 +25,17 @@
 	
 		<!-- Copy project-libs references -->
 		<copy todir="build/libs">
-			<fileset dir="externalLibs">
-				<include name="**/*"/>
+			<fileset dir="${basedir}/../libs">
+				<filename name="**/*"/>
 			</fileset>
 		</copy>
 	
 		<!-- Copy project references -->
 	
 		<!-- Copy project sources itself -->
-		<copy todir="build/src">
-			<fileset dir="project/src">
-				<include name="**/*"/>
+		<copy todir="build">
+			<fileset dir="${basedir}/../">
+				<include name="src/**" />
 			</fileset>
 		</copy>
 		
@@ -68,7 +50,7 @@
 	
 		<!-- Copy over none Java-Files -->
 		<copy todir="build/classes">
-		<fileset dir="project/src">
+		<fileset dir="build/src">
 			<exclude name="**/*.java"/>
 		</fileset>
 		</copy>
@@ -83,8 +65,8 @@
 		<mkdir dir="dist/libs" />
 	
 		<copy todir="dist/libs">
-			<fileset dir="externalLibs">
-				<include name="**/*" />
+			<fileset dir="${basedir}/../libs">
+				<filename name="**/*"/>
 			</fileset>
 		</copy>
 		
@@ -96,18 +78,28 @@
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
 		<copy todir="dist/bin/python" >
-		    <fileset dir="${basedir}/../../../Utility/Python36"/>
+		    <fileset dir="${basedir}/../../../Utility/python35_Linux"/>
 		</copy>
 		
 		<mkdir dir="dist/bin/scripts" />
 		<mkdir dir="dist/bin/scripts/Lesspy" />
 		<copy todir="dist/bin/scripts/Lesspy" >
-		    <fileset dir="${basedir}/../../../python/LessPy" />
+		    <fileset dir="${basedir}/../../../python/lesspy" />
+		</copy>
+
+		<mkdir dir="dist/bin/jre"/>
+		<copy todir="dist/bin/jre" >
+		    <fileset dir="${basedir}/../../../Utility/jre_1_8_linux" />
+		</copy>
+		
+		<copy todir="dist" >
+		    <file file="${basedir}/../../../Utility/less.sh" />
 		</copy>
 		
 	
 		<fx:resources id="appRes">
 			<fx:fileset dir="dist" includes="LessGUI.jar"/>
+			<fx:fileset dir="dist" includes="less.sh"/>
 			<fx:fileset dir="dist" includes="libs/**"/>
 			<fx:fileset dir="dist" includes="bin/**"/>
 			<fx:fileset dir="dist" includes="Database/**"/>
@@ -151,7 +143,7 @@
 			outfile="LessGUI" nativeBundles="exe"
 			updatemode="background" >
 	
-			<fx:platform basedir="C:\Program Files\Java\jdk1.8.0"/>
+			<fx:platform basedir="${java.home}"/>
 			<fx:info title="LessGUI" vendor="Jianbo Qi"/>
 	
 			<fx:application refId="fxApplication"/>
