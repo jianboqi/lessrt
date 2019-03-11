@@ -1,5 +1,5 @@
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/github/jianboqi/lessrt?branch=master&svg=true)](https://ci.appveyor.com/project/jianboqi/lessrt)
-[![Build status](https://ci.appveyor.com/api/projects/status/so72g2kelkpwclhc?svg=true)](https://ci.appveyor.com/project/jianboqi/lessrt-ipr8k)
+Windows: [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/github/jianboqi/lessrt?branch=master&svg=true)](https://ci.appveyor.com/project/jianboqi/lessrt)
+  Linux:[![Build status](https://ci.appveyor.com/api/projects/status/so72g2kelkpwclhc?svg=true)](https://ci.appveyor.com/project/jianboqi/lessrt-ipr8k)
 
 LESS is a 3D radiative transfer model which can simulate large-scale spectral images and remote sensing data.
 
