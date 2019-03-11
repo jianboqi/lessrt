@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="481.0" prefWidth="520.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.ProspectDController">
+<BorderPane prefHeight="481.0" prefWidth="520.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.ProspectDController">
    <center>
       <AnchorPane prefHeight="441.0" prefWidth="520.0" BorderPane.alignment="CENTER">
          <children>

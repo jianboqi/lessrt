@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 
-<BorderPane prefHeight="570.0" prefWidth="1044.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.DBChooserController">
+<BorderPane prefHeight="570.0" prefWidth="1044.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.DBChooserController">
    <center>
       <SplitPane dividerPositions="0.32608695652173914" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
