@@ -196,7 +196,7 @@ class SceneParser:
                 strNode.setAttribute("value", cfg["sensor"]["PhotonTracing"]["LayerDefinition"])
 
         else:
-            integratorNode.setAttribute("type", "volpath_simple")
+            integratorNode.setAttribute("type", "path")
         rootNode.appendChild(integratorNode)
 
         # integrator
