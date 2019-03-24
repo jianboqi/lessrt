@@ -115,7 +115,10 @@ def do_simulation_multi_spectral(cores):
             data = np.load(output_fileName)
             dshape = data.shape
             if len(dshape) == 3:
-                data = data[:,:,0]
+                if dshape[2] <= 4:
+                    data = data[:,:,0]
+                else:
+                    data = data[:,:,0:5]
             bandlist = []
             RasterHelper.saveToHdr_no_transform(data, out_file_no_extension, bandlist, output_format)
             os.remove(output_fileName)

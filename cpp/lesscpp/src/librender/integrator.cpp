@@ -178,6 +178,7 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			fourcomps.push_back(0);
 			fourcomps.push_back(0);
 		}
+		int totalSamples = sampler->getSampleCount();
 		for (size_t j = 0; j<sampler->getSampleCount(); j++) {
 			rRec.newQuery(queryType, sensor->getMedium());
 			Point2 samplePos(Point2(offset) + Vector2(rRec.nextSample2D()));
@@ -203,8 +204,25 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 			sampler->advance();
 		}
 		if (m_hasFourComponentProduct) {
-			int maxPos = std::distance(fourcomps.begin(), std::max_element(fourcomps.begin(), fourcomps.end()));
-			multiImageblock->getFourComponentImageBlock()->put_no_filter(Point2i(points[i]), Spectrum((double)(maxPos +1)), rRec.alpha);
+			int actualTotalSamples = fourcomps[0] + fourcomps[1] + fourcomps[2] + fourcomps[3];
+			if (actualTotalSamples == 0) {
+				multiImageblock->getFourComponentImageBlock()->put_no_filter(Point2i(points[i]), Spectrum(-1.0), rRec.alpha);
+			}
+			else {
+				int maxPos = std::distance(fourcomps.begin(), std::max_element(fourcomps.begin(), fourcomps.end()));
+				if (SPECTRUM_SAMPLES <= 4) {
+					multiImageblock->getFourComponentImageBlock()->put_no_filter(Point2i(points[i]), Spectrum((double)(maxPos + 1)), rRec.alpha);
+				}
+				else {
+					Spectrum outspec(0.0);
+					outspec[0] = (double)(maxPos + 1);
+					outspec[1] = ((double)fourcomps[0]) / ((double)totalSamples);
+					outspec[2] = ((double)fourcomps[1]) / ((double)totalSamples);
+					outspec[3] = ((double)fourcomps[2]) / ((double)totalSamples);
+					outspec[4] = ((double)fourcomps[3]) / ((double)totalSamples);
+					multiImageblock->getFourComponentImageBlock()->put_no_filter(Point2i(points[i]), outspec, rRec.alpha);
+				}
+			}			
 		}
 	}
 }

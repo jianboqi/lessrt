@@ -206,7 +206,10 @@ class BatchGenAndRun:
                     data = np.load(distFile+"_4Components.npy")
                     dshape = data.shape
                     if len(dshape) == 3:
-                        data = data[:,:,0]
+                        if dshape[2] <= 4:
+                            data = data[:,:,0]
+                        else:
+                            data = data[:,:,0:5]
                     bandlist = []
                     RasterHelper.saveToHdr_no_transform(data, distFile+"_4Components", bandlist, output_format)
                     os.remove(distFile+"_4Components.npy")
