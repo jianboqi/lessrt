@@ -285,7 +285,7 @@
                                                       <Label layoutX="3.0" layoutY="343.0" text="NoData Value:" />
                                                       <TextField fx:id="sensorNoDataValueField" layoutX="140.0" layoutY="336.0" prefHeight="35.0" prefWidth="94.0" text="-1.0" AnchorPane.leftAnchor="150.0" />
                                                       <Label layoutX="276.0" layoutY="345.0" text="Repetitive scene:" />
-                                                      <TextField fx:id="sensorRepetitiveSceneTextField" layoutX="388.0" layoutY="338.0" prefHeight="28.0" prefWidth="83.0" text="10" />
+                                                      <TextField fx:id="sensorRepetitiveSceneTextField" layoutX="388.0" layoutY="338.0" prefHeight="28.0" prefWidth="83.0" text="100" />
                                                    </children>
                                                 </AnchorPane>
                                                 <AnchorPane fx:id="orthographicPane" prefHeight="137.0" prefWidth="624.0">

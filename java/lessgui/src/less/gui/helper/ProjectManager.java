@@ -610,8 +610,8 @@ public class ProjectManager {
 			
 			double xExtend = Double.parseDouble(this.mwController.sceneXSizeField.getText().replaceAll(",", ""));
 			double yExtend = Double.parseDouble(this.mwController.sceneYSizeField.getText().replaceAll(",", ""));
-			xsizepos.setText(this.mwController.sensorXExtentField.getText().replaceAll(",", ""));
-			ysizepos.setText(this.mwController.sensorYExtentField.getText().replaceAll(",", ""));
+			xsizepos.setText(this.mwController.sceneXSizeField.getText().replaceAll(",", ""));
+			ysizepos.setText(this.mwController.sceneYSizeField.getText().replaceAll(",", ""));
 			xpos.setText(""+xExtend*0.5);
 			ypos.setText(""+yExtend*0.5);
 			zpos.setText("MAX");

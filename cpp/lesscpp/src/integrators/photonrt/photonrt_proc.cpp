@@ -156,6 +156,17 @@ Spectrum CapturePhotonWorker::repetitiveOcclude(Spectrum value, Point p, Vector 
 	return value;
 }
 
+bool CapturePhotonWorker::rayIntersectExcludeEdge(Ray &ray, Intersection &its) {
+	bool isIntersected = m_scene->rayIntersect(ray, its);
+	if (isIntersected) {
+		while (isIntersected && (!m_sceneBounds.contains(its.p))) {
+			ray.o = its.p;
+			isIntersected = m_scene->rayIntersect(ray, its);
+		}
+	}
+	return isIntersected;
+}
+
 void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResult,
 	const bool &stop) {
 	if ((!m_hasBRFProducts) && (!m_hasUpDownProducts) && (!m_hasfPARProducts)) {
@@ -263,7 +274,8 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		Point previousPoint = Point(std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity());
 		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
-			m_scene->rayIntersect(ray, its);
+			//m_scene->rayIntersect(ray, its);
+			rayIntersectExcludeEdge(ray, its);
 			int repetitiveTimes = 0;
 			//如果需要计算BRF产品，且photon type正确，则计算. repetitive
 			if ((m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) ||
@@ -296,7 +308,8 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 									}
 								}
 							//	cout << "new Pos: " << ray.toString() << endl;
-								m_scene->rayIntersect(ray, its);
+								//m_scene->rayIntersect(ray, its);
+								rayIntersectExcludeEdge(ray, its);
 								if (its.t < std::numeric_limits<Float>::infinity())
 									break;
 							}
@@ -491,8 +504,10 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 				Vector wo = Vector(dx, dy, dz);
 				Ray occludeRay(its.p, wo, 0);
 				bool isDirectionOccuded = false;
-				//for repetitive scene
-				if (!m_scene->rayIntersect(occludeRay)) {
+				//for repetitive scene rayIntersectExcludeEdge
+				//if (!m_scene->rayIntersect(occludeRay)) {
+				Intersection tmp;
+				if (!rayIntersectExcludeEdge(occludeRay, tmp)) {
 					for (int iter = 0; iter < m_repetitiveSceneNum; iter++) {
 						Float tNear, tFar;
 						int exitFace;

@@ -32,7 +32,7 @@
             <Label layoutX="316.0" layoutY="14.0" text="Cols:" />
             <TextField fx:id="textFieldHeight" layoutX="387.0" layoutY="35.0" prefHeight="13.0" prefWidth="48.0" text="1" />
             <Label layoutX="368.0" layoutY="41.0" text="×" />
-            <Label layoutX="387.0" layoutY="13.0" text="Height:" />
+            <Label layoutX="387.0" layoutY="13.0" text="Layers:" />
          </children></AnchorPane>
    </top>
 </BorderPane>

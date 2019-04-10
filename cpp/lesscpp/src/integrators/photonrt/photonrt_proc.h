@@ -156,6 +156,7 @@ public:
 		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
 		const Spectrum &weight, int photoType);
 
+	bool rayIntersectExcludeEdge(Ray &ray, Intersection &its);
 	/**
 	* \brief Handles particles interacting with a medium
 	*
