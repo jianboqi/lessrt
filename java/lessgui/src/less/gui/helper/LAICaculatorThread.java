@@ -146,7 +146,7 @@ public class LAICaculatorThread extends Thread{
  		
  		
  		
- 		this.bdConsole.log("INFO: LAI Resolution: "+laiRows+" × "+laiCols+" × "+laiHeight+" \n");
+ 		this.bdConsole.log("INFO: LAI Resolution: "+laiRows+" \u00D7 "+laiCols+" \u00D7 "+laiHeight+" \n");
  		double width = Double.parseDouble(this.laiController.mwController.sceneXSizeField.getText().replaceAll(",", ""));
  		double height = Double.parseDouble(this.laiController.mwController.sceneYSizeField.getText().replaceAll(",", ""));
  		//get Z bounding
