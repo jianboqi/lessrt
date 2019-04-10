@@ -536,7 +536,9 @@ void CapturePhotonWorker::handleSurfaceInteractionBRF(int depth, int nullInterac
 									occludeRay.o = its_p + Vector(0, 0, boundExtend.z);
 								}
 							}
-							if (m_scene->rayIntersect(occludeRay)) {
+							Intersection tmp;
+							/*if (m_scene->rayIntersect(occludeRay)) {*/
+							if (rayIntersectExcludeEdge(occludeRay, tmp)) {
 								isDirectionOccuded = true;
 								break;
 							}
