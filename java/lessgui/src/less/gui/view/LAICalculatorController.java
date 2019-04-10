@@ -35,6 +35,13 @@ public class LAICalculatorController {
 	
 	@FXML
 	public TextField LAITextField;
+	
+	@FXML
+	public TextField textFieldRows;
+	@FXML
+	public TextField textFieldCols;
+	@FXML
+	public TextField textFieldHeight;
 
 	@FXML
 	public VBox componentVBox;

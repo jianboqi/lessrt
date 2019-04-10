@@ -9,8 +9,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LAICalculatorController">
-   <center>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="less.gui.view.LAICalculatorController">
+   <top>
       <AnchorPane prefHeight="450.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <CheckBox fx:id="selectAllChecbox" layoutX="22.0" layoutY="39.0" mnemonicParsing="false" onAction="#selectAll" selected="true" text="Select All" />
@@ -23,9 +23,16 @@
                   </AnchorPane>
               </content>
             </ScrollPane>
-            <Button layoutX="439.0" layoutY="34.0" mnemonicParsing="false" onAction="#run_lai" text="Run" />
-            <Label layoutX="193.0" layoutY="40.0" text="Resolution [m]:" />
-            <TextField fx:id="LAITextField" layoutX="325.0" layoutY="34.0" prefHeight="35.0" prefWidth="103.0" text="25" />
+            <Button layoutX="456.0" layoutY="35.0" mnemonicParsing="false" onAction="#run_lai" text="Run" />
+            <Label layoutX="156.0" layoutY="40.0" text="Grid Size:" />
+            <TextField fx:id="textFieldRows" layoutX="232.0" layoutY="36.0" prefHeight="13.0" prefWidth="48.0" text="1" />
+            <Label layoutX="235.0" layoutY="14.0" text="Rows:" />
+            <TextField fx:id="textFieldCols" layoutX="313.0" layoutY="35.0" prefHeight="13.0" prefWidth="48.0" text="1" />
+            <Label layoutX="288.0" layoutY="40.0" text="×" />
+            <Label layoutX="316.0" layoutY="14.0" text="Cols:" />
+            <TextField fx:id="textFieldHeight" layoutX="387.0" layoutY="35.0" prefHeight="13.0" prefWidth="48.0" text="1" />
+            <Label layoutX="368.0" layoutY="41.0" text="×" />
+            <Label layoutX="387.0" layoutY="13.0" text="Height:" />
          </children></AnchorPane>
-   </center>
+   </top>
 </BorderPane>

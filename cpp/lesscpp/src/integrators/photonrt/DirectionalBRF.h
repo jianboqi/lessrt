@@ -13,6 +13,7 @@
 #include <mitsuba/core/spectrum.h>
 #include <mitsuba/mitsuba.h>
 #include <boost/algorithm/string.hpp>
+#include <iomanip>      // std::setprecision
 
 using namespace std;
 
@@ -242,6 +243,17 @@ public:
 		return up / down;
 	}
 
+	double broadbandIntegral(Spectrum energy) {
+		if (SPECTRUM_SAMPLES == 1)
+			return energy[0];
+
+		double total = 0.0;
+		for (int j = 0; j < SPECTRUM_SAMPLES - 1; j++) {
+			total += (energy[j] + energy[j + 1])*(m_wavelengths[j + 1] - m_wavelengths[j])*0.5;
+		}
+		return total;
+	}
+
 	void develop(double scale=1.0) {
 		//scale irradiance
 		scaleIrradiance(scale*1/ (m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
@@ -285,10 +297,18 @@ public:
 				}
 			}
 
-			if (!m_isTheramlMode) {
-				Albedo = Albedo / (m_verticalIrradiance*(m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
+			if (!m_isTheramlMode) {				
 				if (m_infoDestnationFile != "") {
 					ofstream infoOut(m_infoDestnationFile);
+
+					//broadband albedo
+					double broadbandAlbedo = broadbandIntegral(Albedo) / broadbandIntegral(m_verticalIrradiance*(m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
+					infoOut << "Broadband Albedo: " << std::fixed << std::setprecision(5) << broadbandAlbedo<<endl;
+
+					//spectral albedo
+					Albedo = Albedo / (m_verticalIrradiance*(m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
+					
+					infoOut << "Spectral Albedo: ";
 					for (int i = 0; i < SPECTRUM_SAMPLES; i++)
 						infoOut << Albedo[i] << " ";
 					infoOut << endl;

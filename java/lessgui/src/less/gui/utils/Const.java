@@ -59,7 +59,7 @@ public class Const {
 	
 	// LESS Mode
 	public static String LESS_MODE= "development11";
-	public static String LESS_VERSION = "V1.8.7";
+	public static String LESS_VERSION = "V1.8.8";
 	
 	public static boolean LESS_OUT_ALL = false;
 	

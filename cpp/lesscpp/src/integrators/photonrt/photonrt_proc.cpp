@@ -264,13 +264,14 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
 			m_scene->rayIntersect(ray, its);
-			
+			int repetitiveTimes = 0;
 			//如果需要计算BRF产品，且photon type正确，则计算. repetitive
 			if ((m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) ||
 				(m_hasfPARProducts && (photoType & EPhotonType::ETypefPAR))) {
 					if (its.t == std::numeric_limits<Float>::infinity()) {
 						//maximum iteration = 5
 						for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
+							repetitiveTimes = iteration;
 							Float tNear, tFar;
 							int exitFace;
 							Vector boundExtend = m_sceneBounds.getExtents();
@@ -329,8 +330,9 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 					}
 				}
 				if (m_hasfPARProducts) {
+					
 					Spectrum ref1;
-					if (dot(its.shFrame.n, bRec.wi) >= 0) {//入射方向在证明,计算正面反射率
+					if (dot(its.geoFrame.n, its.geoFrame.toWorld(bRec.wi)) >= 0) {//入射方向在正面,计算正面反射率
 						Intersection its_tmp1;
 						its_tmp1.p = its.p;
 						BSDFSamplingRecord bRecref1(its_tmp1, Vector(0, 0, 1), Vector(0, 0, 1));
@@ -340,7 +342,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 						Intersection its_tmp2;
 						its_tmp2.p = its.p;
 						BSDFSamplingRecord bRecref2(its_tmp2, Vector(0, 0, -1), Vector(0, 0, -1));
-						ref1 = bsdf->eval(bRecref2)*M_PI_DBL;
+						ref1 = bsdf->eval(bRecref2)*M_PI_DBL;						
 					}
 					Intersection its_tmp;
 					its_tmp.p = its.p;
@@ -700,6 +702,7 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 			else {
 				m_dirBRFs->setDestinationFile(m_scene->getDestinationFile().string() + "_BRF.txt");
 				m_dirBRFs->setInfoDestinationFile(m_scene->getDestinationFile().string() + "_LESS.txt");
+				m_dirBRFs->setWavelengths(m_scene->getIntegrator()->getProperties().getSpectrum("wavelengths"));
 				m_dirBRFs->setCalculationMode(false);
 			}
 			

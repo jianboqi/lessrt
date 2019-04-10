@@ -262,6 +262,10 @@ public class ProjectManager {
 		this.mwController.reDrawAll();
 	}
 	
+	public void onShowObjectDimensionCheck() {
+		this.mwController.reDrawAll();
+	}
+	
 	public void onHideSelectedOn2DCheck(){
 		this.mwController.reDrawAll();
 	}

@@ -55,6 +55,17 @@ public class LSBoundingbox {
 		}
 	}
 	
+	public LSBoundingbox getOffsetedBoundingbox(double x, double y, double z) {
+		LSBoundingbox newboundingbox = new LSBoundingbox();
+		newboundingbox.minX = minX+x;
+		newboundingbox.minY = minY+y;
+		newboundingbox.minZ = minZ+z;
+		newboundingbox.maxX = maxX+x;
+		newboundingbox.maxY = maxY+y;
+		newboundingbox.maxZ = maxZ+z;
+		return newboundingbox;
+	}
+	
 	/**
 	 * merge boundingbox
 	 * @param bound1

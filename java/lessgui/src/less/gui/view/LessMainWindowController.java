@@ -1,6 +1,5 @@
 package less.gui.view;
 
-import java.awt.Checkbox;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -188,6 +187,8 @@ public class LessMainWindowController {
 	private Button DeleteAllPosBtn;
 	@FXML
 	public CheckBox objFileCacheChecbox;
+	@FXML
+	public CheckBox ShowObjectDimensionCheck;
 	
 	/**
 	 * object list
@@ -603,6 +604,11 @@ public class LessMainWindowController {
 	@FXML
 	private void onDisplayPosOn2DCheck(){
 		this.projManager.onDisplayPosOn2DCheck();
+	}
+	
+	@FXML
+	private void onShowObjectDimensionCheck() {
+		this.projManager.onShowObjectDimensionCheck();
 	}
 	
 	@FXML

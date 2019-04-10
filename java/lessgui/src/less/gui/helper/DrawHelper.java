@@ -8,6 +8,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
 import less.gui.display2D.DrawingUtils;
+import less.gui.model.LSBoundingbox;
 import less.gui.model.PositionXY;
 import less.gui.utils.Const;
 import less.gui.utils.RandomColorFactory;
@@ -169,17 +170,36 @@ public class DrawHelper {
     			ObservableList<PositionXY> positionXYs = entry.getValue();
     			if(positionXYs.size() > 1000)
     				r = 1;
-    			gc.setFill(RndColorFactory.getColor());
+    			Color dim_fill_color = RndColorFactory.getColor();
+    			gc.setFill(dim_fill_color);
+    			
+    			double dim_r_x = 0;
+    			double dim_r_y = 0;
+    			if(this.mwController.ShowObjectDimensionCheck.isSelected()) {
+					//Draw Dimension
+    				LSBoundingbox lsbounds = this.mwController.objectAndBoundingboxMap.get(objName);
+    				double xExtends = lsbounds.getXExtent();
+    				double yExtends = lsbounds.getYExtent();
+    				dim_r_x = xExtends*0.5/w*width;
+    				dim_r_y = yExtends*0.5/w*width;
+				}
+    			
     			for(int i=0;i<positionXYs.size();i++){ //component
     				PositionXY posxy = positionXYs.get(i);
     				double tx = Double.parseDouble(posxy.getPos_x().replaceAll(",", ""));
     				double ty = Double.parseDouble(posxy.getPos_y().replaceAll(",", ""));
     				gc.fillOval(tx/w*width-r, ty/h*height-r, 2*r, 2*r);
+    				
+    				if(this.mwController.ShowObjectDimensionCheck.isSelected()) {
+    					gc.setFill(Color.rgb((int)(dim_fill_color.getRed()*255), (int)(dim_fill_color.getGreen()*255),(int)(dim_fill_color.getBlue()*255),0.5));
+    					gc.fillOval(tx/w*width-dim_r_x, ty/h*height-dim_r_y, 2*dim_r_x, 2*dim_r_y);
+    				}
     			}
     			
     		} 
         }else{
         	mwController.outputConsole.log("Object positions are not drawed, The maximum number of drawing is " + Const.LESS_TREE_POS_DRAW_MAX_NUM +".\n");
+        	System.out.println("INFO: "+"Object positions are not drawed, The maximum number of drawing is " + Const.LESS_TREE_POS_DRAW_MAX_NUM +".\n");
         }
 	}
 	

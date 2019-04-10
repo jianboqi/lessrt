@@ -109,12 +109,11 @@ public class LAICaculatorThread extends Thread{
 				objMesh.area += triarea;
 			}
 		}
-		System.out.println(objMesh.area);
 		return objMesh;
 	}
 	
 	
-	private void parse_triangles(int wdith, int height, double laiResolution,double objX,Double objY, ObjectAreaAndMesh objectAreaAndMesh, double [][] lais){
+	private void parse_triangles(int wdith, int height,int depth, double colResolution, double rowResolution, double depthResolution,double objX,double objY,double objZ, ObjectAreaAndMesh objectAreaAndMesh, double [][][] lais){
 		double factor = 1.0/3.0;
 		for(int i=0;i<objectAreaAndMesh.facets.size();i+=3){
 			Point3D p1 = objectAreaAndMesh.points.get(objectAreaAndMesh.facets.get(i));
@@ -126,103 +125,140 @@ public class LAICaculatorThread extends Thread{
 			Point3D center = p1.add(p2).add(p3).multiply(factor);
 			double x = objX - center.getX();
 			double y = objY - center.getZ();
-			int x_index = new Double(Math.floor(x/laiResolution)).intValue();
-			int y_index = new Double(Math.floor(y/laiResolution)).intValue();
-			if (x_index>0 && y_index > 0 && x_index < wdith && y_index < height)
-				lais[y_index][x_index] += triarea;
+			double z = objZ + center.getY();
+			int x_index = new Double(Math.floor(x/colResolution)).intValue();
+			int y_index = new Double(Math.floor(y/rowResolution)).intValue();
+			int z_index = new Double(Math.floor(z/depthResolution)).intValue();
+			if (x_index>=0 && y_index >= 0 && z_index>=0 && x_index < wdith && y_index < height && z_index<depth)
+				lais[y_index][x_index][z_index] += triarea;
 		}
 	}
 	
    private void LAICalculate(){
-	 		if(this.laiController.LAITextField.getText().equals("")){
-	 			return;
-	 		}
-	 		if(this.laiController.mwController.simulation_path == null){
-	 			return;
-	 		}
-	 		this.bdConsole.log("INFO: LAI Calculation started.\n");
-	 		double laiResolution = Double.parseDouble(this.laiController.LAITextField.getText().trim());
-	 		this.bdConsole.log("INFO: LAI Resolution: "+laiResolution+" \n");
-	 		double width = Double.parseDouble(this.laiController.mwController.sceneXSizeField.getText().replaceAll(",", ""));
-	 		double height = Double.parseDouble(this.laiController.mwController.sceneYSizeField.getText().replaceAll(",", ""));
-	 		double dcols = Math.ceil(width/laiResolution);
-	 		double drows = Math.ceil(height/laiResolution);
-	 		int rows = (new Double(drows)).intValue();
-	 		int cols = (new Double(dcols)).intValue();
-	 		double [][] lais = new double [rows][cols];
-	 		Map<String, Double> opticalcomponentArea = new HashMap<String, Double>();		
-	 		ArrayList<String> selectedComps = this.getselectedComps();
-	 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
-	 			String objName = entry.getKey();
-	 			this.bdConsole.log("INFO: Processing object: "+objName+"\n");
-	 			LSBoundingbox objBoundingbox = this.laiController.mwController.objectAndBoundingboxMap.get(objName);
-	 			double xExtent = objBoundingbox.getXExtent();
-	 			double yExtent = objBoundingbox.getYExtent();
-	 			ObservableList<PositionXY> positionXYZs = entry.getValue();
-	 			
-	 			Map<String, ObjectAreaAndMesh> objectArea = new HashMap<String, ObjectAreaAndMesh>();
-	 			
-	 			ArrayList<TriangleMesh> objectMeshes = new ArrayList<TriangleMesh>();
-	 			ObservableList<String> comps = this.laiController.mwController.objectsAndCompomentsMap.get(objName);
-	 			for(int i=0;i<comps.size();i++){
-	 				String compName = comps.get(i);
-	 				if(selectedComps.contains(compName)){
-	 					String objPath = Paths.get(this.laiController.mwController.projManager.getParameterDirPath(),compName).toString();
-	 					TriangleMesh mesh = (TriangleMesh)DrawElement.getMeshFromObj(objPath)[0];
-	 					objectMeshes.add(mesh);
-	 				}
-	 			}
-	 			
-	 			for(int i=0;i<positionXYZs.size();i++){ //component
-	 				PositionXY posxyz = positionXYZs.get(i);
-	 				double x = Double.parseDouble(posxyz.getPos_x());
-	 				double y = Double.parseDouble(posxyz.getPos_y());
-	 				double left = x - 0.5*xExtent;
-	 				double right = x + 0.5*xExtent;
-	 				double up = y - 0.5*yExtent;
-	 				double down = y + 0.5*yExtent;
-	 				
-	 				int left_index = new Double(Math.floor(left/laiResolution)).intValue();
-	 				int right_index = new Double(Math.floor(right/laiResolution)).intValue();
-	 				int up_index = new Double(Math.floor(up/laiResolution)).intValue();
-	 				int down_index = new Double(Math.floor(down/laiResolution)).intValue();
-	 				//
-	 				if(left_index == right_index && up_index == down_index){
-	 					if(objectArea.containsKey(objName)){
-	 						lais[up_index][left_index] += objectArea.get(objName).area;
-	 					}else{
-	 						ObjectAreaAndMesh objectAreaAndMesh = this.getObjectArea(objectMeshes);
-	 						lais[up_index][left_index] += objectAreaAndMesh.area;
-	 						objectArea.put(objName, objectAreaAndMesh);
-	 					}
-	 				}else{//
-	 					if(!objectArea.containsKey(objName)){
-	 						objectArea.put(objName, this.getObjectArea(objectMeshes));
-	 					}
-	 					this.parse_triangles(cols,rows,laiResolution, x, y, objectArea.get(objName), lais);
-	 				}
-	 			}
-	 		}
-	 		
-	 		String lai_output_file = Paths.get(this.laiController.mwController.projManager.getResultsDirPath(),Const.LESS_LAI_OUTPUT_FILE).toString();
-			
-			try {
-				BufferedWriter writer = new BufferedWriter( new FileWriter(lai_output_file));
-				
-		 		for(int i = 0;i<rows;i++){
-		 			for(int j=0;j<cols;j++){
-						writer.write(String.format("%.4f ", lais[i][j]/laiResolution/laiResolution));
+ 		if(this.laiController.mwController.simulation_path == null){
+ 			return;
+ 		}
+ 		this.bdConsole.log("INFO: LAI Calculation started.\n");
+ 		//double laiResolution = Double.parseDouble(this.laiController.LAITextField.getText().trim());
+ 		int laiRows = Integer.parseInt(this.laiController.textFieldRows.getText().trim());
+ 		int laiCols = Integer.parseInt(this.laiController.textFieldCols.getText().trim());
+ 		int laiHeight = Integer.parseInt(this.laiController.textFieldHeight.getText().trim());
+ 		
+ 		
+ 		
+ 		this.bdConsole.log("INFO: LAI Resolution: "+laiRows+" × "+laiCols+" × "+laiHeight+" \n");
+ 		double width = Double.parseDouble(this.laiController.mwController.sceneXSizeField.getText().replaceAll(",", ""));
+ 		double height = Double.parseDouble(this.laiController.mwController.sceneYSizeField.getText().replaceAll(",", ""));
+ 		//get Z bounding
+ 		LSBoundingbox sceneBounds = new LSBoundingbox();
+ 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
+ 			String objName = entry.getKey();
+ 			ObservableList<PositionXY> positionXYZs = entry.getValue();
+ 			LSBoundingbox objBoundingbox = this.laiController.mwController.objectAndBoundingboxMap.get(objName);
+ 			for(int i=0;i<positionXYZs.size();i++){ //component
+ 				PositionXY posxyz = positionXYZs.get(i);
+ 				double x = Double.parseDouble(posxyz.getPos_x());
+ 				double y = Double.parseDouble(posxyz.getPos_y());
+ 				double z = Double.parseDouble(posxyz.getPos_z());
+ 				//x, y is not correct here, we only take the value of z
+ 				sceneBounds = LSBoundingbox.merge(sceneBounds, objBoundingbox.getOffsetedBoundingbox(x, z, y));
+ 			}
+ 		}
+ 		double Depth = sceneBounds.getHeight(); 		
+ 		
+ 		double [][][] lais = new double [laiRows][laiCols][laiHeight];
+ 		double rowResolution = height/laiRows;
+ 		double colResolution = width/laiCols;
+ 		double depthResolution = Depth/laiHeight;
+ 		
+ 		
+ 		//Map<String, Double> opticalcomponentArea = new HashMap<String, Double>();		
+ 		ArrayList<String> selectedComps = this.getselectedComps();
+ 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
+ 			String objName = entry.getKey();
+ 			this.bdConsole.log("INFO: Processing object: "+objName+"\n");
+ 			LSBoundingbox objBoundingbox = this.laiController.mwController.objectAndBoundingboxMap.get(objName);
+ 			double xExtent = objBoundingbox.getXExtent();
+ 			double yExtent = objBoundingbox.getYExtent();
+ 			double zExtent = objBoundingbox.getHeight();
+ 			ObservableList<PositionXY> positionXYZs = entry.getValue();
+ 			
+ 			Map<String, ObjectAreaAndMesh> objectArea = new HashMap<String, ObjectAreaAndMesh>();
+ 			
+ 			ArrayList<TriangleMesh> objectMeshes = new ArrayList<TriangleMesh>();
+ 			ObservableList<String> comps = this.laiController.mwController.objectsAndCompomentsMap.get(objName);
+ 			for(int i=0;i<comps.size();i++){
+ 				String compName = comps.get(i);
+ 				if(selectedComps.contains(compName)){
+ 					String objPath = Paths.get(this.laiController.mwController.projManager.getParameterDirPath(),compName).toString();
+ 					TriangleMesh mesh = (TriangleMesh)DrawElement.getMeshFromObj(objPath)[0];
+ 					objectMeshes.add(mesh);
+ 				}
+ 			}
+ 			
+ 			for(int i=0;i<positionXYZs.size();i++){ //component
+ 				PositionXY posxyz = positionXYZs.get(i);
+ 				double x = Double.parseDouble(posxyz.getPos_x());
+ 				double y = Double.parseDouble(posxyz.getPos_y());
+ 				double z = Double.parseDouble(posxyz.getPos_z());
+ 				double left = x - 0.5*xExtent;
+ 				double right = x + 0.5*xExtent;
+ 				double up = y - 0.5*yExtent;
+ 				double down = y + 0.5*yExtent;
+ 				double bottom = z;
+ 				double above = z+zExtent;
+ 				
+ 				int left_index = new Double(Math.floor(left/colResolution)).intValue();
+ 				int right_index = new Double(Math.floor(right/colResolution)).intValue();
+ 				int up_index = new Double(Math.floor(up/rowResolution)).intValue();
+ 				int down_index = new Double(Math.floor(down/rowResolution)).intValue();
+ 				int bottom_index = new Double(Math.floor(bottom/depthResolution)).intValue();
+ 				int above_index = new Double(Math.floor(above/depthResolution)).intValue();
+ 				if(above == depthResolution) above_index = 0;
+ 				
+ 				//
+ 				if(left_index == right_index && up_index == down_index && bottom_index == above_index){
+ 					if(objectArea.containsKey(objName)){
+ 						lais[up_index][left_index][bottom_index] += objectArea.get(objName).area;
+ 					}else{
+ 						ObjectAreaAndMesh objectAreaAndMesh = this.getObjectArea(objectMeshes);
+ 						System.out.println("INFO: "+objName+" Area[m2]: "+objectAreaAndMesh.area);
+ 						lais[up_index][left_index][bottom_index] += objectAreaAndMesh.area;
+ 						objectArea.put(objName, objectAreaAndMesh);
+ 					}
+ 				}else{//
+ 					if(!objectArea.containsKey(objName)){
+ 						objectArea.put(objName, this.getObjectArea(objectMeshes));
+ 					}
+ 					this.parse_triangles(laiCols,laiRows,laiHeight,colResolution,rowResolution,depthResolution, x, y,z, objectArea.get(objName), lais);
+ 				}
+ 			}
+ 		}
+ 		
+ 		String lai_output_file = Paths.get(this.laiController.mwController.projManager.getResultsDirPath(),Const.LESS_LAI_OUTPUT_FILE).toString();
+		
+		try {
+			BufferedWriter writer = new BufferedWriter( new FileWriter(lai_output_file));
+			writer.write("Scene Size [X, Y, Z]: "+String.format("%.4f ",width)+" "+String.format("%.4f ",height)+" "+String.format("%.4f ",Depth)+"\n");
+			writer.write("LAI Dimension [Rows, Cols, height]: "+laiRows+" "+laiCols+" "+laiHeight+"\n");
+			for(int k=0;k<laiHeight;k++) {
+				for(int i = 0;i<laiRows;i++){
+		 			for(int j=0;j<laiCols;j++){
+						writer.write(String.format("%.4f ", lais[i][j][k]/colResolution/rowResolution));
 		 			}
 		 			writer.write("\n");
 		 		}
-		 		
-		 		writer.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				writer.write("\n");
 			}
-			this.bdConsole.log("INFO: Writing results to "+Const.LESS_LAI_OUTPUT_FILE+"\n");
-	 		this.bdConsole.log("INFO: Done.\n");
+	 		
+	 		
+	 		writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.bdConsole.log("INFO: Writing results to "+Const.LESS_LAI_OUTPUT_FILE+"\n");
+ 		this.bdConsole.log("INFO: Done.\n");
 	 		
    }
 	
