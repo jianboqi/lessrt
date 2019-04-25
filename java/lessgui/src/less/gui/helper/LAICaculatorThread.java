@@ -149,22 +149,39 @@ public class LAICaculatorThread extends Thread{
  		this.bdConsole.log("INFO: LAI Resolution: "+laiRows+" \u00D7 "+laiCols+" \u00D7 "+laiHeight+" \n");
  		double width = Double.parseDouble(this.laiController.mwController.sceneXSizeField.getText().replaceAll(",", ""));
  		double height = Double.parseDouble(this.laiController.mwController.sceneYSizeField.getText().replaceAll(",", ""));
- 		//get Z bounding
- 		LSBoundingbox sceneBounds = new LSBoundingbox();
+ 		//get Z height
+ 		double Depth = 0;
  		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
  			String objName = entry.getKey();
  			ObservableList<PositionXY> positionXYZs = entry.getValue();
  			LSBoundingbox objBoundingbox = this.laiController.mwController.objectAndBoundingboxMap.get(objName);
  			for(int i=0;i<positionXYZs.size();i++){ //component
  				PositionXY posxyz = positionXYZs.get(i);
- 				double x = Double.parseDouble(posxyz.getPos_x());
- 				double y = Double.parseDouble(posxyz.getPos_y());
  				double z = Double.parseDouble(posxyz.getPos_z());
- 				//x, y is not correct here, we only take the value of z
- 				sceneBounds = LSBoundingbox.merge(sceneBounds, objBoundingbox.getOffsetedBoundingbox(x, z, y));
+ 				double tmp = z + objBoundingbox.getHeight();
+ 				if(tmp > Depth)
+ 					Depth = tmp;
  			}
  		}
- 		double Depth = sceneBounds.getHeight(); 		
+ 		
+ 		
+// 		LSBoundingbox sceneBounds = new LSBoundingbox();
+// 		for(Map.Entry<String, ObservableList<PositionXY>> entry: this.laiController.mwController.objectAndPositionMap.entrySet()){
+// 			String objName = entry.getKey();
+// 			ObservableList<PositionXY> positionXYZs = entry.getValue();
+// 			LSBoundingbox objBoundingbox = this.laiController.mwController.objectAndBoundingboxMap.get(objName);
+// 			for(int i=0;i<positionXYZs.size();i++){ //component
+// 				PositionXY posxyz = positionXYZs.get(i);
+// 				double x = Double.parseDouble(posxyz.getPos_x());
+// 				double y = Double.parseDouble(posxyz.getPos_y());
+// 				double z = Double.parseDouble(posxyz.getPos_z());
+// 				//x, y is not correct here, we only take the value of z
+// 				sceneBounds = LSBoundingbox.merge(sceneBounds, objBoundingbox.getOffsetedBoundingbox(x, z, y));
+// 			}
+// 		}
+// 		double Depth = sceneBounds.getHeight(); 
+ 		System.out.println("Scene Depth [m]: "+Depth);
+ 		
  		
  		double [][][] lais = new double [laiRows][laiCols][laiHeight];
  		double rowResolution = height/laiRows;
@@ -222,7 +239,6 @@ public class LAICaculatorThread extends Thread{
  						lais[up_index][left_index][bottom_index] += objectArea.get(objName).area;
  					}else{
  						ObjectAreaAndMesh objectAreaAndMesh = this.getObjectArea(objectMeshes);
- 						System.out.println("INFO: "+objName+" Area[m2]: "+objectAreaAndMesh.area);
  						lais[up_index][left_index][bottom_index] += objectAreaAndMesh.area;
  						objectArea.put(objName, objectAreaAndMesh);
  					}
