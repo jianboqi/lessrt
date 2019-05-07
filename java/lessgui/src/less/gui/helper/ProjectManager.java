@@ -49,6 +49,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import less.LessMainApp;
+import less.gui.lidar.LiDARMainApp;
 import less.gui.model.AtmosphereParams;
 import less.gui.model.FacetOptical;
 import less.gui.model.PositionXY;
@@ -62,6 +63,7 @@ import less.gui.view.DBChooserController;
 import less.gui.view.HelpViewerController;
 import less.gui.view.LAICalculatorController;
 import less.gui.view.LessMainWindowController;
+import less.gui.view.ObjectsDefineWindowViewController;
 import less.gui.view.PlotSpectraController;
 import less.gui.view.ProspectDController;
 import less.gui.view.RunningOnClusterController;
@@ -1527,4 +1529,37 @@ public class ProjectManager {
 		Thread testA=new Thread(pyServer);  
         testA.start();  
 	}
+	
+	///LiDAR simulator
+	public void openLiDARSimulator() {
+		LiDARMainApp lidarMainApp = new LiDARMainApp();
+		Stage subStage = new Stage();
+		lidarMainApp.start(subStage,this.mwController.mainApp);
+//		try {	
+//			FXMLLoader loader = new FXMLLoader();
+//			loader.setLocation(LiDARMainApp.class.getResource("view/RootLayout.fxml"));
+//			
+//			lidarMainApp.rootLayout = (BorderPane) loader.load();
+//			Scene scene = new Scene(lidarMainApp.rootLayout);
+//			Stage subStage = new Stage();
+//			subStage.setScene(scene);
+//			subStage.setTitle("LiDAR Simulator");
+//			
+//			
+//			
+//			
+//			ObjectsDefineWindowViewController objController = loader.getController();
+//			objController.setMainWindowController(this);
+//			objController.setParentStage(subStage);
+//			objController.initView();
+//			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+//			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+//			subStage.initOwner(this.mainApp.getPrimaryStage());
+//			subStage.show();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	
 }

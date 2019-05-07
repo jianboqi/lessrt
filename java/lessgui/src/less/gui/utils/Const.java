@@ -58,7 +58,7 @@ public class Const {
 	
 	
 	// LESS Mode
-	public static String LESS_MODE= "development11";
+	public static String LESS_MODE= "development";
 	public static String LESS_VERSION = "V1.8.8";
 	
 	public static boolean LESS_OUT_ALL = false;
@@ -119,5 +119,9 @@ public class Const {
 	public static String LESS_ATS_TYPE_ATS = "ATMOSPHERE";
 	public static String LESS_ATS_CAL_MODE_TWOSTEP = "Two-Step Mode";
 	public static String LESS_ATS_CAL_MODE_ONESTEP = "One-Step Mode";
+	
+	
+	//LiDAR
+	public static String LIDAR_PARAMETER = "lidar.conf";
 	
 }

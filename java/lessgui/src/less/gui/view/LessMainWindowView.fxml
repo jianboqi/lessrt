@@ -88,6 +88,11 @@
                         <MenuItem mnemonicParsing="false" onAction="#RunLAICalculator" text="LAI Calculator" />
                         <MenuItem mnemonicParsing="false" onAction="#RunPythonConsole" text="Python Console" />
                      </items></Menu>
+                  <Menu mnemonicParsing="false" text="Extensions">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#openLiDARSimulator" text="LiDAR Simulator" />
+                    </items>
+                  </Menu>
                   <Menu mnemonicParsing="false" text="Display">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#Open3DViewer" text="3D Viewer" />

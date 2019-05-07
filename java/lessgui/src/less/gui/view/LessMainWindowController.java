@@ -1688,6 +1688,11 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
+	private void openLiDARSimulator() {
+		this.projManager.openLiDARSimulator();
+	}
+	
+	@FXML
 	private void OpenResultsFolder(){
 		this.projManager.openResultFolder();
 	}
@@ -1747,7 +1752,6 @@ public class LessMainWindowController {
 	@FXML
 	private void PyJavaCommunication(){
 		this.projManager.PyJavaCommunication();
-	}
-	
+	}	
 	
 }
