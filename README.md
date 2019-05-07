@@ -13,6 +13,7 @@ LESS is a 3D radiative transfer model which can simulate large-scale spectral im
 * Albedo simulation
 * Thermal infrared image simulation
 * Upwelling and downwelling radiation simulation over rugged terrains with realistic trees
+* FPAR Simulation
 * ...
 
 ## Usage
