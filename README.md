@@ -35,6 +35,6 @@ The whole model (including GUI) is written with C++, Python and JavaFX. JavaFX i
 ## Papers
 If you use this model, please cite:
 
-Qi, J., Xie, D., Yin, T., Yan, G., Gastellu-Etchegorry, J.-P., Li, L., Zhang, W., Mu, X., Norford, L.K., 2019. LESS: LargE-Scale remote sensing data and image simulation framework over heterogeneous 3D scenes. Remote Sensing of Environment. 221, 695–706. (https://www.sciencedirect.com/science/article/pii/S0034425718305443)
+Qi, J., Xie, D., Yin, T., Yan, G., Gastellu-Etchegorry, J.-P., Li, L., Zhang, W., Mu, X., Norford, L.K., 2019. **LESS: LargE-Scale remote sensing data and image simulation framework over heterogeneous 3D scenes.** Remote Sensing of Environment. 221, 695–706. (https://www.sciencedirect.com/science/article/pii/S0034425718305443)
 
 
