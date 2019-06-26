@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
 import org.junit.experimental.theories.Theories;
@@ -37,6 +38,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -91,6 +93,7 @@ public class ObjectsDefineWindowViewController {
 	public double fx = 1.0;
 	public double fy = 1.0;
 	public double fz = 1.0;
+	public boolean isTranslate2Origin = false; 
 	
 	
 	public void setMainWindowController(LessMainWindowController mwController){
@@ -600,6 +603,7 @@ public class ObjectsDefineWindowViewController {
 	    		
 	    		
 	    		//determine boundingbox
+	    		LSBoundingbox subObjBoundingBox = new LSBoundingbox(); //Import obj to an existing obj
 	    		for (Map.Entry<String, MeshView> entry : importedGroupsMap.entrySet()) {
 	    			TriangleMesh compMesh = (TriangleMesh)entry.getValue().getMesh();
 	    			LSBoundingbox lsBoundingbox = new LSBoundingbox();
@@ -615,29 +619,53 @@ public class ObjectsDefineWindowViewController {
 	    				if(y > lsBoundingbox.maxY) lsBoundingbox.maxY = y;
 	    				if(z > lsBoundingbox.maxZ) lsBoundingbox.maxZ = z;
 	    			}
-	    			if(this.mwController.objectAndBoundingboxMap.containsKey(objName)){
-		    			this.mwController.objectAndBoundingboxMap.get(objName).addChild(lsBoundingbox);;
-		    		}else{
-		    			LSBoundingbox objBoundingbox = new LSBoundingbox();
-		    			objBoundingbox.addChild(lsBoundingbox);
-		    			this.mwController.objectAndBoundingboxMap.put(objName, objBoundingbox);
-		    		}
+	    			subObjBoundingBox.addChild(lsBoundingbox);
+	    		}
+
+	    		double lower_center_x=0,lower_center_z=0,lower_center_y=0;
+	    		if(this.isTranslate2Origin) {
+	    			lower_center_x = 0.5*(subObjBoundingBox.minX + subObjBoundingBox.maxX);
+		    		lower_center_z = 0.5*(subObjBoundingBox.minZ + subObjBoundingBox.maxZ);
+		    		lower_center_y = subObjBoundingBox.minY;
+		    		subObjBoundingBox.offset(-lower_center_x, -lower_center_y, -lower_center_z);
 	    		}
 	    		
-	    		LSBoundingbox totalBounds = this.mwController.objectAndBoundingboxMap.get(objName);
-	    		double lower_center_x = 0.5*(totalBounds.minX + totalBounds.maxX);
-	    		double lower_center_z = 0.5*(totalBounds.minZ + totalBounds.maxZ);
-	    		double lower_center_y = totalBounds.minY;
+	    		if(this.mwController.objectAndBoundingboxMap.containsKey(objName)){
+	    			this.mwController.objectAndBoundingboxMap.get(objName).addChild(subObjBoundingBox);
+	    		}else{
+	    			this.mwController.objectAndBoundingboxMap.put(objName, subObjBoundingBox);
+	    		}
+	    		
 	    		
 	    		for (Map.Entry<String, MeshView> entry : importedGroupsMap.entrySet())
 	    		{
-	    			String targetFileName = objName+"_"+entry.getKey();
+	    			String readedGroupName = entry.getKey();
+	    			//rename the group
+	    			if(readedGroupName.equals("Group")) {
+	    				TextInputDialog dialog = new TextInputDialog("Group");
+	    		        dialog.setTitle("Rename the component");
+	    		        dialog.setHeaderText("Group name is not found, please enter a new one (e.g., branch or leaves) or keep default:");
+	    		        dialog.setContentText("Component Name:"); 		 
+	    		        Optional<String> result = dialog.showAndWait();
+	    		        if(result.isPresent()) {
+	    		        	readedGroupName = result.get();
+	    		        }
+	    		    }
+
+	    			String targetFileName = objName+"_"+readedGroupName;
 	    			targetFileName = targetFileName.replace(".", "_");
+	    			String write_groupName = targetFileName;
 	    			targetFileName += ".obj";
+	    			
+	    			//if exiting, choose another name
+	    			if(mwController.objectsAndCompomentsMap.get(objName).contains(targetFileName)) {
+	    				targetFileName = targetFileName.substring(0, targetFileName.length()-4)+mwController.objectsAndCompomentsMap.get(objName).size()+".obj";
+	    			}
+	    			
 		        	mwController.objectsAndCompomentsMap.get(objName).add(targetFileName);
 		        	String param_path = this.mwController.projManager.getParameterDirPath();
 		        	String targetFilePath = Paths.get(param_path, targetFileName).toString();
-		        	Filehelper.write_mesh_to_obj(targetFilePath, (TriangleMesh)entry.getValue().getMesh(),fx,fy,fz,
+		        	Filehelper.write_mesh_to_obj(targetFilePath, write_groupName, (TriangleMesh)entry.getValue().getMesh(),fx,fy,fz,
 		        			lower_center_x, lower_center_y,lower_center_z);
 		        	
 		        	//set color according to possible name

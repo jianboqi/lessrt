@@ -66,6 +66,19 @@ public class LSBoundingbox {
 		return newboundingbox;
 	}
 	
+	public void offset(double x, double y, double z) {
+		for(int i=0;i<this.childBoundingbox.size();i++){
+			LSBoundingbox child = this.childBoundingbox.get(i);
+			child.minX = child.minX+x;
+			child.minY = child.minY+y;
+			child.minZ = child.minZ+z;
+			child.maxX = child.maxX+x;
+			child.maxY = child.maxY+y;
+			child.maxZ = child.maxZ+z;
+		}
+		updateBoundingbox();
+	}
+	
 	/**
 	 * merge boundingbox
 	 * @param bound1
@@ -81,6 +94,21 @@ public class LSBoundingbox {
 		newboundingbox.maxY = Math.max(bound1.maxY, bound2.maxY);
 		newboundingbox.maxZ = Math.max(bound1.maxZ, bound2.maxZ);
 		return newboundingbox;
+	}
+	
+	/**
+	 * Merge children from another Boundingbox
+	 * @param bound1
+	 */
+	public void mergeAllChildren(LSBoundingbox bound1) {
+		for(int i=0;i<bound1.getChildList().size();i++){
+			LSBoundingbox child = bound1.getChildList().get(i);
+			this.childBoundingbox.add(child);
+		}
+	}
+	
+	public ObservableList<LSBoundingbox> getChildList(){
+		return this.childBoundingbox;
 	}
 	
 	public double getMaxDiameter(){

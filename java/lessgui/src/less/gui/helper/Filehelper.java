@@ -42,7 +42,7 @@ public class Filehelper {
 	 * @param filepath
 	 * @param triangleMesh
 	 */
-	public static void write_mesh_to_obj(String filepath, TriangleMesh triangleMesh, 
+	public static void write_mesh_to_obj(String filepath, String groupName, TriangleMesh triangleMesh, 
 			double fx, double fy, double fz,
 			double offsetX, double offsetY, double offsetZ){
 		BufferedWriter writer=null;
@@ -55,6 +55,14 @@ public class Filehelper {
 		 
 		ObservableFloatArray pointarray =  triangleMesh.getPoints();
 		ObservableFaceArray faces = triangleMesh.getFaces();
+		
+		try {
+			writer.write("g "+groupName+"\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		for(int i=0;i<pointarray.size();i += 3){
 			double x = pointarray.get(i)*fx-offsetX;
 			double y = -pointarray.get(i+1)*fy-offsetY;

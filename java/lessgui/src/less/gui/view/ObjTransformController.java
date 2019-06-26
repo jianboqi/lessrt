@@ -1,6 +1,7 @@
 package less.gui.view;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -11,6 +12,8 @@ public class ObjTransformController {
 	TextField scaleYField;
 	@FXML
 	TextField scaleZField;
+	@FXML
+	CheckBox TranslateToOriginCheckBox;
 	
 	private Stage parentStage;
 	
@@ -30,6 +33,11 @@ public class ObjTransformController {
     	this.objDefController.fx = Double.parseDouble(this.scaleXField.getText());
     	this.objDefController.fy = Double.parseDouble(this.scaleYField.getText());
     	this.objDefController.fz = Double.parseDouble(this.scaleZField.getText());
+    	if(this.TranslateToOriginCheckBox.isSelected()) {
+    		this.objDefController.isTranslate2Origin = true;
+    	}else {
+    		this.objDefController.isTranslate2Origin = false;
+    	}
     	this.parentStage.close();
     }
 	
