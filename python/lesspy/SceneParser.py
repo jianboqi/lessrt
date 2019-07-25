@@ -281,8 +281,9 @@ class SceneParser:
 
 
         # <boolean name="hideEmitters" value="true"/>
-        if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"] and cfg["sensor"]["sensor_type"]\
-                != "CircularFisheye":
+        # if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"] and cfg["sensor"]["sensor_type"]\
+        #         != "CircularFisheye":
+        if cfg["sensor"]["film_type"] == "spectrum" and not cfg["sensor"]["thermal_radiation"]:
             boolNode = doc.createElement("boolean")
             integratorNode.appendChild(boolNode)
             boolNode.setAttribute("name", "hideEmitters")

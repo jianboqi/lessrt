@@ -93,6 +93,11 @@
 		    <fileset dir="${basedir}/../../../Utility/Database"/>
 		</copy>
 		
+		<mkdir dir="dist/Python_script" />
+		<copy todir="dist/Python_script" >
+		    <fileset dir="${basedir}/../../../Utility/Python_script"/>
+		</copy>
+		
 		<mkdir dir="dist/bin" />
 		<mkdir dir="dist/bin/python" />
 		<copy todir="dist/bin/python" >
@@ -111,6 +116,7 @@
 			<fx:fileset dir="dist" includes="libs/**"/>
 			<fx:fileset dir="dist" includes="bin/**"/>
 			<fx:fileset dir="dist" includes="Database/**"/>
+			<fx:fileset dir="dist" includes="Python_script/**"/>
 		</fx:resources>
 	
 		<fx:application id="fxApplication"
