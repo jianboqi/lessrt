@@ -1491,7 +1491,7 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
-	private void generate_3d_model(){
+	public void generate_3d_model(){
 		before_run();
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
@@ -1689,6 +1689,10 @@ public class LessMainWindowController {
 	
 	@FXML
 	private void openLiDARSimulator() {
+		if (simulation_path == null) {
+			outputConsole.log("No simulation.\n");
+			return ;
+		}
 		this.projManager.openLiDARSimulator();
 	}
 	

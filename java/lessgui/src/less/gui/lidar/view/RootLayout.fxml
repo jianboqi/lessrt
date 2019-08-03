@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -16,11 +17,6 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-                  <MenuItem mnemonicParsing="false" onAction="#handleOpen" text="Open">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="O" control="ANY" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
                   <MenuItem mnemonicParsing="false" onAction="#handleSave" text="Save">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="S" control="ANY" meta="UP" shift="UP" shortcut="UP" />
@@ -31,9 +27,13 @@
           </Menu>
             <Menu mnemonicParsing="false" onShown="#handleRunMenu" text="Run">
               <items>
-                <MenuItem fx:id="singleLineMenuItem" mnemonicParsing="false" text="Single line point cloud" />
-                  <MenuItem fx:id="multiLinesPointCloudMenuItem" mnemonicParsing="false" text="Multi lines point cloud" />
-                  <MenuItem mnemonicParsing="false" text="Multi lines waveform" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleToXml" text="Generate scene" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem fx:id="singleLineMenuItem" mnemonicParsing="false" onAction="#handleSingleRayPointCloud" text="Single ray point cloud" />
+                  <MenuItem fx:id="multiLinesPointCloudMenuItem" mnemonicParsing="false" onAction="#handleMultiLinePointCloud" text="Multi rays point cloud" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleMultiLineWaveform" text="Multi rays waveform" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleWaveformToPoint" text="Waveform To Point" />
               </items>
             </Menu>
         </menus>

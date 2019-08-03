@@ -19,7 +19,7 @@ public class LessMainApp extends Application {
 	private Stage primaryStage;
 	private BorderPane rootLayout;
 	private Scene scene;
-	private LessMainWindowController lessMainController;
+	public LessMainWindowController lessMainController;
 	 private static final int COUNT_LIMIT = 500000;
 	
 	

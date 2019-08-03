@@ -1,6 +1,13 @@
 package less.gui.lidar;
 
-import javafx.application.Application;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FileUtils;
+import org.json.JSONObject;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -21,6 +28,7 @@ import less.gui.lidar.view.MonoPulseParameterController;
 import less.gui.lidar.view.RootLayoutController;
 import less.gui.lidar.view.TextParameterViewController;
 import less.gui.lidar.view.TlsParameterController;
+import less.gui.utils.Const;
 
 public class LiDARMainApp{
 
@@ -38,21 +46,32 @@ public class LiDARMainApp{
 	public TlsParameterModel tlsParameterModel;
 	public MlsParameterModel mlsParameterModel;
 	
+	public JSONObject lidarConfigJson;
+	
 	public void start(Stage primaryStage, LessMainApp mainApp) {
-		instantiate();
+		
 		
 		this.primaryStage = primaryStage;
 		this.mainApp = mainApp;
 		this.primaryStage.initOwner(this.mainApp.getPrimaryStage());
 		this.primaryStage.setTitle("LiDAR Simulator");
 		
+		// instantiate models
+		instantiate();
+		// load fxml of root layout
 		initRootLayout();
 		
 		Scene scene = new Scene(rootLayout);
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		
-		update();	
+		// open lidar.conf and set models
+		Path path = Paths.get(mainApp.lessMainController.simulation_path, "Parameters", Const.LIDAR_PARAMETER);
+		rootLayoutController.open(new File(path.toString()));
+		// view data in models
+		update();
+		// select platform by 'type' in lidar.conf file
+		rootLayoutController.open(new File(path.toString()));  // TODO: open twice ?
 	}
 	
 	public void update() {
