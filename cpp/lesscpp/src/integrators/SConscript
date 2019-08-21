@@ -6,4 +6,8 @@ plugins += env.SharedLibrary('volpath', ['path/volpath.cpp'])
 plugins += env.SharedLibrary('volpath_simple', ['path/volpath_simple.cpp'])
 plugins += env.SharedLibrary('photonrt',['photonrt/photonrt.cpp','photonrt/photonrt_proc.cpp'])
 
+plugins += env.SharedLibrary('waveform', ['lidar/waveform.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp'])
+plugins += env.SharedLibrary('pointcloud', ['lidar/pointCloud/pointcloud.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp', 'lidar/PulseGaussianFitting.cpp', 'lidar/mpfit.c'])
+plugins += env.SharedLibrary('singleRay', ['lidar/singleRay/singleRay.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp'])
+
 Export('plugins')

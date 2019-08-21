@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -47,7 +48,11 @@ public class PyLauncher extends Thread{
 	public enum Operation {
 	    NEW_SIM, GENERATE_V_I, GENERATE_3D_MODEL,
 	    RUN_LESS,RUN_ALL,SAVE_AS,RUN_BATCH,RUN_BRF,RUN_BT,
-	    RUN_TREE_DETECTION, GENERATE_TERRAIN, GENERATE_TREEHEIGHT_FOR_3DVIWER
+	    RUN_TREE_DETECTION, GENERATE_TERRAIN, GENERATE_TREEHEIGHT_FOR_3DVIWER,
+	    
+	    RUN_WAVEFORM,
+	    RUN_MULTI_RAYS_POINT_CLOUD,
+	    RUN_SINGLE_RAY_POINT_CLOUD,
 	}
 	
 	public static String getPyexe(){
@@ -197,6 +202,19 @@ public class PyLauncher extends Thread{
 			case GENERATE_TREEHEIGHT_FOR_3DVIWER:
 				generate_3D_pos_of_objects();
 				break;
+				
+			case RUN_WAVEFORM:
+				runWaveform();
+				break;
+			case RUN_MULTI_RAYS_POINT_CLOUD:
+				runMultiRaysPointCloud();
+				break;
+				
+			case RUN_SINGLE_RAY_POINT_CLOUD:
+				runSingleRayPointCloud();
+				break;
+				
+				
 			default:
 				break;
 			}
@@ -455,6 +473,31 @@ public class PyLauncher extends Thread{
 		Platform.runLater(() -> this.mwController.projManager.treePosFromCHM_PostProcessing());
 		this.mwController.StopDrawTree = false;
 		Platform.runLater(() -> this.mwController.reDrawAll());
+	}
+	
+	// LiDAR
+	public void runWaveform() {
+		this.isRunningLess = true;
+		Path script_path = Paths.get(PyLauncher.getScriptsPath("lidarless"));
+		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(), script_path.toString(), "waveform");
+		runProcess(pd);
+		this.isRunningLess = false;
+	}
+	
+	public void runMultiRaysPointCloud() {
+		this.isRunningLess = true;
+		Path script_path = Paths.get(PyLauncher.getScriptsPath("lidarless"));
+		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(), script_path.toString(), "pointcloud");
+		runProcess(pd);
+		this.isRunningLess = false;
+	}
+	
+	public void runSingleRayPointCloud() {
+		this.isRunningLess = true;
+		Path script_path = Paths.get(PyLauncher.getScriptsPath("lidarless"));
+		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(), script_path.toString(), "singleRay");
+		runProcess(pd);
+		this.isRunningLess = false;
 	}
 	
 	/**

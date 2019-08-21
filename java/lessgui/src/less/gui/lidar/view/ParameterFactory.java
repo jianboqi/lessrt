@@ -13,6 +13,8 @@ public class ParameterFactory {
 		Label label = new Label();
 		TextField field = new TextField();
 		
+		
+		
 		box.getChildren().addAll(label, field);
 		label.setPrefWidth(300);
 //		label.setPrefWidth(100);
@@ -29,10 +31,15 @@ public class ParameterFactory {
 	
 		field.textProperty().addListener((ov, o, newValue) -> {
 			try {
-				double value = Double.parseDouble(newValue);
-				model.setField(name, value);
-			} catch (Exception e) {
-				e.printStackTrace();
+//				double value = Double.parseDouble(newValue);
+				model.setField(name, newValue);
+			} catch (NullPointerException e) {
+				model.setField(name, "0");
+				System.out.println("Null Pointer Exception");
+			} catch (NumberFormatException e) {
+				model.setField(name, o);
+				System.out.println("Number Format Exception");
+				
 			}
 		});	
 		

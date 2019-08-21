@@ -10,20 +10,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.json.JSONObject;
 
 public class Model {
 	
-	public void setField(String fieldName, Object value) {
+	public void setField(String fieldName, String value) {
 		try {
 			String firstLetter = fieldName.substring(0, 1).toUpperCase();
 			String setter = "set" + firstLetter + fieldName.substring(1);
 //			Method method = this.getClass().getMethod(setter, new Class[] {});
 			
+			
 			for (Method m : this.getClass().getMethods()) {
 				if (setter.equals(m.getName())) {
-					m.invoke(this, value);
+//					System.out.println(setter + " " + this.getClass().getField(fieldName).getType().getName());
+					if (this.getClass().getField(fieldName).getType().getName().equals("double")) {
+						m.invoke(this, Double.parseDouble(value));
+					} else if (this.getClass().getField(fieldName).getType().getName().equals("int")) {
+						m.invoke(this, Integer.parseInt(value));
+					}
+					
+//					m.invoke(this, value);
 					break;
 				}
 			}
@@ -74,9 +81,9 @@ public class Model {
 			for (Field f : this.getClass().getFields()) {
 				
 				if (f.getType().getName().equals("double")) {
-					setField(f.getName(), json.getDouble(f.getName()));
+					setField(f.getName(), String.valueOf(json.getDouble(f.getName())));
 				} else if (f.getType().getName().equals("int")) {
-					setField(f.getName(), json.getInt(f.getName()));
+					setField(f.getName(), String.valueOf(json.getInt(f.getName())));
 				}
 				
 			}
@@ -91,9 +98,9 @@ public class Model {
 			for (Field f : this.getClass().getFields()) {
 				
 				if (f.getType().getName().equals("double")) {
-					setField(f.getName(), json.getDouble(f.getName()));
+					setField(f.getName(), String.valueOf(json.getDouble(f.getName())));
 				} else if (f.getType().getName().equals("int")) {
-					setField(f.getName(), json.getInt(f.getName()));
+					setField(f.getName(), String.valueOf(json.getInt(f.getName())));
 				}
 				
 			}
