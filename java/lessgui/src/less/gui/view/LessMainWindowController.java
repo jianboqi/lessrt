@@ -1449,6 +1449,7 @@ public class LessMainWindowController {
 			CountDownLatch latch = new CountDownLatch(1);
 			currentPyLaucherThread = new PyLauncher();
 			currentPyLaucherThread.setTmpData(old);
+			currentPyLaucherThread.setLessMainController(this);
 			currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.SAVE_AS, latch, outputConsole);
 			currentPyLaucherThread.start();
 			try {
@@ -1484,6 +1485,7 @@ public class LessMainWindowController {
 		before_run();
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.setLessMainController(this);
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.GENERATE_V_I, latch, outputConsole);
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
 		currentRunningStatusThread.setMainController(this);
@@ -1495,6 +1497,7 @@ public class LessMainWindowController {
 		before_run();
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.setLessMainController(this);
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.GENERATE_3D_MODEL, latch, outputConsole);
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
 		currentRunningStatusThread.setMainController(this);
@@ -1522,6 +1525,7 @@ public class LessMainWindowController {
 		before_run();
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.setLessMainController(this);
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.RUN_ALL, latch, outputConsole);
 		currentPyLaucherThread.setTmpData(this.NumberofCoresTextField.getText());//Number of cores
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
@@ -1540,6 +1544,7 @@ public class LessMainWindowController {
 	private void runBRF(){
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.setLessMainController(this);
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.RUN_BRF, latch, outputConsole);
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
 		currentRunningStatusThread.setMainController(this);
@@ -1550,6 +1555,7 @@ public class LessMainWindowController {
 	private void runBT() {
 		CountDownLatch latch = new CountDownLatch(1);
 		currentPyLaucherThread = new PyLauncher();
+		currentPyLaucherThread.setLessMainController(this);
 		currentPyLaucherThread.prepare(this.simulation_path, PyLauncher.Operation.RUN_BT, latch, outputConsole);
 		currentRunningStatusThread = new RunningStatusThread(currentPyLaucherThread, outputConsole, runBtn);
 		currentRunningStatusThread.setMainController(this);

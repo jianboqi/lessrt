@@ -126,6 +126,12 @@ public class ProjectManager {
 		return result_path;
 	}
 	
+	public String getDotLessDirPath() {
+		String dotless_path = Paths.get(this.mwController.simulation_path,
+				this.mwController.constConfig.data.getString("less_identifier")).toString();
+		return dotless_path;
+	}
+	
 	public void openResultFolder() {
 		if (this.mwController.simulation_path == null){
 			return;
@@ -1076,6 +1082,7 @@ public class ProjectManager {
 		    		
 		    		mwController.fPARLayerTextEdit = new TextField();
 		    		mwController.fPARLayerTextEdit.setPromptText("Example: 0:2:20 or 10");
+		    		mwController.fPARLayerTextEdit.setText("0:2:20");
 		    		mwController.ptConfigPanel.getChildren().add(mwController.fPARLayerTextEdit);
 		    		AnchorPane.setLeftAnchor(mwController.fPARLayerTextEdit, 150.0);
 		    		AnchorPane.setRightAnchor(mwController.fPARLayerTextEdit, 20.0);

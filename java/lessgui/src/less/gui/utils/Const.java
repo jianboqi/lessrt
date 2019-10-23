@@ -124,4 +124,9 @@ public class Const {
 	//LiDAR
 	public static String LIDAR_PARAMETER = "lidar.conf";
 	
+	//for web platform
+	public static String LESS_SIM_STATUS_OUTPUT_FILE="STATUS";
+	public static boolean LESS_OUT_ALL_TO_FILE = true;
+	public static String LESS_OUT_ALL_TO_FILE_NAME = "log.txt";
+	
 }

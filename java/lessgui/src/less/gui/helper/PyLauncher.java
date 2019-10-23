@@ -1,7 +1,9 @@
 package less.gui.helper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
@@ -286,6 +288,23 @@ public class PyLauncher extends Thread{
 	   }
 	
 	/**
+	 * extract time information and write it to a file for supporting the web platform
+	 */
+	private void outputTimeInfo2file(String timeText) {
+		String statusTextPath = Paths.get(this.mwController.projManager.getDotLessDirPath(),Const.LESS_SIM_STATUS_OUTPUT_FILE).toString();
+		int start = timeText.indexOf("(");
+		String substr = timeText.substring(start+1, timeText.length()-3);
+		try {
+			BufferedWriter writer = new BufferedWriter( new FileWriter(statusTextPath));
+			writer.write(substr+"\n");
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Control the output of less
 	 * @param line
 	 */
@@ -311,6 +330,8 @@ public class PyLauncher extends Thread{
 				String substr = text.substring(0, text.length()-1);
 				int start = substr.lastIndexOf("\n");
 				bdConsole.repalce(start+1, bdConsole.console.getCaretPosition(), line+"\n");
+				outputTimeInfo2file(lastText);
+				
 			}else{
 				bdConsole.log(line+"\n");
 			}
@@ -331,35 +352,75 @@ public class PyLauncher extends Thread{
 			
 	}
 	
+	private BufferedWriter logWriter = null;
+	private void output_log_to_file(String line) {
+		//Write all output to a file named log.txt
+		if(Const.LESS_OUT_ALL_TO_FILE) {
+			try {
+				if(logWriter == null) {
+					String logTextPath = Paths.get(this.mwController.projManager.getDotLessDirPath(),Const.LESS_OUT_ALL_TO_FILE_NAME).toString();
+					logWriter = new BufferedWriter( new FileWriter(logTextPath));
+				}
+				logWriter.write(line);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	private void runProcess(ProcessBuilder pd){
 		if(this.sim_path==null){
 			return;
 		}
 		pd.directory(new File(sim_path));
+		
+//		if(this.operation != Operation.NEW_SIM) {
+//			String logTextPath = Paths.get(this.mwController.projManager.getDotLessDirPath(),Const.LESS_OUT_ALL_TO_FILE_NAME).toString();
+//			File output = new File(logTextPath);
+//			pd.redirectOutput(output);
+//		}
+		
 		try {
 //			pd.redirectErrorStream(true);
 			p = pd.start();
 			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String line;
+			
 			while ((line = input.readLine()) != null) {
+				
+				if(this.operation != Operation.NEW_SIM)
+					output_log_to_file(line+"\n");	
+				
 				if(this.isRunningLess){
 					try{
-						controlOutputofLess(line);
+						controlOutputofLess(line);					
 					}catch (Exception e) {
 					}
 					continue;
 				}else{
 					bdConsole.appendText(line+"\n");
 				}
-				
 			}
+			
 			input = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			while ((line = input.readLine()) != null) {
 				bdConsole.setErrorMode();
 				bdConsole.log(line+"\n");
+				if(this.operation != Operation.NEW_SIM)
+					output_log_to_file(line+"\n");
 			}
 			p.waitFor();
+				
+			if(Const.LESS_OUT_ALL_TO_FILE) {
+				if(logWriter != null) {
+					logWriter.close();
+					logWriter = null;
+				}
+			
+			}
+			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -426,6 +487,7 @@ public class PyLauncher extends Thread{
 		this.isRunningLess = true;
 		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(),getScriptsRoot(),"-r","n","-p", this.userData);
 		runProcess(pd);
+		outputTimeInfo2file("(Done);;");
 		this.isRunningLess = false;
 	}
 	

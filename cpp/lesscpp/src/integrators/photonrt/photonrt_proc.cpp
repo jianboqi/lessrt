@@ -235,7 +235,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 
 		if (m_hasBRFProducts || m_hasfPARProducts) {
 			//sample 一条光线后，首先判断是否是有效光线，即在场景的顶部
-			//如果再场景顶部，则进入场景
+			//如果在场景顶部，则进入场景
 			double H = ray.o[1] - m_sceneBounds.max.y;
 			if (H >= 0) {
 				double a = ray.d.x;
@@ -272,6 +272,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		int depth = 1, nullInteractions = 0;
 		bool delta = false;
 		Point previousPoint = Point(std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity(), std::numeric_limits<Float>::infinity());
+		int previousStatus = 0; //计算再碰撞概率，前一个是不是地面 0 for nothing, 1 for terrain, 2 for vegetation
 		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
 			//m_scene->rayIntersect(ray, its);
@@ -321,6 +322,11 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 
 			}//hasBRFProducts or hasfPARProducts
 
+
+			if (m_hasfPARProducts) {
+				handleSurfaceReProb(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType, previousStatus);
+			}
+
 			//如果最大穿越场景次数之后，还是没有交点，则放弃
 			if (its.t == std::numeric_limits<Float>::infinity()) {
 				handleSurfaceInteractionBRF(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
@@ -367,7 +373,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 				handleSurfaceInteractionBRF(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 				handleSurfaceInteractionUpDown(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 
-				if (bsdfWeight.isZero() || bsdfWeight.min() < 0) {
+				if (bsdfWeight.isZero() || bsdfWeight.min() < 0) {				
 					break;
 				}
 
@@ -378,7 +384,15 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 				ray.mint = Epsilon;
 
 				previousPoint = its.p;
-
+				
+				string previousOjb = its.shape->getID();
+				if (previousOjb == "terrain") {
+					previousStatus = 1;
+				}
+				else {
+					previousStatus = 2;
+				}
+				
 				if (depth++ >= m_rrDepth) { //当深度超过了设置的最小深度时，采用Russian roulette方法决定是否停止
 					Float q = std::min(throughput.max(), (Float) 0.95f);
 					if (m_sampler->next1D() >= q)
@@ -452,7 +466,7 @@ void CapturePhotonWorker::handleSurfaceInteractionFPAR(int depth, int nullIntera
 	const Spectrum &weight, int photoType) {
 	if (m_hasfPARProducts && (photoType & EPhotonType::ETypefPAR)) {
 		if(m_virtualBounds.contains(its.p))
-			m_workResult->m_fPARsWordResult->put(its, weight);
+			m_workResult->m_fPARsWordResult->put(depth, its, weight);
 	}
 
 }
@@ -619,7 +633,14 @@ void CapturePhotonWorker::handleSurfaceInteractionUpDown(int depth, int nullInte
 	}
 
 }
-
+void CapturePhotonWorker::handleSurfaceReProb(int depth, int nullInteractions,
+	bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+	const Spectrum &weight, int photoType, int previousStatus) {
+	if (m_hasfPARProducts && (photoType & EPhotonType::ETypefPAR)) {
+		if (m_virtualBounds.contains(its.p))
+			m_workResult->m_fPARsWordResult->putReProb(depth, its, weight, previousStatus);
+	}
+}
 
 void CapturePhotonWorker::handleMediumInteraction(int depth, int nullInteractions, bool caustic,
 	const MediumSamplingRecord &mRec, const Medium *medium, const Vector &wi,
@@ -747,6 +768,7 @@ void CapturePhotonProcess::bindResource(const std::string &name, int id) {
 			m_layerDefinition = m_scene->getIntegrator()->getProperties().getString("LayerDefinition", "0:2:20");
 			m_fPARs = new fPARProduct(m_layerDefinition);
 			m_fPARs->setDestinationFile(m_scene->getDestinationFile().string() + "_Layer_fPAR.txt");
+			m_fPARs->setDestnationProbFile(m_scene->getDestinationFile().string() + "_Prob.txt");
 			m_fPARs->setWavelengths(m_scene->getIntegrator()->getProperties().getSpectrum("wavelengths"));
 
 			m_fPARs->setSceneBoundPlaneSize(Vector2(sceneBoundX, scenBoundZ));

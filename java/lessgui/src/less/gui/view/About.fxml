@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <AnchorPane maxHeight="424.0" maxWidth="562.0" prefHeight="424.0" prefWidth="562.0" BorderPane.alignment="CENTER">
+      <AnchorPane maxHeight="443.0" maxWidth="595.0" prefHeight="443.0" prefWidth="595.0" BorderPane.alignment="CENTER">
          <children>
             <ImageView fitHeight="80.0" fitWidth="120.0" layoutX="14.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -23,14 +23,16 @@
                   <Font name="System Bold" size="24.0" />
                </font>
             </Label>
-            <Label layoutX="112.0" layoutY="55.0" text="Large-scale Emulation System for forest Simulation" />
-            <Label layoutX="112.0" layoutY="85.0" text="Version: Release 1.8.6" />
+            <Label layoutX="112.0" layoutY="55.0" text="LargE-Scale remote sensing and image Simulation framework" />
+            <Label layoutX="112.0" layoutY="85.0" text="Version: Release 1.8.8" />
             <Label layoutX="308.0" layoutY="85.0" text="Date: 2018/012/02" />
-            <TextArea editable="false" layoutX="27.0" layoutY="145.0" prefHeight="184.0" prefWidth="508.0" text="LESS is a ray-tracing based 3D radiative transfer model, which can simulate remote sensing data and images over large-scale and realistic 3D scenes. LESS employs a weighted forward photon tracing (FPT) method to simulate multispectral bidirectional reflectance factor (BRF) or flux-related data (e.g., downwelling radiation) and a backward path tracing (BPT) method to generate sensor images (e.g., fisheye images) or large-scale (e.g. 1 km2) spectral images. The BPT also has been extended to simulate thermal infrared radiation by using an on-the-fly computation of the sunlit and shaded scene components. It also provides a user-friendly graphic user interface (GUI) and a set of tools to help construct the landscape and set parameters. The accuracy of LESS is evaluated with other models as well as field measurements in terms of directional BRFs and pixel-wise simulated image comparisons, which shows very good agreement. LESS can work on both single computer and computing clusters. LESS is developed with Java, Python and C++." wrapText="true" />
-            <Hyperlink layoutX="172.0" layoutY="112.0" text="http://ramm.bnu.edu.cn/projects/less/" />
+            <TextArea editable="false" layoutX="30.0" layoutY="145.0" prefHeight="184.0" prefWidth="529.0" text="LESS is a ray-tracing based 3D radiative transfer model, which can simulate remote sensing data and images over large-scale and realistic 3D scenes. LESS employs a weighted forward photon tracing (FPT) method to simulate multispectral bidirectional reflectance factor (BRF) or flux-related data (e.g., downwelling radiation) and a backward path tracing (BPT) method to generate sensor images (e.g., fisheye images) or large-scale (e.g. 1 km2) spectral images. The BPT also has been extended to simulate thermal infrared radiation by using an on-the-fly computation of the sunlit and shaded scene components. It also provides a user-friendly graphic user interface (GUI) and a set of tools to help construct the landscape and set parameters. The accuracy of LESS is evaluated with other models as well as field measurements in terms of directional BRFs and pixel-wise simulated image comparisons, which shows very good agreement. LESS can work on both single computer and computing clusters. LESS is developed with Java, Python and C++." wrapText="true" />
+            <Hyperlink layoutX="162.0" layoutY="112.0" text="http://lessrt.org" />
             <Label layoutX="29.0" layoutY="116.0" text="Documentation:" />
-            <Label layoutX="27.0" layoutY="338.0" text="Designed by Jianbo Qi        Email: jianboqi@gmail.com" />
-            <Label layoutX="18.0" layoutY="369.0" text="Beijing Normal University, Université Toulouse III - Paul Sabatier" />
+            <Label layoutX="33.0" layoutY="338.0" text="Designed by Jianbo Qi        Email: jianboqi@bjfu.edu.cn" />
+            <Label layoutX="34.0" layoutY="369.0" prefHeight="20.0" prefWidth="203.0" text="Beijing Forestry University" />
+            <Label layoutX="232.0" layoutY="369.0" prefHeight="20.0" prefWidth="203.0" text="Beijing Normal University" />
+            <Label layoutX="35.0" layoutY="401.0" prefHeight="20.0" prefWidth="280.0" text="Université Toulouse III - Paul Sabatier" />
          </children>
       </AnchorPane>
    </center>

@@ -156,6 +156,10 @@ public:
 		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
 		const Spectrum &weight, int photoType);
 
+	void handleSurfaceReProb(int depth, int nullInteractions,
+		bool delta, const Intersection &its, Ray &ray, Point &previousPoint, const Medium *medium,
+		const Spectrum &weight, int photoType, int previousStatus);
+
 	bool rayIntersectExcludeEdge(Ray &ray, Intersection &its);
 	/**
 	* \brief Handles particles interacting with a medium
