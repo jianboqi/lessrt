@@ -2,6 +2,7 @@ package less;
 	
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.sun.javafx.application.LauncherImpl;
 
@@ -91,7 +92,6 @@ public class LessMainApp extends Application {
     
 	@Override
 	public void start(Stage primaryStage) {
-
 		this.primaryStage = primaryStage;
 		this.primaryStage.getIcons().addAll(getIconList());
 		this.primaryStage.setTitle("LESS");
@@ -103,6 +103,7 @@ public class LessMainApp extends Application {
 	
 	@SuppressWarnings("restriction")
 	public static void main(String[] args) {
+		Locale.setDefault(new Locale("en", "US"));
 		//launch(args);
 		LauncherImpl.launchApplication(LessMainApp.class, LessMainPreloader.class, args);
 	}
