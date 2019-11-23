@@ -331,10 +331,11 @@ class SceneGenerate:
     @staticmethod
     def get_hidded_objects():
         hidden_obj_file_path = os.path.join(session.get_input_dir(), hide_objects_file)
-        f = open(hidden_obj_file_path)
         hidden_objects = []
-        for line in f:
-            hidden_objects.append(line.replace("\n", ""))
+        if os.path.exists(hidden_obj_file_path):
+            f = open(hidden_obj_file_path)
+            for line in f:
+                hidden_objects.append(line.replace("\n", ""))
         return hidden_objects
 
 
@@ -545,13 +546,15 @@ class SceneGenerate:
             dem_arr = dem_arr-dem_arr.min()
 
         #读取object boundingbox 数据
-        fobj = open(os.path.join(session.get_input_dir(),obj_bounding_box_file))
-        bound_dict = dict()
-        for line in fobj:
-            arr = line.split(":")
-            objName = arr[0]
-            arr = list(map(lambda x:float(x), arr[1].split(" ")))
-            bound_dict[objName] = [arr[3]-arr[0],arr[4]-arr[1],arr[5]-arr[2]]
+        bound_path = os.path.join(session.get_input_dir(), obj_bounding_box_file)
+        if os.path.exists(bound_path):
+            fobj = open()
+            bound_dict = dict()
+            for line in fobj:
+                arr = line.split(":")
+                objName = arr[0]
+                arr = list(map(lambda x:float(x), arr[1].split(" ")))
+                bound_dict[objName] = [arr[3]-arr[0],arr[4]-arr[1],arr[5]-arr[2]]
 
         scenepath = session.get_scenefile_path()
         # if "Windows" in platform.system():
