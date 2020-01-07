@@ -93,7 +93,8 @@ public class ObjectsDefineWindowViewController {
 	public double fx = 1.0;
 	public double fy = 1.0;
 	public double fz = 1.0;
-	public boolean isTranslate2Origin = false; 
+	public boolean isTranslate2Origin_xyz = false;
+	public boolean isTranslate2Origin_xy = false;
 	
 	
 	public void setMainWindowController(LessMainWindowController mwController){
@@ -623,10 +624,16 @@ public class ObjectsDefineWindowViewController {
 	    		}
 
 	    		double lower_center_x=0,lower_center_z=0,lower_center_y=0;
-	    		if(this.isTranslate2Origin) {
+	    		if(this.isTranslate2Origin_xyz) {
 	    			lower_center_x = 0.5*(subObjBoundingBox.minX + subObjBoundingBox.maxX);
 		    		lower_center_z = 0.5*(subObjBoundingBox.minZ + subObjBoundingBox.maxZ);
 		    		lower_center_y = subObjBoundingBox.minY;
+		    		subObjBoundingBox.offset(-lower_center_x, -lower_center_y, -lower_center_z);
+	    		}
+	    		
+	    		if(this.isTranslate2Origin_xy) {
+	    			lower_center_x = 0.5*(subObjBoundingBox.minX + subObjBoundingBox.maxX);
+		    		lower_center_z = 0.5*(subObjBoundingBox.minZ + subObjBoundingBox.maxZ);
 		    		subObjBoundingBox.offset(-lower_center_x, -lower_center_y, -lower_center_z);
 	    		}
 	    		
@@ -694,6 +701,7 @@ public class ObjectsDefineWindowViewController {
 			ObjTransformController objController = loader.getController();
 			objController.setParentStage(subStage);
 			objController.setObjDefController(this);
+			objController.initView();
 			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
 			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
 			subStage.initOwner(this.parentStage);

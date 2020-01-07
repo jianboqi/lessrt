@@ -60,8 +60,8 @@ class Landscape(Element):
     def add_op_item(self, op_item):
         self.optical_properties.add_optical_item(op_item)
 
-    def add_object(self, scene_object: SceneObject):
-        self.scene_objects.add_object(scene_object)
+    def add_object(self, scene_object: SceneObject, override_file=True, translate_to_origin="no"):
+        self.scene_objects.add_object(scene_object, override_file, translate_to_origin)
 
     def place_object(self, obj_name, x=50.0, y=50.0, z=0.0, rotate=0.0):
         self.scene_objects.place_object_to(obj_name, x, y, z, rotate)

@@ -28,7 +28,7 @@ public class AlsParameterModel extends Model {
 		savedUpper = 10;
 		savedLower = 10;
 		
-		setLabel("altitude", "Altitude [km]");
+		setLabel("altitude", "Altitude [m]");
 		setLabel("platformAzimuth", "Platform azimuth [deg]");
 		setLabel("swathWidth", "Swath width [m]");
 		setLabel("startX", "Start X [m]");

@@ -3,6 +3,8 @@ import os
 from Element import Element
 import shutil
 from LSBoundingBox import LSBoundingBox
+from Utility import OBJHelper
+
 
 class SceneObject(Element):
     def __init__(self, name=None, components={}):
@@ -16,7 +18,7 @@ class SceneObject(Element):
     def get_scene_obj_name(self):
         return self.scene_obj_name
 
-    def add_component(self, obj_path, op_name, temperature="-", color="0x006400ff"):
+    def add_component_from_file(self, obj_path, op_name, temperature="-", color="0x006400ff"):
         # get filename
         (dir_path, file_name) = os.path.split(obj_path)
         component_name = self.scene_obj_name + "_" + file_name
@@ -25,6 +27,10 @@ class SceneObject(Element):
                                                     "obj_file_path": obj_path}
         else:
             print("Warning: Component " + component_name + "already exists.")
+
+    @staticmethod
+    def read_components(obj_path):
+        pass
 
 
 class SceneObjects(Element):
@@ -127,14 +133,52 @@ class SceneObjects(Element):
             return True
         return False
 
-    def __copy_components(self, components):
+    def __copy_components(self, components, override_file=True):
         for comp_name in components:
             obj_file_path = components[comp_name]["obj_file_path"]
             dst_file_path = os.path.join(self.get_sim().get_sim_dir(), "Parameters", comp_name)
-            shutil.copy(obj_file_path, dst_file_path)
+            if os.path.exists(dst_file_path):
+                if override_file:
+                    shutil.copy(obj_file_path, dst_file_path)
+            else:
+                shutil.copy(obj_file_path, dst_file_path)
+
+    def __copy_components_with_translate(self, components, translate_to_origin, override_file=True):
+        obj_bound_box = LSBoundingBox()
+        for comp_name in components:
+            obj_file_path = components[comp_name]["obj_file_path"]
+            bound_box = OBJHelper.get_obj_bound(obj_file_path)
+            obj_bound_box.add_child(bound_box)
+        offsetx = - 0.5 * (obj_bound_box.minX + obj_bound_box.maxX)
+        offsey = - obj_bound_box.minY
+        offsetz = -0.5 * (obj_bound_box.minZ + obj_bound_box.maxZ)
+        if translate_to_origin == "xy":
+            offsey = 0
+        for comp_name in components:
+            obj_file_path = components[comp_name]["obj_file_path"]
+            dst_file_path = os.path.join(self.get_sim().get_sim_dir(), "Parameters", comp_name)
+            write_file = False
+            if os.path.exists(dst_file_path):
+                if override_file:
+                    write_file = True
+            else:
+                write_file = True
+
+            if write_file:
+                fout = open(dst_file_path, "w")
+                fin = open(obj_file_path)
+                for line in fin:
+                    if line.startswith("v"):
+                        (x, y, z) = list(map(lambda xx: float(xx), line[1:].strip().split(" ")))
+                        newx, newy, new = x+offsetx, y+offsey, z+offsetz
+                        fout.write("v %f %f %f\n" % (newx, newy, new))
+                    else:
+                        fout.write(line)
+                fin.close()
+                fout.close()
 
     # add a object
-    def add_object(self, scene_object: SceneObject):
+    def add_object(self, scene_object: SceneObject, override_file=True, translate_to_origin="no"):
         obj_name = scene_object.get_scene_obj_name()
         # check if scene object is valid
         if self.__is_scene_object_valid(scene_object):
@@ -142,7 +186,12 @@ class SceneObjects(Element):
                 print("Warning: scene object " + obj_name + " already exists.")
             else:
                 self.objects[obj_name] = scene_object.scene_obj_components
-                self.__copy_components(scene_object.scene_obj_components)
+                if translate_to_origin == "no":
+                    self.__copy_components(scene_object.scene_obj_components)
+                else:
+                    print("INFO: Translating obj...")
+                    self.__copy_components_with_translate(scene_object.scene_obj_components,
+                                                          translate_to_origin)
 
     def place_object_to(self, obj_name, x=50.0, y=50.0, z=0.0, rotate=0.0):
         if not self.__is_scene_object_exist(obj_name):

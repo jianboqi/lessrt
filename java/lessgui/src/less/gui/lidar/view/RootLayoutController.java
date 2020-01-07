@@ -94,7 +94,7 @@ public class RootLayoutController {
 
 	public void open(File file) {
 		try {
-			if (file == null) {
+			if (!file.exists()) {
 				return ;
 			}
 			
@@ -143,6 +143,7 @@ public class RootLayoutController {
 	
 	@FXML
 	private void handleToXml() {
+		handleSave();
 		toXml();
 		createGeometryConfigurationFile();
 		
@@ -169,8 +170,6 @@ public class RootLayoutController {
 			ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(), script_path.toString());
 			pd.directory(new File(parameters_path.toString()));
 			pd.start();
-			System.out.println("Create geometry configuration script: " + script_path);
-			System.out.println("Create geometry configuration file: " + parameters_path);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

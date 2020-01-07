@@ -626,10 +626,12 @@ public class Display3DController {
 				Double pos_x = Double.parseDouble(posxy.getPos_x());
 				Double pos_y = Double.parseDouble(posxy.getPos_y());
 				Double pos_z = Double.parseDouble(posxy.getPos_z());
+				Double rotate_degree = Double.parseDouble(posxy.getExtra_props());
 				if (!ballAsObjects){ //not boundingbox
 					Xform instanceForm = DrawElement.ConvertMeshList2xform(objMeshes,compColorList);
 					instanceForm.setTranslateX(width*0.5-pos_x);
 					instanceForm.setTranslateZ(height*0.5 - pos_y);
+					instanceForm.setRotateY(rotate_degree);
 					if(isTerrainRaster)
 						instanceForm.setTranslateY(altitudeList.get(index)+pos_z);
 					else

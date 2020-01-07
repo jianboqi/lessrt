@@ -548,7 +548,7 @@ class SceneGenerate:
         #读取object boundingbox 数据
         bound_path = os.path.join(session.get_input_dir(), obj_bounding_box_file)
         if os.path.exists(bound_path):
-            fobj = open()
+            fobj = open(bound_path)
             bound_dict = dict()
             for line in fobj:
                 arr = line.split(":")

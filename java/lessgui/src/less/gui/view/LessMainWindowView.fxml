@@ -445,24 +445,36 @@
                         </TitledPane>
                         <TitledPane animated="false" text="Optical Database">
                           <content>
-                            <AnchorPane fx:id="opticalAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                              <AnchorPane>
                                  <children>
-                                    <TableView fx:id="opticalTable" layoutX="26.6" layoutY="72.6" prefHeight="283.0" prefWidth="459.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
-                                       <columnResizePolicy>
-                                          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                       </columnResizePolicy>
-                                    </TableView>
-                                    <Button layoutX="451.0" layoutY="16.0" mnemonicParsing="false" onAction="#addOptical" prefHeight="20.0" prefWidth="60.0" text="Add" AnchorPane.leftAnchor="445.0" AnchorPane.topAnchor="7.0" />
-                                    <TextField fx:id="opticalNameField" layoutX="14.0" layoutY="17.0" prefHeight="35.0" prefWidth="88.0" promptText="Name" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="3.0" />
-                                    <TextField fx:id="opticalRefFrantField" layoutX="127.6" layoutY="30.6" prefHeight="35.0" prefWidth="98.0" promptText="Ref (Front)" AnchorPane.leftAnchor="105.0" AnchorPane.topAnchor="3.0" />
-                                    <TextField fx:id="opticalRefBackField" layoutX="229.0" layoutY="16.0" prefHeight="35.0" prefWidth="103.0" promptText="Ref (Back)" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="3.0" />
-                                    <TextField fx:id="opticalTransField" layoutX="390.6" layoutY="58.6" prefHeight="35.0" prefWidth="98.0" promptText="Transmittance" AnchorPane.leftAnchor="330.0" AnchorPane.topAnchor="3.0" />
-                                    <Button layoutX="511.0" layoutY="16.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="513.0" AnchorPane.topAnchor="7.0" />
-                                    <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="From database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="173.0" layoutY="350.0" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="592.0" layoutY="19.0" mnemonicParsing="false" onAction="#copyOptical" prefHeight="18.0" prefWidth="56.0" text="Copy" AnchorPane.topAnchor="7.0" />
-                                    <Button layoutX="363.0" layoutY="350.0" mnemonicParsing="false" onAction="#OpenProspectD" prefHeight="21.0" prefWidth="149.0" text="From PROSPECT-D..." AnchorPane.rightAnchor="145.0" AnchorPane.topAnchor="340.0" />
-                                    <Button layoutX="254.0" layoutY="359.6" mnemonicParsing="false" onAction="#PlotSpectra" prefHeight="23.0" prefWidth="64.0" text="Plot" AnchorPane.rightAnchor="330.0" AnchorPane.topAnchor="340.0" />
+                                    <ScrollPane fitToWidth="true" layoutX="9.600000381469727" layoutY="9.600000381469727" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <content>
+                                          <VBox prefHeight="180.0" prefWidth="315.0">
+                                             <children>
+                                              <AnchorPane fx:id="opticalAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                   <children>
+                                                      <TableView fx:id="opticalTable" layoutX="26.6" layoutY="72.6" prefHeight="283.0" prefWidth="459.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+                                                         <columnResizePolicy>
+                                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                         </columnResizePolicy>
+                                                      </TableView>
+                                                      <Button layoutX="433.0" layoutY="7.0" mnemonicParsing="false" onAction="#addOptical" prefHeight="20.0" prefWidth="60.0" text="Add" AnchorPane.leftAnchor="433.0" AnchorPane.topAnchor="7.0" />
+                                                      <TextField fx:id="opticalNameField" layoutX="14.0" layoutY="17.0" prefHeight="35.0" prefWidth="88.0" promptText="Name" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="3.0" />
+                                                      <TextField fx:id="opticalRefFrantField" layoutX="127.6" layoutY="30.6" prefHeight="35.0" prefWidth="98.0" promptText="Ref (Front)" AnchorPane.leftAnchor="105.0" AnchorPane.topAnchor="3.0" />
+                                                      <TextField fx:id="opticalRefBackField" layoutX="229.0" layoutY="16.0" prefHeight="35.0" prefWidth="103.0" promptText="Ref (Back)" AnchorPane.leftAnchor="215.0" AnchorPane.topAnchor="3.0" />
+                                                      <TextField fx:id="opticalTransField" layoutX="390.6" layoutY="58.6" prefHeight="35.0" prefWidth="98.0" promptText="Transmittance" AnchorPane.leftAnchor="330.0" AnchorPane.topAnchor="3.0" />
+                                                      <Button layoutX="500.0" layoutY="7.0" mnemonicParsing="false" onAction="#deleteOptical" prefHeight="20.0" prefWidth="60.0" text="Del" AnchorPane.leftAnchor="500.0" AnchorPane.topAnchor="7.0" />
+                                                      <Button fx:id="chooseFromDBBtn" layoutX="485.0" layoutY="347.0" mnemonicParsing="false" onAction="#OpenDBChooser" text="From database..." AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="340.0" />
+                                                      <Button layoutX="173.0" layoutY="350.0" mnemonicParsing="false" onAction="#RefreshDB" text="Refresh" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="340.0" />
+                                                      <Button layoutX="569.4" layoutY="7.0" mnemonicParsing="false" onAction="#copyOptical" prefHeight="18.0" prefWidth="56.0" text="Copy" AnchorPane.leftAnchor="569.4" AnchorPane.topAnchor="7.0" />
+                                                      <Button layoutX="363.0" layoutY="350.0" mnemonicParsing="false" onAction="#OpenProspectD" prefHeight="21.0" prefWidth="149.0" text="From PROSPECT-D..." AnchorPane.rightAnchor="145.0" AnchorPane.topAnchor="340.0" />
+                                                      <Button layoutX="254.0" layoutY="359.6" mnemonicParsing="false" onAction="#PlotSpectra" prefHeight="23.0" prefWidth="64.0" text="Plot" AnchorPane.rightAnchor="330.0" AnchorPane.topAnchor="340.0" />
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                          </VBox>
+                                       </content>
+                                    </ScrollPane>
                                  </children>
                               </AnchorPane>
                           </content>
