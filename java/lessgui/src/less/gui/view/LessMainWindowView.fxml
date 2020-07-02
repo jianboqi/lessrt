@@ -33,7 +33,6 @@
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Ellipse?>
@@ -83,9 +82,15 @@
                 <Menu mnemonicParsing="false" text="Tools">
                      <items>
                         <MenuItem mnemonicParsing="false" onAction="#OpenResultsFolder" text="Open Results Folder" />
-                        <MenuItem mnemonicParsing="false" onAction="#OpenBatchTool" text="Batch Tool" />
-                        <MenuItem mnemonicParsing="false" onAction="#RunOnCluster" text="Server Setting" />
+                        <MenuItem mnemonicParsing="false" onAction="#OpenBatchTool" text="Batch Tool" visible="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#onNewBatchTool" text="Batch Tool" />
+                        <Menu mnemonicParsing="false" text="3D Object Creation">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#OpenSimpleCrownCreator" text="Simple Crown Creator" />
+                          </items>
+                        </Menu>
                         <MenuItem mnemonicParsing="false" onAction="#RunLAICalculator" text="LAI Calculator" />
+                        <MenuItem mnemonicParsing="false" onAction="#RunOnCluster" text="Server Setting" />
                         <MenuItem mnemonicParsing="false" onAction="#RunPythonConsole" text="Python Console" />
                      </items></Menu>
                   <Menu mnemonicParsing="false" text="Extensions">
@@ -632,7 +637,4 @@
          </BorderPane.margin>
       </SplitPane>
    </center>
-   <bottom>
-      <HBox prefHeight="25.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-   </bottom>
 </BorderPane>

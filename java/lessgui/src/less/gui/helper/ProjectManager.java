@@ -63,10 +63,12 @@ import less.gui.view.DBChooserController;
 import less.gui.view.HelpViewerController;
 import less.gui.view.LAICalculatorController;
 import less.gui.view.LessMainWindowController;
+import less.gui.view.NewBatchController;
 import less.gui.view.ObjectsDefineWindowViewController;
 import less.gui.view.PlotSpectraController;
 import less.gui.view.ProspectDController;
 import less.gui.view.RunningOnClusterController;
+import less.gui.view.SimpleCrownGeneratorController;
 import less.gui.view.SunPostionCalculatorController;
 
 /**
@@ -938,6 +940,30 @@ public class ProjectManager {
 	}
 	
 	
+	//Open Simple Crown Generator
+	public void OpenSimpleCrownCreator() {
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(SimpleCrownGeneratorController.class.getResource("SimpleCrownGenerator.fxml"));
+		try {
+			BorderPane rootLayout = (BorderPane) loader.load();
+			Scene scene = new Scene(rootLayout);
+			Stage simpleCrownStage = new Stage();
+			simpleCrownStage.setScene(scene);
+			simpleCrownStage.setTitle("Simple Crown Creator");
+			SimpleCrownGeneratorController simpleCrownCreatorController = loader.getController();
+			simpleCrownCreatorController.setParentStage(simpleCrownStage);
+			simpleCrownCreatorController.setmwController(this.mwController);
+			simpleCrownCreatorController.initView();
+			simpleCrownStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+			simpleCrownStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+			//simpleCrownStage.initOwner(this.mwController.mainApp.getPrimaryStage());
+			simpleCrownStage.show();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	//Open Atmosphere editor
 	public void OpenAtmosphereEditor() {
 		FXMLLoader loader = new FXMLLoader();
@@ -1535,6 +1561,33 @@ public class ProjectManager {
 		pyServer.setMainConroller(this.mwController);
 		Thread testA=new Thread(pyServer);  
         testA.start();  
+	}
+	
+	public void onNewBatchTool() {
+		if(this.mwController.simulation_path == null){
+			System.out.println("Please create a simulation first.\n");
+			return;
+		}
+		try {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(BatchController.class.getResource("NewBatchView.fxml"));
+			BorderPane rootLayout = (BorderPane) loader.load();
+			Scene scene = new Scene(rootLayout);
+			Stage subStage = new Stage();
+			subStage.setScene(scene);
+			subStage.setTitle("New Batch Tool");
+			NewBatchController btController = loader.getController();
+			btController.setMainWindowController(this.mwController);
+			btController.setParentStage(subStage);
+			btController.initView();
+			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS16_16.png")));
+			subStage.getIcons().add(new Image(LessMainApp.class.getResourceAsStream("LESS32_32.png")));
+			subStage.initOwner(this.mwController.mainApp.getPrimaryStage());
+			subStage.show();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	///LiDAR simulator

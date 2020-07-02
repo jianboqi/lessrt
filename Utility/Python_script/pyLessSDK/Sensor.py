@@ -2,6 +2,13 @@
 from Element import Element
 
 
+class SensorType:
+    PERSPECTIVE = "perspective"
+    ORTHOGRAPHIC = "orthographic"
+    CIRCULARFISHEYE = "CircularFisheye"
+    PHOTONTRACING = "PhotonTracing"
+
+
 class SensorBasic(Element):
     def __init__(self):
         super().__init__()

@@ -643,7 +643,7 @@ class SceneParser:
             else:
                 SKYL = cfg["illumination"]["atmosphere"]["percentage"]
 
-            skyls = list(map(lambda x:float(x), SKYL.split(",")))
+            skyls = list(map(lambda x: float(x), SKYL.split(",")))
             if (not "sun_spectrum" in cfg["illumination"]["sun"])  and (not "sky_spectrum" in cfg["illumination"]["atmosphere"]):
                 sun_irr, sky_irr = sun_irradiance_db.read_toa_with_bandwidth_SKYLs( cfg["sensor"]["bands"],skyls)
                 sky_irr = list(map(lambda x:x*math.cos(theta),sky_irr))

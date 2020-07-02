@@ -51,6 +51,7 @@ public class Const {
 	public static String LAST_OPNED_CHOOSE_POLYGON = "choosePolygon";
 	public static String LAST_OPNED_DEF_FILE_PATH = "chooseDef";
 	public static String LAST_OPNED_BATCH_FILE_PATH = "chooseBatch";
+	public static String LAST_OPNED_OUT_OBJ_FILE_PATH = "chooseOutOBJ";
 	public static String LAST_OPNED_CHM_FILE_PATH = "chooseCHM";
 	
 	public static String LESS_RT_NAME_WINDOWS = "lessrt.exe";
@@ -58,7 +59,7 @@ public class Const {
 	
 	
 	// LESS Mode
-	public static String LESS_MODE= "development11";
+	public static String LESS_MODE= "development";
 	public static String LESS_VERSION = "V1.8.8";
 	
 	public static boolean LESS_OUT_ALL = false;
@@ -84,6 +85,7 @@ public class Const {
 	public static String LESS_UTILITY_SCRIPT_LCTYPES = "extractLandcoverType";
 	public static String LESS_UTILITY_SCRIPT_RASTER2OBJ = "Raster2obj";
 	public static String LESS_UTILITY_SCRIPT_PROSPECT5D = "Prospect5AndD";
+	public static String LESS_UTILITY_SCRIPT_SIMPLE_CROWN_GENERATOR = "SimpleCrownGenerator";
 	
 	public static String LESS_PYTHON_STARTUP_SCRIPT = "startup_scripts";
 	

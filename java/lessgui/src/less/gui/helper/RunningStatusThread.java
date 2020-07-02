@@ -14,9 +14,7 @@ import less.gui.view.LessMainWindowController;
 import za.co.luma.geom.Vector2DDouble;
 
 public class RunningStatusThread extends Thread{
-	
-
-	
+		
 	private Thread t;
 	private Thread monitorThread;
 	private OutputConsole console;
@@ -29,7 +27,6 @@ public class RunningStatusThread extends Thread{
 		this.console = console;
 		this.runBtn = runBtn;
 	}
-	
 	
 	public void setMainController(LessMainWindowController mWindowController){
 		this.mwController = mWindowController;

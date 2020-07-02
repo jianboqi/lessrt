@@ -65,3 +65,6 @@ class Landscape(Element):
 
     def place_object(self, obj_name, x=50.0, y=50.0, z=0.0, rotate=0.0):
         self.scene_objects.place_object_to(obj_name, x, y, z, rotate)
+
+    def set_terrain_op(self, op_name):
+        self.terrain.optical = op_name

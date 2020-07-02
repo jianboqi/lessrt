@@ -38,7 +38,7 @@ def do_ats_simulation(cores):
     os.chdir(current_working_dir)
 
 
-def do_simulation_multi_spectral(cores):
+def do_simulation_multi_spectral(cores, distname=""):
     currdir = os.path.split(os.path.realpath(__file__))[0]
     rt_dir = os.path.join(currdir + '/bin/rt/'+current_rt_program)
     os.environ['PATH'] =  rt_dir + os.pathsep + os.environ['PATH']
@@ -67,6 +67,9 @@ def do_simulation_multi_spectral(cores):
 
     distFile = os.path.join(session.get_output_dir(), distFileName)
     scene_file_path = os.path.join(session.get_scenefile_path(), main_scene_xml_file)
+
+    if distname != "":
+        distFile = distname
 
     server_file = os.path.join(session.get_input_dir(),"server.txt")
     current_working_dir = os.getcwd()

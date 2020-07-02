@@ -206,6 +206,8 @@ class SceneObjects(Element):
     # For open the project with LESS GUI, this function must be executed before
     def calculate_object_bounding_box(self):
         if len(self.objects) > 0:
+            boundingbox_file_path = os.path.join(self.get_sim().get_sim_dir(), "Parameters", "objects_boundingbox.txt")
+            fo = open(boundingbox_file_path, "w")
             for obj_name in self.objects:
                 obj_bound_box = LSBoundingBox()
                 for comp_name in self.objects[obj_name]:
@@ -230,7 +232,5 @@ class SceneObjects(Element):
                                 comp_bound_box.maxZ = z
                     f.close()
                     obj_bound_box.add_child(comp_bound_box)
-                instances_file_path = os.path.join(self.get_sim().get_sim_dir(), "Parameters", "objects_boundingbox.txt")
-                f = open(instances_file_path, "w")
-                f.write(obj_name + ":" + obj_bound_box.to_string()+"\n")
-                f.close()
+                fo.write(obj_name + ":" + obj_bound_box.to_string()+"\n")
+            fo.close()

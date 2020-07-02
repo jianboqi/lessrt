@@ -471,7 +471,7 @@ public class PyLauncher extends Thread{
 	}
 	
 	/**
-	 * 生成三维显示时所有的树木的高程程序，通过光线跟踪
+	 * 
 	 */
 	public void generate_3D_pos_of_objects(){
 		ProcessBuilder pd=new ProcessBuilder(PyLauncher.getPyexe(),getScriptsRoot(),"-g","m");

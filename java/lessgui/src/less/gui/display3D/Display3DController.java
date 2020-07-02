@@ -563,13 +563,14 @@ public class Display3DController {
 			CountDownLatch latch = new CountDownLatch(1);
 			this.mwController.currentPyLaucherThread = new PyLauncher();
 			this.mwController.currentPyLaucherThread.prepare(this.mwController.simulation_path, PyLauncher.Operation.GENERATE_TREEHEIGHT_FOR_3DVIWER, latch, this.mwController.outputConsole);
+			this.mwController.currentPyLaucherThread.setLessMainController(this.mwController);
 			this.mwController.currentRunningStatusThread = new RunningStatusThread(this.mwController.currentPyLaucherThread, this.mwController.outputConsole, this.mwController.runBtn);
 			this.mwController.currentRunningStatusThread.setMainController(this.mwController);
 			this.mwController.currentRunningStatusThread.start();
 			try {
 				latch.await();
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
+				
 				e1.printStackTrace();
 			}
 			
@@ -626,7 +627,13 @@ public class Display3DController {
 				Double pos_x = Double.parseDouble(posxy.getPos_x());
 				Double pos_y = Double.parseDouble(posxy.getPos_y());
 				Double pos_z = Double.parseDouble(posxy.getPos_z());
-				Double rotate_degree = Double.parseDouble(posxy.getExtra_props());
+				String extraProps = posxy.getExtra_props();
+				String [] arr = extraProps.trim().split(" ");
+				Double rotate_degree = 0.0;
+				if(arr.length == 1) {
+					rotate_degree = Double.parseDouble(extraProps);
+				}
+				
 				if (!ballAsObjects){ //not boundingbox
 					Xform instanceForm = DrawElement.ConvertMeshList2xform(objMeshes,compColorList);
 					instanceForm.setTranslateX(width*0.5-pos_x);

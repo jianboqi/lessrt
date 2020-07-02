@@ -18,8 +18,8 @@ public class OutputConsole extends OutputStream {
      }
      
      public void log(String valueOf){
-    	 
-    	 Platform.runLater(() -> console.appendText(valueOf));
+//    	 if(valueOf != null)
+    		 Platform.runLater(() -> console.appendText(valueOf)); 	 
      }
      
      public void setText(String valueOf){

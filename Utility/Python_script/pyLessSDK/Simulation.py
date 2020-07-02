@@ -16,6 +16,7 @@ class Simulation(object):
         self.__sim_dir = sim_dir
         self.__sim_helper = simulation_helper
         self.__scene = Scene()
+        self.dist_file = ""
 
         # calculated members
         self.__input_conf_path = os.path.join(sim_dir, "Parameters", "input.conf")
@@ -113,7 +114,7 @@ class Simulation(object):
         os.system(interpreter + " " + script_lesspy_path + " -g s")
         os.system(interpreter + " " + script_lesspy_path + " -g v")
         os.system(interpreter + " " + script_lesspy_path + " -r n -p " +
-                  str(self.__input_conf["Advanced"]["number_of_cores"]))
+                  str(self.get_scene().get_advanced_params().number_of_cores) + " -d " + self.dist_file)
         os.chdir(cwd)
 
 

@@ -42,19 +42,19 @@ public class LAICaculatorThread extends Thread{
 	}
 	
 	public void start () {
-	      if (t == null) {
-	         t = new Thread (this, "LAICalculator");
-	         t.setUncaughtExceptionHandler((thread, throwable) -> {
-	        	 bdConsole.setErrorMode();
-	 			 bdConsole.log(throwable.getMessage());
-	 			// notify to finish
-	 			synchronized (this) {
-	 				 notify();
-	 			}
-	         });
-	         t.start ();
-	      }
-	   }
+      if (t == null) {
+         t = new Thread (this, "LAICalculator");
+         t.setUncaughtExceptionHandler((thread, throwable) -> {
+        	 bdConsole.setErrorMode();
+ 			 bdConsole.log(throwable.getMessage());
+ 			// notify to finish
+ 			synchronized (this) {
+ 				 notify();
+ 			}
+         });
+         t.start ();
+      }
+   }
 	
 	public void stop_current_job(){
 		

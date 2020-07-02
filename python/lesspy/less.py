@@ -17,6 +17,7 @@ import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('-n', '--new', help="Initialize a new simulation.", action='store_true')
 parser.add_argument('--newseq', help="New sequence.")
+parser.add_argument('-d', '--dist', help="Dist file path.")
 parser.add_argument('-s','--saveas', help="save simulation to other places.")
 parser.add_argument('-v', '--version', help="Version.", action='store_true')
 parser.add_argument('-p', '--cores', help="Number of cores.", type=int, default=-1)
@@ -40,8 +41,11 @@ if args.run is not None:
     config_file_path = session.get_config_file()
     f = open(config_file_path, 'r')
     cfg = json.load(f)
+    distFile = ""
+    if args.dist:
+        distFile = args.dist
     if mode == "n":
-        Simulation.do_simulation_multi_spectral(args.cores)
+        Simulation.do_simulation_multi_spectral(args.cores, distFile)
 
 if args.generate is not None:
     gvalue = args.generate[0]
@@ -62,7 +66,6 @@ if args.generate is not None:
         sp = SceneParser()
         irrstr = sp.parse(cfgfile)
         sp.write_irr_to_file(irrstr)
-
 
     # combine forest generation and terrain generation
     if gvalue in ("s", "scene"):

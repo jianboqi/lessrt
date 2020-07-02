@@ -13,6 +13,8 @@ else:
     sys.path.append(currdir + '/bin/rt/' + current_rt_program + '/python/3.5/')
 os.environ['PATH'] = currdir + '/bin/rt/' + current_rt_program + '/' + os.pathsep + os.environ['PATH']
 import codecs
+from Utility.Prospect5AndD import prospect5AndD
+
 
 class SceneGenerate:
 
@@ -367,12 +369,32 @@ class SceneGenerate:
                 object_name = arr[0]
                 if object_name not in hidden_objects:
                     object_optical.append(arr)
-                    for i in range(1, len(arr),4):
-                        opticalSet.add(arr[i+1]) # add all spectral properties to set
+                    for i in range(1, len(arr), 4):
+                        opticalSet.add(arr[i+1])  # add all spectral properties to set
 
         opticalSet = list(opticalSet)
         for i in range(0, len(opticalSet)):
             defined_op = cfg["scene"]["optical_properties"][opticalSet[i]]["value"]
+            op_type = cfg["scene"]["optical_properties"][opticalSet[i]]["Type"]
+            if op_type == 2:  # using prospect model
+                ProspectDParams = cfg["scene"]["optical_properties"][opticalSet[i]]["ProspectDParams"]
+                tmparr = cfg["sensor"]["bands"].split(",")
+                wls = []
+                for tmp in tmparr:
+                    wl = tmp.split(":")[0]
+                    wls.append(wl)
+                (ref, trans) = prospect5AndD(",".join(wls),
+                                             ProspectDParams["isProsect5"],
+                                             ProspectDParams["N"],
+                                             ProspectDParams["Car"],
+                                             ProspectDParams["BP"],
+                                             ProspectDParams["Cm"],
+                                             ProspectDParams["Cab"],
+                                             ProspectDParams["Anth"],
+                                             ProspectDParams["Cw"]
+                                             )
+                defined_op = ref + ";" + ref + ";" + trans
+
             arr = defined_op.split(";")
             if len(arr) != 3:
                 log("Error while setting optical properties.")
@@ -600,7 +622,7 @@ class SceneGenerate:
                     scale_node.setAttribute("z", str(float(arr[4]) / bound_dict[objectName][0]))
                     scale_node.setAttribute("y", str(float(arr[5]) / bound_dict[objectName][1]))
 
-                if len(arr) == 5: # for roatation of the tree
+                if len(arr) == 5: # for rotation of the tree
                     angle = arr[len(arr)-1]
                     rotatenode = doc.createElement("rotate")
                     trnode.appendChild(rotatenode)
@@ -632,6 +654,11 @@ class SceneGenerate:
                         if cfg["scene"]["terrain"]["terrain_type"] == "RASTER":
                             im_r = int((y / float(zScale)) * img_h)
                             im_c = int((x / float(xScale)) * img_w)
+                            if im_r >= img_h:
+                                im_r = img_h-1
+                            if im_c >= img_w:
+                                im_c = img_w-1
+
                             translatenode.setAttribute("y", str(dem_arr[im_r][im_c]+z))
                         else:
                             translatenode.setAttribute("y", str(z))

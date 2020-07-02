@@ -61,7 +61,7 @@
 		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src" destdir="build/classes" encoding="GBK">
 			<classpath>
 				<fileset dir="build/libs">
-					<include name="*"/>
+					<include name="*.jar"/>
 				</fileset>
 			</classpath>
 		</javac>
@@ -118,12 +118,17 @@
 			<fx:fileset dir="dist" includes="Database/**"/>
 			<fx:fileset dir="dist" includes="Python_script/**"/>
 		</fx:resources>
+		
+		<fx:resources id="jarRes">
+			<fx:fileset dir="dist" includes="LessGUI.jar"/>
+			<fx:fileset dir="dist" includes="libs/**"/>
+		</fx:resources>
 	
 		<fx:application id="fxApplication"
 			name="LESS"
 			mainClass="less.LessMainApp"
 			toolkit="fx"
-			version="1.2"
+			version="1.8"
 		/>
 	
 		<mkdir dir="build/classes/META-INF" />
@@ -134,7 +139,7 @@
 			<fx:application refid="fxApplication"/>
 			<fileset dir="build/classes">
 			</fileset>
-			<fx:resources refid="appRes"/>
+			<fx:resources refid="jarRes"/>
 	
 			<manifest>
 				<attribute name="Implementation-Vendor" value="Jianbo Qi"/>
@@ -157,7 +162,8 @@
 			outfile="LessGUI" nativeBundles="exe"
 			updatemode="background" >
 	
-			<fx:platform basedir="${java.home}"/>
+			<!--<fx:platform basedir="${java.home}"/>-->
+			<fx:platform basedir="D:\Program Files\Java\jdk1.8.0_171"/>
 			<fx:info title="LessGUI" vendor="Jianbo Qi"/>
 	
 			<fx:application refId="fxApplication"/>

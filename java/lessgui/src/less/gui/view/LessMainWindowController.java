@@ -1736,6 +1736,11 @@ public class LessMainWindowController {
 	}
 	
 	@FXML
+	private void OpenSimpleCrownCreator() {
+		this.projManager.OpenSimpleCrownCreator();
+	}
+	
+	@FXML
 	private void choosePyInterpreter(){
 		this.projManager.choosePyInterpreter();
 	}
@@ -1762,6 +1767,11 @@ public class LessMainWindowController {
 	@FXML
 	private void PyJavaCommunication(){
 		this.projManager.PyJavaCommunication();
-	}	
+	}
+	
+	@FXML
+	private void onNewBatchTool(){
+		this.projManager.onNewBatchTool();
+	}
 	
 }

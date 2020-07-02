@@ -72,6 +72,10 @@ class threeDView:
                     if cfg["scene"]["terrain"]["terrain_type"] == "RASTER":
                         im_r = int((y / float(zScale)) * img_h)
                         im_c = int((x / float(xScale)) * img_w)
+                        if im_r >= img_h:
+                            im_r = img_h - 1
+                        if im_c >= img_w:
+                            im_c = img_w - 1
                         linestr = objectName + " "+str(treeX) + " " + str(dem_arr[im_r][im_c]) + " " + str(treeZ) + "\n"
                     else:
                         linestr = objectName + " "+str(treeX) + " " + str(0) + " " + str(treeZ) + "\n"

@@ -110,6 +110,11 @@
 			<fx:fileset dir="dist" includes="Database/**"/>
 			<fx:fileset dir="dist" includes="Python_script/**"/>
 		</fx:resources>
+		
+		<fx:resources id="jarRes">
+			<fx:fileset dir="dist" includes="LessGUI.jar"/>
+			<fx:fileset dir="dist" includes="libs/**"/>
+		</fx:resources>
 	
 		<fx:application id="fxApplication"
 			name="LESS"
@@ -126,7 +131,7 @@
 			<fx:application refid="fxApplication"/>
 			<fileset dir="build/classes">
 			</fileset>
-			<fx:resources refid="appRes"/>
+			<fx:resources refid="jarRes"/>
 	
 			<manifest>
 				<attribute name="Implementation-Vendor" value="Jianbo Qi"/>

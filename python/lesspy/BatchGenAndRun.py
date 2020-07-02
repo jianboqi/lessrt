@@ -29,9 +29,23 @@ class BatchGenAndRun:
 
         self.parameter_file_list = None
 
-    def read_param_types(self):
+    def read_param_types_depressed(self):
         currdir = os.path.split(os.path.realpath(__file__))[0]
         f = open(os.path.join(currdir, batch_conf), 'r')
+        tmp_config = json.load(f)
+        mapDict = dict()
+        self.readBatchTypesMap(tmp_config, mapDict)
+        return mapDict
+
+    def readBatchTypesMap_depressed(self, cfg, mapDict):
+        for k in cfg:
+            if isinstance(cfg[k], dict):
+                self.readBatchTypesMap(cfg[k], mapDict)
+            else:
+                mapDict[k] = cfg[k]
+
+    def read_param_types(self):
+        f = open(session.get_config_file(), 'r')
         tmp_config = json.load(f)
         mapDict = dict()
         self.readBatchTypesMap(tmp_config, mapDict)
@@ -42,10 +56,18 @@ class BatchGenAndRun:
             if isinstance(cfg[k], dict):
                 self.readBatchTypesMap(cfg[k], mapDict)
             else:
-                mapDict[k] = cfg[k]
+                value = cfg[k]
+                if isinstance(value, int):
+                    mapDict[k] = "int"
+                elif isinstance(value, float):
+                    mapDict[k] = "double"
+                else:
+                    mapDict[k] = "string"
 
     def getTypedValue(self, key, value):
-        ftype = self.batchTypesMap[key]
+        arr = key.split(">")
+        uni_key = arr[-1]
+        ftype = self.batchTypesMap[uni_key]
         if ftype == "double":
             return float(value)
         elif ftype == "int":
@@ -57,7 +79,7 @@ class BatchGenAndRun:
         tmp_config = json.load(f)
         return tmp_config
 
-    def writeKey(self, cfg, key, value):
+    def writeKey_depressed(self, cfg, key, value):
         for k in cfg:
             if k == key:
                 cfg[k] = value
@@ -65,6 +87,14 @@ class BatchGenAndRun:
             else:
                 if isinstance(cfg[k], dict):
                     self.writeKey(cfg[k], key, value)
+        return cfg
+
+    def writeKey(self, cfg, key, value):
+        arr = key.split(">")
+        obj = cfg
+        for i in range(0, len(arr)-1):
+            obj = obj[arr[i]]
+        obj[arr[-1]] = value
         return cfg
 
     def writeCfgFile(self, cfg, cfgfile_path):
@@ -88,7 +118,7 @@ class BatchGenAndRun:
                 paramValue = seq[groupName][paramName]
                 if paramValue.startswith(batch_List_name):
                     arr = paramValue.split(":", 1)
-                    arr = arr[1].split(",")
+                    arr = arr[1].split("/")
                     index = 0
                     for data in arr:
                         if index not in groupParam:
@@ -115,6 +145,7 @@ class BatchGenAndRun:
                 for paramValueIndex in combination:
                     for paramName in params[groupIndex][paramValueIndex]:
                         paraVal = params[groupIndex][paramValueIndex][paramName]
+                        print("INFO: --", paramName)
                         self.writeKey(cfg, paramName, self.getTypedValue(paramName, paraVal))
                         finfo.write(paramName + " " + paraVal + " ")
                     groupIndex += 1

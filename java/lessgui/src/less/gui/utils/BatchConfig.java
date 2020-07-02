@@ -19,6 +19,9 @@ public class BatchConfig {
 public JSONObject data;
 	
 	public BatchConfig(){
+	}
+	
+	public void load_data() {
 		String jsonPath;
 		if(Const.LESS_MODE.equals("development")){
 			jsonPath= Paths.get(PyLauncher.getLessPyFolderPath(),Const.LESS_BATCH_JSON_NAME).toString();
@@ -32,8 +35,19 @@ public JSONObject data;
 			e.printStackTrace();
 		}  
 		data = new JSONObject(jsonTokener);
-        
 	}
+	
+	public void load_data(String param_file_path) {
+		String jsonPath = param_file_path;
+		JSONTokener jsonTokener = null;
+		try {
+			jsonTokener = new JSONTokener(new FileReader(new File(jsonPath)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}  
+		data = new JSONObject(jsonTokener);
+	}
+	
 	
 	public void iterChild(TreeViewNode node, JSONObject obj){
 		Iterator<?> keys = obj.keys();
@@ -42,7 +56,13 @@ public JSONObject data;
 		    Object value = obj.get(key);
 		    TreeViewNode childNode ;
 		    if(! (value instanceof JSONObject)){
-		    	childNode= new TreeViewNode(key, (String)value);
+		    	childNode= new TreeViewNode(key, (String)(value+""));
+//		    	if(value instanceof String) {
+//		    		childNode= new TreeViewNode(key, (String)value);
+//		    	}else if(value instanceof Integer) {
+//		    		childNode= new TreeViewNode(key, (String)(value+""));
+//		    	}
+		    	
 		    }else{
 		    	childNode= new TreeViewNode(key, "");
 		    }

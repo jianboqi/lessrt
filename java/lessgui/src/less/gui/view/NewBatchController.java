@@ -4,6 +4,7 @@ package less.gui.view;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeCell;
@@ -38,7 +40,7 @@ import less.gui.usercontrol.TreeViewWithItems;
 import less.gui.utils.BatchConfig;
 import less.gui.utils.Const;
 
-public class BatchController {
+public class NewBatchController {
 	@FXML
 	private TreeViewWithItems<TreeViewNode> parameterTreeView;
 	private ObservableList<TreeViewNode> paramterArray = FXCollections.observableArrayList();
@@ -67,6 +69,9 @@ public class BatchController {
 	
 	@FXML
 	private TextField valueTextField;
+	
+	@FXML
+	private Label LabelExampleData;
 
 	private LessMainWindowController mwController;
 	
@@ -104,7 +109,10 @@ public class BatchController {
 			}
 		});	
 		BatchConfig batchConfig = new BatchConfig();
-		batchConfig.load_data();
+		String parameter_file_path = Paths.get(this.mwController.simulation_path,
+				this.mwController.constConfig.data.getString("input_dir"),
+				this.mwController.constConfig.data.getString("config_file")).toString();
+		batchConfig.load_data(parameter_file_path);
 		batchConfig.constructTree(root);
 		paramterArray.add(root);
 		for(TreeItem<?> child: rootItem.getChildren()){
@@ -165,10 +173,27 @@ public class BatchController {
 		    }
 		});
 		
+		this.parameterTreeView.getSelectionModel().selectedItemProperty().addListener( new ChangeListener<Object>() {
+	        @Override
+	        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+	        	TreeItem<TreeViewNode> selectedItem = (TreeItem<TreeViewNode>)newValue;
+	        	LabelExampleData.setText("Example Data : " + selectedItem.getValue().getParameterType());
+	            // do what ever you want 
+	        }
+
+	      });
+		
 		this.paramterAddBtn.setOnAction((event) -> {
 			TreeItem<TreeViewNode> tItem = this.parameterTreeView.getSelectionModel().getSelectedItem();
 			if(tItem!= null && tItem.isLeaf()){
-				String nodeName = tItem.getValue().getParameterName();
+				String nodeValue = tItem.getValue().getParameterName();
+				String nodeName = nodeValue;
+				TreeItem<TreeViewNode> parent = tItem.getParent();
+				while(parent != null && parent.getParent().getParent() !=null) {
+					String parentName = parent.getValue().getParameterName();
+					nodeName = parentName + ">" + nodeName;
+					parent = parent.getParent();
+				}
 				String gname = groupListView.getSelectionModel().getSelectedItem();
 				if(!group_param_map.get(gname).contains(nodeName)){
 					group_param_map.get(gname).add(nodeName);

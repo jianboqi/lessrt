@@ -49,8 +49,10 @@ public class DBReader {
 	public ObservableList<String> getTableList(){
 		ObservableList<String> tableList = FXCollections.observableArrayList();
 		try {
-			ResultSet rs = stmt.executeQuery( "SELECT name FROM sqlite_sequence;");
+			ResultSet rs = stmt.executeQuery( "SELECT name FROM sqlite_master WHERE type = \"table\"");
 			while ( rs.next() ) {
+				String tableName = rs.getString("name");
+				if(!tableName.equals("description") && !tableName.equals("sqlite_sequence"))
 				tableList.add(rs.getString("name"));
 			}
 			rs.close();
