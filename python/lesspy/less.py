@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-n', '--new', help="Initialize a new simulation.", action='store_true')
 parser.add_argument('--newseq', help="New sequence.")
 parser.add_argument('-d', '--dist', help="Dist file path.")
-parser.add_argument('-s','--saveas', help="save simulation to other places.")
+parser.add_argument('-s', '--saveas', help="save simulation to other places.")
 parser.add_argument('-v', '--version', help="Version.", action='store_true')
 parser.add_argument('-p', '--cores', help="Number of cores.", type=int, default=-1)
 parser.add_argument('-r', '--run', help="Run a simulation. n: normal mode, s: sequencer mode, m: multiple scene at the"

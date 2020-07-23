@@ -77,9 +77,6 @@ public:
 					"transformation are not allowed!");
 		}
 		m_distance = props.getFloat("emitterDistance", 100000);
-
-		//virtual bounds to narrow the illumination area
-		m_hasVirtualPlane = props.getBoolean("virtualBounds", false);
 	}
 
 	DirectionalEmitter(Stream *stream, InstanceManager *manager)
@@ -101,6 +98,8 @@ public:
 
 	ref<Shape> createShape(const Scene *scene) {
 		/* Create a bounding sphere that surrounds the scene */
+		//virtual bounds to narrow the illumination area
+	//	m_hasVirtualPlane = scene->getIntegrator()->getProperties().getBoolean("SceneVirtualPlane", false);
 		if (m_hasVirtualPlane) {
 			Vector2 sceneSize = Vector2(scene->getIntegrator()->getProperties().getFloat("subSceneXSize", 100),
 				scene->getIntegrator()->getProperties().getFloat("subSceneZSize", 100));

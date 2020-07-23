@@ -29,7 +29,6 @@ class OBJHelper(object):
         f.close()
         return bound_box
 
-
     @staticmethod
     def seperate_obj(obj_path, translate_to_origin="no"):
         vertice = []

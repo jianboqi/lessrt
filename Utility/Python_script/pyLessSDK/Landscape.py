@@ -60,6 +60,9 @@ class Landscape(Element):
     def add_op_item(self, op_item):
         self.optical_properties.add_optical_item(op_item)
 
+    def get_op_item(self, op_name):
+        return self.optical_properties.get_optical_item(op_name)
+
     def add_object(self, scene_object: SceneObject, override_file=True, translate_to_origin="no"):
         self.scene_objects.add_object(scene_object, override_file, translate_to_origin)
 
@@ -68,3 +71,6 @@ class Landscape(Element):
 
     def set_terrain_op(self, op_name):
         self.terrain.optical = op_name
+
+    def get_terrain(self):
+        return self.terrain

@@ -71,7 +71,10 @@ class BatchGenAndRun:
         if ftype == "double":
             return float(value)
         elif ftype == "int":
-            return int(value)
+            if "." in value:  # Because of some bug of jsonobject, e.g., 12.0 will be 12, i.e., double will be int
+                return float(value)
+            else:
+                return int(value)
         return value
 
     def read_config_file(self):

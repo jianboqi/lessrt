@@ -24,7 +24,7 @@ class SceneObject(Element):
         component_name = self.scene_obj_name + "_" + file_name
         if file_name not in self.scene_obj_components:
             self.scene_obj_components[component_name] = {"op_name": op_name, "temperature": temperature, "color": color,
-                                                    "obj_file_path": obj_path}
+                                                        "obj_file_path": obj_path}
         else:
             print("Warning: Component " + component_name + "already exists.")
 

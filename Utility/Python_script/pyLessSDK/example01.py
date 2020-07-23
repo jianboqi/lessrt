@@ -26,6 +26,8 @@ landscape.scene_objects.instances.clear()
 op_item = OpticalItem("op_leaves", "0.05,0.4;0.05,0.4;0.05,0.4")
 landscape.add_op_item(op_item)  # 添加到场景库
 
+landscape.terrain.optical = "op_leaves"
+
 scene_obj = SceneObject("tree1")  # 定义一个场景物体，名叫tree1
 # 添加一个obj文件作为tree1的一个组分
 scene_obj.add_component_from_file(r"lm_10.obj", "op_leaves")

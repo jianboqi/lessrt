@@ -61,7 +61,6 @@ class session:
         output_dir1 = os.path.join(curr_dir, output_dir)
         return output_dir1
 
-
     @staticmethod
     def get_config_file():
         curr_dir = os.getcwd()

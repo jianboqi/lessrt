@@ -71,27 +71,27 @@ def do_simulation_multi_spectral(cores, distname=""):
     if distname != "":
         distFile = distname
 
-    server_file = os.path.join(session.get_input_dir(),"server.txt")
+    server_file = os.path.join(session.get_input_dir(), "server.txt")
     current_working_dir = os.getcwd()
     os.chdir(rt_dir)
     if cfg["Advanced"]["network_sim"]:
         if cores == -1:
-            subprocess.call([excuable, scene_file_path, "-o", distFile,"-s", server_file])
+            subprocess.call([excuable, scene_file_path, "-o", distFile, "-s", server_file])
         else:
             subprocess.call(
-                [excuable, scene_file_path, "-o", distFile,"-p",cores, "-s", server_file])
+                [excuable, scene_file_path, "-o", distFile, "-p", cores, "-s", server_file])
     else:
         if cores == -1:
-            subprocess.call([excuable,scene_file_path,"-o",distFile])
+            subprocess.call([excuable, scene_file_path, "-o", distFile])
         else:
-            subprocess.call([excuable, scene_file_path, "-o", distFile,"-p", str(cores)])
+            subprocess.call([excuable, scene_file_path, "-o", distFile, "-p", str(cores)])
     os.chdir(current_working_dir)
 
     # subprocess.check_output([excuable,scene_file_path,"-o",distFile])
     # sys.exit(0)
-    #write info.txt
+    # write info.txt
     infofile = os.path.join(session.get_output_dir(), spectral_info_file)
-    f = open(infofile,'w')
+    f = open(infofile, 'w')
     f.write(distFileName)
     f.close()
 

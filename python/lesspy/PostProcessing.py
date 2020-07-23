@@ -13,12 +13,13 @@ from Constant import irradiance_file,BATCH_INFO_FILE,spectral_info_file,waveleng
 from Loger import log
 import shutil
 from Utils import planck_invert
+import argparse
 
 
 def brf_single_img_processing(radianceFilePath, sunirr, outFilePath):
     dataset = gdal.Open(radianceFilePath)
     band_num = dataset.RasterCount
-    XSize,YSize = dataset.RasterXSize,dataset.RasterYSize
+    XSize, YSize = dataset.RasterXSize,dataset.RasterYSize
 
     format = "ENVI"
     driver = gdal.GetDriverByName(format)
@@ -38,8 +39,9 @@ def brf_single_img_processing(radianceFilePath, sunirr, outFilePath):
 
     return meanBRFs
 
+
 # processing single image: calculate temperature,
-def bt_single_img_processing(radianceFilePath,wavelengths):
+def bt_single_img_processing(radianceFilePath, wavelengths):
     dataset = gdal.Open(radianceFilePath)
     band_num = dataset.RasterCount
     meanBTs = []
@@ -51,6 +53,7 @@ def bt_single_img_processing(radianceFilePath,wavelengths):
         meanBT = planck_invert(meanRadiance,wavelengths[i])
         meanBTs.append(meanBT)
     return meanBTs
+
 
 # only contains one simulation
 def readIrr(irrFilePath):
@@ -73,6 +76,7 @@ def readIrr(irrFilePath):
     f.close()
     return sunirr
 
+
 # e.g. samples_Irradiance.txt contains a seq of simulations
 def read_irr_for_seq(seq_name):
     irr_map = dict() # [seq_name->[boa_band1, boa_band2,...]]
@@ -92,14 +96,12 @@ def read_irr_for_seq(seq_name):
     return irr_map
 
 
-import argparse
-
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', '--type', help="Product Type.",type=str)
-parser.add_argument('-f', '--file', help="info filename.",type=str)
+parser.add_argument('-t', '--type', help="Product Type.", type=str)
+parser.add_argument('-f', '--file', help="info filename.", type=str)
 args = parser.parse_args()
 # processing thermal products
-if args.type in ("T","BT","thermal"):
+if args.type in ("T", "BT", "thermal"):
     # read wavelengths
     ft = open(os.path.join(session.get_output_dir(), wavelength_file_for_thermal))
     wavelengths = list(map(lambda x:float(x),ft.readline().split(",")))
@@ -124,7 +126,7 @@ if args.type in ("T","BT","thermal"):
 
 if args.type == "brf" or args.type == "BRF":
     # read sequence info file to process
-    seq_info_files = glob.glob(os.path.join(session.get_output_dir(),"*"+BATCH_INFO_FILE))
+    seq_info_files = glob.glob(os.path.join(session.get_output_dir(), "*"+BATCH_INFO_FILE))
     for seq_file in seq_info_files:
         seq_name = os.path.splitext(os.path.basename(seq_file))[0].rsplit("_", 1)[0]
         log("INFO: Processing Batch: " + seq_name)
@@ -133,7 +135,7 @@ if args.type == "brf" or args.type == "BRF":
         fbrf = open(os.path.join(session.get_output_dir(), seq_name+"_BRF.txt"),'w')
         for line in f:
             arr = line.strip().split()
-            radiance_file = arr[0] #实际上为当个模拟的名称
+            radiance_file = arr[0]  # 实际上为当个模拟的名称
             sunirr = irr_map[radiance_file]
             radiance_path = os.path.join(session.get_output_dir(), radiance_file)
             out_BRF_File = os.path.join(session.get_output_dir(), radiance_file+"_BRF")

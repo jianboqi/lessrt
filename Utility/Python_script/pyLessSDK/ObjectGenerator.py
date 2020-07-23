@@ -5,6 +5,7 @@
 import numpy as np
 from scipy.linalg import expm, norm
 
+
 class LAD:
     UNIFORM = "Uniform"
     SPHERICAL = "Spherical"

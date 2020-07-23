@@ -24,6 +24,12 @@ class Simulation(object):
         self.__input_conf = json.load(f)
         f.close()
 
+    def get_dist_file(self):
+        return self.dist_file
+
+    def set_dist_file(self, dist_file):
+        self.dist_file = dist_file
+
     def __read_sensor_from_json(self):
         sensor_type = self.__input_conf["sensor"]["sensor_type"]
         sensor = SensorBasic()
@@ -113,8 +119,12 @@ class Simulation(object):
         script_lesspy_path = self.__sim_helper.get_script_less_py_path()
         os.system(interpreter + " " + script_lesspy_path + " -g s")
         os.system(interpreter + " " + script_lesspy_path + " -g v")
-        os.system(interpreter + " " + script_lesspy_path + " -r n -p " +
-                  str(self.get_scene().get_advanced_params().number_of_cores) + " -d " + self.dist_file)
+        if self.dist_file == "":
+            os.system(interpreter + " " + script_lesspy_path + " -r n -p " +
+                      str(self.get_scene().get_advanced_params().number_of_cores))
+        else:
+            os.system(interpreter + " " + script_lesspy_path + " -r n -p " +
+                      str(self.get_scene().get_advanced_params().number_of_cores) + " -d " + self.dist_file)
         os.chdir(cwd)
 
 
