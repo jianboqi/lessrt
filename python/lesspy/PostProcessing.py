@@ -79,11 +79,11 @@ def readIrr(irrFilePath):
 
 # e.g. samples_Irradiance.txt contains a seq of simulations
 def read_irr_for_seq(seq_name):
-    irr_map = dict() # [seq_name->[boa_band1, boa_band2,...]]
-    f = open(os.path.join(session.get_output_dir(),seq_name+"_"+irradiance_file))
+    irr_map = dict()  # [seq_name->[boa_band1, boa_band2,...]]
+    f = open(os.path.join(session.get_output_dir(), seq_name+"_" + irradiance_file))
     current_seq = ""
     for line in f:
-        if line.startswith(seq_name): #
+        if line.startswith(seq_name):  #
             current_seq = line.strip()
             irr_map[current_seq] = []
         else:

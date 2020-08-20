@@ -340,8 +340,7 @@ class SceneGenerate:
                 hidden_objects.append(line.replace("\n", ""))
         return hidden_objects
 
-
-    #generate objects file: objects.xml
+    # generate objects file: objects.xml
     @staticmethod
     def generate_objects_file(config_file_path, obj_file_prifix=""):
         f = open(config_file_path, 'r')
@@ -369,10 +368,11 @@ class SceneGenerate:
                 object_name = arr[0]
                 if object_name not in hidden_objects:
                     object_optical.append(arr)
-                    for i in range(1, len(arr), 4):
+                    for i in range(1, len(arr), 8):
                         opticalSet.add(arr[i+1])  # add all spectral properties to set
 
         opticalSet = list(opticalSet)
+        optical_map = dict()  # store the optical name - value pairs
         for i in range(0, len(opticalSet)):
             defined_op = cfg["scene"]["optical_properties"][opticalSet[i]]["value"]
             op_type = cfg["scene"]["optical_properties"][opticalSet[i]]["Type"]
@@ -394,6 +394,7 @@ class SceneGenerate:
                                              ProspectDParams["Cw"]
                                              )
                 defined_op = ref + ";" + ref + ";" + trans
+            optical_map[opticalSet[i]] = defined_op
 
             arr = defined_op.split(";")
             if len(arr) != 3:
@@ -450,16 +451,17 @@ class SceneGenerate:
         for i in range(0, len(object_optical)):
             rowdata = object_optical[i]
             objectName = rowdata[0]
-            #创建group
+            # 创建group
             shapenode = objdoc.createElement("shape")
             objroot.appendChild(shapenode)
             shapenode.setAttribute("id", objectName)
             shapenode.setAttribute("type", "shapegroup")
 
-            for j in range(1, len(rowdata),4):
+            for j in range(1, len(rowdata), 8):
                 compnentName = rowdata[j]
                 opticalName = rowdata[j+1]
                 temperatureName = rowdata[j+2]
+                isMedium = True if rowdata[j+4] == "true" else False
                 subshapnode = objdoc.createElement("shape")
                 shapenode.appendChild(subshapnode)
                 subshapnode.setAttribute("type", "serialized")
@@ -474,14 +476,46 @@ class SceneGenerate:
                 objfile = os.path.join(session.get_input_dir(), compnentName)
                 convert_obj_2_serialized(objfile, session.get_scenefile_path(), cfg["scene"]["forest"]["CacheOBJFile"])
                 strnode.setAttribute("value", os.path.splitext(compnentName)[0] + ".serialized")
-                refnode = objdoc.createElement("ref")
-                subshapnode.appendChild(refnode)
-                refnode.setAttribute("id", opticalName)
-                # using face normal
-                boolNode = objdoc.createElement("boolean")
-                subshapnode.appendChild(boolNode)
-                boolNode.setAttribute("name", "faceNormals")
-                boolNode.setAttribute("value", "true")
+                if not isMedium:  # if the shape is not a medium
+                    refnode = objdoc.createElement("ref")
+                    subshapnode.appendChild(refnode)
+                    refnode.setAttribute("id", opticalName)
+                    # using face normal
+                    boolNode = objdoc.createElement("boolean")
+                    subshapnode.appendChild(boolNode)
+                    boolNode.setAttribute("name", "faceNormals")
+                    boolNode.setAttribute("value", "true")
+                else:  # The shape is a medium
+                    mediumnode = objdoc.createElement("medium")
+                    subshapnode.appendChild(mediumnode)
+                    mediumnode.setAttribute("name", "interior")
+                    mediumnode.setAttribute("type", "vegmedium")
+
+                    define_op = optical_map[opticalName]
+                    arr = define_op.split(";")
+                    # albedo
+                    albedo = list(map(lambda xx, yy: str(float(xx)+float(yy)), arr[0].split(","), arr[2].split(",")))
+                    albedonode = objdoc.createElement("spectrum")
+                    mediumnode.appendChild(albedonode)
+                    albedonode.setAttribute("name", "singleScatteringAlbedo")
+                    albedonode.setAttribute("value", ",".join(albedo))
+
+                    densitynode = objdoc.createElement("float")
+                    mediumnode.appendChild(densitynode)
+                    densitynode.setAttribute("name", "leafAreaDensity")
+                    densitynode.setAttribute("value", rowdata[j + 5])
+
+                    ladphasenode = objdoc.createElement("phase")
+                    mediumnode.appendChild(ladphasenode)
+                    ladphasenode.setAttribute("type", "vegphase")
+                    ladnode = objdoc.createElement("string")
+                    ladphasenode.appendChild(ladnode)
+                    ladnode.setAttribute("name", "ladtype")
+                    ladnode.setAttribute("value", rowdata[j+6])
+                    hotspotnode = objdoc.createElement("float")
+                    ladphasenode.appendChild(hotspotnode)
+                    hotspotnode.setAttribute("name", "hotspotFactor")
+                    hotspotnode.setAttribute("value", rowdata[j + 7])
 
                 # for thermal
                 if cfg["sensor"]["thermal_radiation"]:
@@ -587,8 +621,8 @@ class SceneGenerate:
         logger.clearAppenders()
         fileResolver.appendPath(str(scenepath))
         # 由于batch模式不会改变地形几何结构，因此在用地形打点计算树木的高程时，用第一个terrain文件即可，所以加上了_0_
-        if(forest_prifix != ""):
-            forest_prifix = forest_prifix[0:len(forest_prifix)-1] +"_0_"
+        # if(forest_prifix != ""):
+        #     forest_prifix = forest_prifix[0:len(forest_prifix)-1] +"_0_"
         scene = SceneHandler.loadScene(fileResolver.resolve(str(forest_prifix+terr_scene_file)))
         # scene = SceneHandler.loadScene(fileResolver.resolve(r"E:\Research\20-LESS\RealScene\SimProj\calLAI\Parameters\_scenefile\terrain1.xml"))
         scene.configure()

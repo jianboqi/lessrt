@@ -1266,18 +1266,39 @@ public class LessMainWindowController {
 		        		this.objectAndPositionMap.get(objName).addListener(tree_pos_change_listener);
 		        	}
 		        	ObservableList<String> compList = FXCollections.observableArrayList();
-		        	//compatible with older simulation project
+
 		        	if(arr[4].startsWith("0x")) {
-		        		for(int i=1;i<arr.length;i=i+4){
-			        		String compName = arr[i];
-			        		compList.add(compName);
-			        		String opticalName = arr[i+1];
-			        		String temperName = arr[i+2];
-			        		String colorStr = arr[i+3];
-			        		OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName, colorStr);
-			        		opticalcomponentMap.put(objName+"_"+compName, property);
-			        	}
-		        	}else {
+		        		if(!(arr[5].equals("true") || arr[5].equals("false"))){
+							for(int i=1;i<arr.length;i=i+4){
+								String compName = arr[i];
+								compList.add(compName);
+								String opticalName = arr[i+1];
+								String temperName = arr[i+2];
+								String colorStr = arr[i+3];
+								OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName, colorStr);
+								opticalcomponentMap.put(objName+"_"+compName, property);
+							}
+						}else{
+							for(int i=1;i<arr.length;i=i+8){
+								String compName = arr[i];
+								compList.add(compName);
+								String opticalName = arr[i+1];
+								String temperName = arr[i+2];
+								String colorStr = arr[i+3];
+								boolean isMedium = false;
+								if(arr[i+4].equals("true")){
+									isMedium = true;
+								}
+								OpticalThermalProperty property = new OpticalThermalProperty(opticalName, temperName, colorStr);
+								property.setMedium(isMedium);
+								property.setLeafAreaDensity(Double.parseDouble(arr[i+5]));
+								property.setLad(arr[i+6]);
+								property.setHotspotFactor(Double.parseDouble(arr[i+7]));
+								opticalcomponentMap.put(objName+"_"+compName, property);
+							}
+						}
+
+		        	}else {//compatible with older simulation project
 		        		for(int i=1;i<arr.length;i=i+3){
 			        		String compName = arr[i];
 			        		compList.add(compName);

@@ -33,6 +33,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
@@ -60,6 +61,7 @@ import less.gui.model.PositionXY;
 import less.gui.utils.CommonUitls;
 import less.gui.utils.Const;
 
+
 public class ObjectsDefineWindowViewController {
 	
 	@FXML
@@ -82,6 +84,19 @@ public class ObjectsDefineWindowViewController {
 	private AnchorPane temperAnchorPane;
 	@FXML
 	private ColorPicker compColorPicker;
+	
+	
+	@FXML
+	private AnchorPane ladPane;
+	@FXML
+	private CheckBox checkboxTurbidMedium;
+	@FXML
+	private ComboBox<String> ladCombobox;
+	@FXML
+	private TextField textFieldHotspot;
+	@FXML
+	private TextField textFieldLeafAreaDensity;
+
 	
 	public LessMainWindowController mwController;
 	private Stage parentStage;
@@ -108,6 +123,13 @@ public class ObjectsDefineWindowViewController {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void initView(){
+
+		ladCombobox.getItems().clear();
+		ladCombobox.getItems().addAll("Spherical","Uniform","Planophile",
+				"Plagiophile", "Erectophile", "Extremophile");
+		//ladCombobox.getSelectionModel().select(0);
+		textFieldHotspot.setText("0.1");
+
 		this.objectsLV.setItems(this.mwController.objectsList);
 		//change selection
 		this.objectsLV.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
@@ -137,6 +159,12 @@ public class ObjectsDefineWindowViewController {
 		    		   OpticalThermalProperty property = mwController.opticalcomponentMap.get(objName+"_"+newValue);
 		    		   opticalPropsComboBox.getSelectionModel().select(property.getOpticalName());
 		    		   compColorPicker.setValue(property.getComponentColor());
+		    		   checkboxTurbidMedium.setSelected(property.getMedium());
+		    		   if(property.getMedium()){
+		    		   		textFieldLeafAreaDensity.setText(property.getLeafAreaDensity()+"");
+		    		   		ladCombobox.getSelectionModel().select(property.getLad());
+		    		   		textFieldHotspot.setText(property.getHotspotFactor()+"");
+					   }
 		    	   }
 		    	   else{
 		    		   opticalPropsComboBox.getSelectionModel().select(null);
@@ -237,6 +265,96 @@ public class ObjectsDefineWindowViewController {
 		}
 		//load existed file
 		//load_objects_file();
+
+		//leaf angle distribution and hotspot factor
+		ladPane.setVisible(false);
+		checkboxTurbidMedium.selectedProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				String objName = objectsLV.getSelectionModel().getSelectedItem();
+				String compoName = componentLV.getSelectionModel().getSelectedItem();
+				String key = objName+"_"+compoName;
+				if(newValue){
+					ladPane.setVisible(true);
+					if(mwController.opticalcomponentMap.containsKey(key)){
+						mwController.opticalcomponentMap.get(key).setMedium(true);
+						mwController.opticalcomponentMap.get(key).setHotspotFactor(
+								mwController.opticalcomponentMap.get(key).getHotspotFactor());
+						mwController.opticalcomponentMap.get(key).setLeafAreaDensity(
+								mwController.opticalcomponentMap.get(key).getLeafAreaDensity());
+					}else{
+						OpticalThermalProperty op = new OpticalThermalProperty();
+						op.setMedium(true);
+						mwController.opticalcomponentMap.put(key, op);
+					}
+				}else{
+					ladPane.setVisible(false);
+					if(mwController.opticalcomponentMap.containsKey(key)){
+						mwController.opticalcomponentMap.get(key).setMedium(false);
+						mwController.opticalcomponentMap.get(key).setLad("-");
+						mwController.opticalcomponentMap.get(key).setLeafAreaDensity(-999);
+						mwController.opticalcomponentMap.get(key).setHotspotFactor(-999);
+					}else{
+						OpticalThermalProperty op = new OpticalThermalProperty();
+						op.setMedium(false);
+						mwController.opticalcomponentMap.put(key, op);
+					}
+
+				}
+			}
+		});
+
+		ladCombobox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if(newValue != "" && newValue != null){
+					String objName = objectsLV.getSelectionModel().getSelectedItem();
+					String compoName = componentLV.getSelectionModel().getSelectedItem();
+					String key = objName+"_"+compoName;
+					if(mwController.opticalcomponentMap.containsKey(key)){
+						mwController.opticalcomponentMap.get(key).setLad(newValue);
+					}else{
+						OpticalThermalProperty op = new OpticalThermalProperty();
+						op.setLad(newValue);
+						mwController.opticalcomponentMap.put(key, op);
+					}
+				}
+			}
+		});
+
+		textFieldHotspot.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				String objName = objectsLV.getSelectionModel().getSelectedItem();
+				String compoName = componentLV.getSelectionModel().getSelectedItem();
+				String key = objName+"_"+compoName;
+				if(mwController.opticalcomponentMap.containsKey(key)){
+					mwController.opticalcomponentMap.get(key).setHotspotFactor(Double.parseDouble(newValue));
+				}else{
+					OpticalThermalProperty op = new OpticalThermalProperty();
+					op.setHotspotFactor(Double.parseDouble(newValue));
+					mwController.opticalcomponentMap.put(key, op);
+				}
+			}
+		});
+
+		textFieldLeafAreaDensity.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				String objName = objectsLV.getSelectionModel().getSelectedItem();
+				String compoName = componentLV.getSelectionModel().getSelectedItem();
+				String key = objName+"_"+compoName;
+				if(mwController.opticalcomponentMap.containsKey(key)){
+					mwController.opticalcomponentMap.get(key).setLeafAreaDensity(Double.parseDouble(newValue));
+				}else{
+					OpticalThermalProperty op = new OpticalThermalProperty();
+					op.setLeafAreaDensity(Double.parseDouble(newValue));
+					mwController.opticalcomponentMap.put(key, op);
+				}
+			}
+		});
+
+
 	}
 	
 //	@FXML
@@ -405,7 +523,7 @@ public class ObjectsDefineWindowViewController {
 					}
 				}
 				OpticalThermalProperty ot = this.mwController.opticalcomponentMap.get(opticalKey);
-				totalStr += " "+compName + " " + ot.getOpticalName() + " " +ot.getTermperatureName()+" "+ ot.getComponentColor().toString();
+				totalStr += " "+compName + " " + ot.toString();
 				initObjectAndPositionMap(objName);
 			}
 			totalStr += System.getProperty("line.separator");

@@ -164,7 +164,7 @@ class BatchGenAndRun:
         return sorted(lists, key=self.compare_fun)
 
     def readParameterFileList(self):
-        if self.parameter_file_list == None:
+        if self.parameter_file_list is None:
             self.parameter_file_list = []
             for filename in os.listdir(session.get_input_dir()):
                 if filename.startswith(self.seq_name):
@@ -179,20 +179,22 @@ class BatchGenAndRun:
             tcfgfile = os.path.join(session.get_input_dir(), filename)
             prifix = os.path.splitext(filename)[0] + "_"
             SceneGenerate.terr_generate(tcfgfile, prifix)
+            SceneGenerate.generate_objects_file(tcfgfile, prifix)
+            SceneGenerate.forest_generate(tcfgfile, prifix)
 
-        if (len(self.parameter_file_list) > 0):
-            SceneGenerate.generate_objects_file(self._cfgFile, self.seq_name + "_")
-            SceneGenerate.forest_generate(self._cfgFile, self.seq_name + "_")
-        log("INFO: Generating view and illuminations.")
+        # if len(self.parameter_file_list) > 0:
+            # SceneGenerate.generate_objects_file(self._cfgFile, self.seq_name + "_")
+            # SceneGenerate.forest_generate(self._cfgFile, self.seq_name + "_")
+        # log("INFO: Generating view and illuminations.")
 
         # 输出irridiance
         fi = open(os.path.join(session.get_output_dir(), self.seq_name + "_" + irradiance_file), 'w')
         sp = SceneParser()
         for filename in self.parameter_file_list:
             tcfgfile = os.path.join(session.get_input_dir(), filename)
-            prifix = os.path.splitext(filename)[0]
-            irrstr = sp.parse(tcfgfile, prifix + "_", self.seq_name + "_")
-            fi.write(prifix + "\n" + irrstr + "\n")
+            prifix = os.path.splitext(filename)[0] + "_"
+            irrstr = sp.parse(tcfgfile, prifix, prifix)
+            fi.write(os.path.splitext(filename)[0] + "\n" + irrstr + "\n")
         log("INFO: view and illuminations generated.")
         fi.close()
 
