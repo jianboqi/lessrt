@@ -59,7 +59,7 @@ public class Const {
 	
 	
 	// LESS Mode
-	public static String LESS_MODE= "development11";
+	public static String LESS_MODE= "development";
 	public static String LESS_VERSION = "V1.8.8";
 	
 	public static boolean LESS_OUT_ALL = false;
@@ -110,7 +110,7 @@ public class Const {
 	public static String LESS_SERVER_EXE = "lesssrv";
 	public static String LESS_SERVER_TXT_FILE = "server.txt";
 	
-	public static String LESS_HELP_ONLINE_URL = "http://ramm.bnu.edu.cn/projects/less/Documentation/";
+	public static String LESS_HELP_ONLINE_URL = "http://lessrt.org/docs/documentation/";
 	
 	//LAI
 	public static String LESS_LAI_OUTPUT_FILE = "LAI.txt";
