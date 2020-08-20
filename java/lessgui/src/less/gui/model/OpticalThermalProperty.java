@@ -11,44 +11,7 @@ public class OpticalThermalProperty {
 	private String opticalName;
 	private String temperatureName="-"; //temperature with default value equals to -
 	private Color componentColor = Color.DARKGREEN; // the color of each component.
-
-	private Boolean isMedium = false;
-	private double leafAreaDensity = -999;
-	private String lad = "-";
-	private double hotspotFactor = -999;
-
-	public Boolean getMedium() {
-		return isMedium;
-	}
-
-	public void setMedium(Boolean medium) {
-		isMedium = medium;
-	}
-
-	public String getLad() {
-		return lad;
-	}
-
-	public void setLad(String lad) {
-		this.lad = lad;
-	}
-
-	public double getHotspotFactor() {
-		return hotspotFactor;
-	}
-
-	public void setHotspotFactor(double hotspotFactor) {
-		this.hotspotFactor = hotspotFactor;
-	}
-
-	public void setLeafAreaDensity(double leafAreaDensity){
-		this.leafAreaDensity = leafAreaDensity;
-	}
-	public double getLeafAreaDensity(){
-		return this.leafAreaDensity;
-	}
-
-	public OpticalThermalProperty(){}
+	
 
 	public OpticalThermalProperty(String o, String t){
 		this.opticalName = o;
@@ -89,12 +52,9 @@ public class OpticalThermalProperty {
 	public String getTermperatureName(){
 		return this.temperatureName;
 	}	
-	public void setTemperatureName(String t){this.temperatureName = t;}
-
-	public String toString(){
-		return this.getOpticalName() + " " +this.getTermperatureName()+" "+
-				this.getComponentColor().toString() + " " +this.isMedium.toString()
-				+" "+ this.leafAreaDensity+" "+this.lad+" "+this.hotspotFactor;
+	public void setTemperatureName(String t){
+		this.temperatureName = t;
 	}
+	
 	
 }

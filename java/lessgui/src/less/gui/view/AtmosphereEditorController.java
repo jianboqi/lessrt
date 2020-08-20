@@ -1,7 +1,5 @@
 package less.gui.view;
 
-import org.controlsfx.control.PropertySheet;
-
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -37,8 +35,6 @@ public class AtmosphereEditorController {
 			AtmosphereParams atsParams = this.mwController.projManager.atmosphereParams;	
 			atsComboxCalculationMode.setValue(atsParams.calculationMode);			
 		}
-		
-		
 	}
 	
 	@FXML
