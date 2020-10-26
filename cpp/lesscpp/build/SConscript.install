@@ -82,6 +82,9 @@ if sys.platform == 'win32':
 	if 'WIN64' in env['CXXFLAGS']:
 		if compilerType == 'vc141':
 			installTargets += env.Install(distDir, '#dependencies/lib/VC_redist_2017.x64.exe')
+			installTargets += env.Install(distDir, '#dependencies/lib/msvcp140.dll')
+			installTargets += env.Install(distDir, '#dependencies/lib/vcomp140.dll')
+			installTargets += env.Install(distDir, '#dependencies/lib/vcruntime140.dll')
 
 	if 'REDIST_PATH' in env:
 		install(distDir, ['libmmd.dll', 'libiomp5md.dll', 'svml_dispmd.dll'], prefix = env['REDIST_PATH'])

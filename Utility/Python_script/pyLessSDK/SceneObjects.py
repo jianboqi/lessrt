@@ -4,7 +4,7 @@ from Element import Element
 import shutil
 from LSBoundingBox import LSBoundingBox
 from Utility import OBJHelper
-
+import sys
 
 class SceneObject(Element):
     def __init__(self, name=None, components={}):
@@ -18,13 +18,16 @@ class SceneObject(Element):
     def get_scene_obj_name(self):
         return self.scene_obj_name
 
+    def set_component_op(self, comp_name, op_name):
+        self.scene_obj_components[comp_name]["op_name"] = op_name
+
     def add_component_from_file(self, obj_path, op_name, temperature="-", color="0x006400ff"):
         # get filename
         (dir_path, file_name) = os.path.split(obj_path)
         component_name = self.scene_obj_name + "_" + file_name
         if file_name not in self.scene_obj_components:
             self.scene_obj_components[component_name] = {"op_name": op_name, "temperature": temperature, "color": color,
-                                                        "obj_file_path": obj_path}
+                                                         "obj_file_path": obj_path}
         else:
             print("Warning: Component " + component_name + "already exists.")
 
@@ -192,6 +195,13 @@ class SceneObjects(Element):
                     print("INFO: Translating obj...")
                     self.__copy_components_with_translate(scene_object.scene_obj_components,
                                                           translate_to_origin)
+
+    def get_object(self, obj_name):
+        if obj_name not in self.objects:
+            print("Warning: scene object " + obj_name + " does not exist.")
+            sys.exit(0)
+        else:
+            return SceneObject(obj_name, self.objects[obj_name])
 
     def place_object_to(self, obj_name, x=50.0, y=50.0, z=0.0, rotate=0.0):
         if not self.__is_scene_object_exist(obj_name):

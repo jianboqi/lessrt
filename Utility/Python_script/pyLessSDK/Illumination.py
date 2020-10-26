@@ -13,6 +13,9 @@ class Illumination(Element):
 
         self.sun_calculator = False
 
+    def set_ats_percentage(self, ats_percentage):
+        self.atmosphere_percentage = ats_percentage
+
     def init_illumination_from_json(self, json_object):
         self.atmosphere_percentage = json_object["illumination"]["atmosphere"]["percentage"]
         self.ats_type = json_object["illumination"]["atmosphere"]["ats_type"]
@@ -22,7 +25,7 @@ class Illumination(Element):
         return self
 
     def to_json_object(self):
-        if  not self.get_sim().get_scene().get_sensor().thermal_radiation:
+        if not self.get_sim().get_scene().get_sensor().thermal_radiation:
             json_object = {"atmosphere": {"percentage": self.atmosphere_percentage,
                                           "ats_type": self.ats_type},
                            "sun": {"sun_azimuth": self.sun_azimuth,

@@ -67,3 +67,9 @@ class OpticalProperties(Element):
             if op_name == op_item.op_name:
                 return op_item
         return None
+
+    # #  refresh op database before running the simulation
+    # def refresh_op_properties(self):
+    #     for op_item in self.optical_properties:
+    #         if op_item.op_type == 0:
+    #             # get information from databse

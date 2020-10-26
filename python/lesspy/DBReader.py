@@ -161,11 +161,11 @@ class sun_irradiance_db:
             wbarr = wl.split(":")
             w,b = float(wbarr[0]),float(wbarr[1])
             if b < 0.0001:
-                b=1
+                b = 1
             left = w - 0.5 * b
             right = w + 0.5 * b
             cu.execute("select wavelength, irradiance from TOASolar_2005_per_nm where "
-                       "wavelength>=%.13f and wavelength<=%.13f"%(left, right))
+                       "wavelength>=%.13f and wavelength<=%.13f" % (left, right))
             re = cu.fetchall()
             length = len(re)
             totalIrr = 0

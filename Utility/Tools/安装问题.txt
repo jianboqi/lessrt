@@ -1,0 +1,9 @@
+通过安装VC runtime解决：
+1.如果GUI界面无法打开，尝试安装vc2010
+2.如果mtsimport等出错，尝试安装VC2017，如果VC2017安装失败，尝试首先卸载原来安装的VC2017 x64，再安装LESS自带的版本。
+3. 如果Python import mtisuba出错，一般是未安装VC2017造成的。
+
+在版本打包发布时，将相应的DLL拷贝到特定目录下：
+在lessrt目录下，增加:msvcp140.dll vcomp140.dll vcruntime140.dll
+在python.exe所在目录的osgeo目录下添加：msvcp140.dll vcomp140.dll vcruntime140.dll
+在LESS.exe所在目录，添加api-ms-win-core*等文件，以及msvcp140.dll vcomp140.dll msvcr100.dll （目前通过ideal打包已经自动添加了，无需手工）

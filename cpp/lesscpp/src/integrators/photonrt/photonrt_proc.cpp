@@ -191,6 +191,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 	m_workResult->m_PhtonsEachProcess = 0;	
 
 	Intersection its;
+	MediumSamplingRecord mRec;
 	ref<Sensor> sensor = m_scene->getSensor();
 	PositionSamplingRecord pRec(sensor->getShutterOpen()
 		+ 0.5f * sensor->getShutterOpenTime());
@@ -276,7 +277,7 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 		Spectrum throughput(1.0f); // unitless path throughput (used for russian roulette)
 		while (!throughput.isZero() && (depth <= m_maxDepth || m_maxDepth < 0)) {
 			//m_scene->rayIntersect(ray, its);
-			rayIntersectExcludeEdge(ray, its);
+			rayIntersectExcludeEdge(ray, its);  //判断光线是否与场景包围盒以外的元素发生相交作用。
 			int repetitiveTimes = 0;
 			//如果需要计算BRF产品，且photon type正确，则计算. repetitive
 			if ((m_hasBRFProducts && (photoType & EPhotonType::ETypeBRF)) ||
@@ -322,20 +323,34 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 
 			}//hasBRFProducts or hasfPARProducts
 
+			if (medium && medium->sampleDistance(Ray(ray, 0, its.t), mRec, m_sampler)) {
+				throughput *= mRec.sigmaS * mRec.transmittance / mRec.pdfSuccess;
+				PhaseFunctionSamplingRecord pRec(mRec, -ray.d, EImportance);
+				throughput *= medium->getPhaseFunction()->sample(pRec, m_sampler);
+				delta = false;
 
-			if (m_hasfPARProducts) {
-				handleSurfaceReProb(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType, previousStatus);
-			}
+				ray = Ray(mRec.p, pRec.wo, ray.time);
+				ray.mint = 0;
 
-			//如果最大穿越场景次数之后，还是没有交点，则放弃
-			if (its.t == std::numeric_limits<Float>::infinity()) {
+			}//如果最大穿越场景次数之后，还是没有交点，则放弃
+			else if (its.t == std::numeric_limits<Float>::infinity()) {
 				handleSurfaceInteractionBRF(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 				handleSurfaceInteractionUpDown(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType);
 				break;
 			}
 			else {
+
+				if (m_hasfPARProducts) {
+					//计算再碰撞概率
+					handleSurfaceReProb(depth, nullInteractions, delta, its, ray, previousPoint, medium, throughput*power, photoType, previousStatus);
+				}
+
+				if (medium)
+					throughput *= mRec.transmittance / mRec.pdfFailure;
+
 				//处理BRDF
 				const BSDF *bsdf = its.getBSDF();
+				cout <<its.shape->getID()<<" "<< bsdf->toString() << endl;
 				BSDFSamplingRecord bRec(its, m_sampler, EImportance);
 				Spectrum bsdfWeight = bsdf->sample(bRec, m_sampler->next2D()); //bsdfWeight: 方向反射率
 				if (bsdfWeight == Spectrum(-1)) {// -1表示碰撞点位于单面材质的背面
@@ -377,8 +392,18 @@ void CapturePhotonWorker::process(const WorkUnit *workUnit, WorkResult *workResu
 					break;
 				}
 
+				Vector wi = -ray.d, wo = its.toWorld(bRec.wo);
+				Float wiDotGeoN = dot(its.geoFrame.n, wi),
+					woDotGeoN = dot(its.geoFrame.n, wo);
+				if (wiDotGeoN * Frame::cosTheta(bRec.wi) <= 0 ||
+					woDotGeoN * Frame::cosTheta(bRec.wo) <= 0)
+					break;
+
 				throughput *= bsdfWeight;
-				Vector wo = its.toWorld(bRec.wo);
+				if (its.isMediumTransition())
+					medium = its.getTargetMedium(woDotGeoN);
+
+				//Vector wo = its.toWorld(bRec.wo);
 				ray.setOrigin(its.p);
 				ray.setDirection(wo);
 				ray.mint = Epsilon;

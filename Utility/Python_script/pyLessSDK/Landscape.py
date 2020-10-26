@@ -74,3 +74,9 @@ class Landscape(Element):
 
     def get_terrain(self):
         return self.terrain
+
+    def get_op_properties(self):
+        return self.optical_properties
+
+    def get_scene_objects(self):
+        return self.scene_objects

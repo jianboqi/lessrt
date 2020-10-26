@@ -22,6 +22,9 @@ class SensorBasic(Element):
         self.bands = "600:2,900:2"
         self.no_data_value = -1
 
+    def set_spectral_bands(self, spectral_bands):
+        self.bands = spectral_bands
+
 
 class SensorOrthographic(SensorBasic):
     def __init__(self):
@@ -193,6 +196,7 @@ class SensorFisheye(SensorBasic):
     def __init__(self):
         super().__init__()
         self.sample_per_square_meter = 128
+        self.sample_per_pixel = 128
         self.angular_fov = 165
         self.projection_type = "equisolid"
 

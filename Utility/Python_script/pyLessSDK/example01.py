@@ -23,15 +23,15 @@ landscape.scene_objects.instances.clear()
 
 # define scene
 # 定义一个光学属性（正面反射；背面反射；透射）
-op_item = OpticalItem("op_leaves", "0.05,0.4;0.05,0.4;0.05,0.4")
+op_item = OpticalItem("op_leaves", "0.05,0.4,0.5;0.05,0.4,0.5;0.05,0.4")
 landscape.add_op_item(op_item)  # 添加到场景库
 
 landscape.terrain.optical = "op_leaves"
 
 scene_obj = SceneObject("tree1")  # 定义一个场景物体，名叫tree1
 # 添加一个obj文件作为tree1的一个组分
-scene_obj.add_component_from_file(r"lm_10.obj", "op_leaves")
-scene_obj.add_component_from_file(r"ww_10.obj", "op_leaves")
+scene_obj.add_component_from_file(r"SampleData\lm_10.obj", "op_leaves")
+scene_obj.add_component_from_file(r"SampleData\ww_10.obj", "op_leaves")
 landscape.add_object(scene_obj)
 
 # 随机放置在场景中
@@ -44,6 +44,7 @@ for i in range(1000):
 landscape.scene_objects.calculate_object_bounding_box()
 
 # 设置相机参数
+
 sensor.film_type = "rgb"
 sensor.image_width = 300
 sensor.image_height = 300

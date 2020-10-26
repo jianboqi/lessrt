@@ -233,7 +233,6 @@ def do_simulation_multiangle_seq(seqname):
         scheduler.registerWorker(LocalWorker(i, 'wrk%i' % i))
     scheduler.start()
 
-
     scene_path = session.get_scenefile_path()
     fileResolver = Thread.getThread().getFileResolver()
     fileResolver.appendPath(str(scene_path))

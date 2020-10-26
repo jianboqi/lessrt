@@ -200,7 +200,6 @@ class SceneGenerate:
             #                         cfg["sensor"]["bands"])
             # spectrumNode.setAttribute("value",emit_spectral)
 
-
         if "landcover" not in cfg["scene"]["terrain"]:
             if cfg["scene"]["terrain"]["terrBRDFType"] == "Lambertian":
                 reflectancenode = doc.createElement("spectrum")

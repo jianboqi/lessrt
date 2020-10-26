@@ -49,6 +49,3 @@ for i in range(0, 5):
     sim.start()  # 开始模拟
     # 将模拟的辐亮度影像转换为反射率影像
     PostProcessing.radiance2brf(sim.get_sim_dir(), sim_dist_file, sim_dist_file_brf)
-
-
-
