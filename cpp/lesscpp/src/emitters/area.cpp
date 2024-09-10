@@ -156,7 +156,14 @@ public:
 
 	Spectrum sampleDirect(DirectSamplingRecord &dRec,
 			const Point2 &sample) const {
-		m_shape->sampleDirect(dRec, sample);
+		m_shape->sampleDirect(dRec, sample, m_worldTransform.get());
+
+		//offset the sampled position to the position of instance
+		// already transform in sampleDirect
+		//if (m_worldTransform != nullptr) {
+		//	const Transform& trafo = m_worldTransform->eval(0);
+		//	dRec.p = trafo(dRec.p);
+		//}
 
 		/* Check that the emitter and reference position are oriented correctly
 		   with respect to each other. Note that the >= 0 check

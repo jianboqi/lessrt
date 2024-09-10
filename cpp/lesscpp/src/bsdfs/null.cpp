@@ -44,6 +44,10 @@ public:
 	Spectrum eval(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		return Spectrum(((bRec.typeMask & ENull) && measure == EDiscrete) ? 1.0f : 0.0f);
 	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		return Spectrum(((bRec.typeMask & ENull) && measure == EDiscrete) ? 1.0f : 0.0f);
+	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		return ((bRec.typeMask & ENull) && measure == EDiscrete) ? 1.0f : 0.0f;
@@ -60,6 +64,19 @@ public:
 			return Spectrum(0.0f);
 		}
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		if (bRec.typeMask & ENull) {
+			bRec.wo = -bRec.wi;
+			bRec.sampledComponent = 0;
+			bRec.sampledType = ENull;
+			bRec.eta = 1.0f;
+			return Spectrum(1.0f);
+		}
+		else {
+			return Spectrum(0.0f);
+		}
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &_sample) const {
 		if (bRec.typeMask & ENull) {
@@ -70,6 +87,20 @@ public:
 			pdf = 1;
 			return Spectrum(1.0f);
 		} else {
+			return Spectrum(0.0f);
+		}
+	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		if (bRec.typeMask & ENull) {
+			bRec.wo = -bRec.wi;
+			bRec.sampledComponent = 0;
+			bRec.sampledType = ENull;
+			bRec.eta = 1.0f;
+			pdf = 1;
+			return Spectrum(1.0f);
+		}
+		else {
 			return Spectrum(0.0f);
 		}
 	}

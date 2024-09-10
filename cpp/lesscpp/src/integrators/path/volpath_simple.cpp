@@ -110,7 +110,7 @@ public:
 					tempRay.maxt = std::numeric_limits<Float>::infinity();
 					transmitance = medium->evalTransmittance(tempRay, nullptr);
 				}
-				
+
 				DirectSamplingRecord dSampling;
 				dSampling.ref = Point(0, 0, 0);
 				Point2 p2;
@@ -143,13 +143,6 @@ public:
 		   intersection has already been provided). */
 		rRec.rayIntersect(ray);
 		Spectrum throughput(1.0f);
-
-#ifdef QI_DEBUG
-		cout << "***************start*******************" << endl;
-		cout << its.toString() << endl;
-		cout << "its.t " << its.t << endl;
-#endif // QI_DEBUG
-
 
 		if (m_maxDepth == 1)
 			rRec.type &= RadianceQueryRecord::EEmittedRadiance;
@@ -352,6 +345,10 @@ public:
 		avgPathLength.incrementBase();
 		avgPathLength += rRec.depth;
 		return Li;
+	}
+	Spectrum LiWithEF(const RayDifferential& ray, RadianceQueryRecord& rRec,
+		Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const {
+		return Spectrum(0.0f);
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {

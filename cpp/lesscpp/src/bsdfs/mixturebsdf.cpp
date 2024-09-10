@@ -82,6 +82,9 @@ public:
 				SLog(EError, "Invalid BSDF weight!");
 			m_weights[i] = weight;
 		}
+		if (props.hasProperty("kChlrel")) {
+			parseSpectrumTxt(props, "kChlrel", m_kChlrel);
+		}
 	}
 
 	MixtureBSDF(Stream *stream, InstanceManager *manager)
@@ -171,6 +174,27 @@ public:
 		BSDF::configure();
 	}
 
+	void parseSpectrumTxt(const Properties& props, const std::string& name, Spectrum& m) {
+		std::vector<std::string> s = tokenize(props.getString(name, ""), " ,;\n");
+		if (s.size() == 0) {
+			SLog(EError, "No %s were supplied!", name.c_str());
+		}
+		if (s.size() != SPECTRUM_SAMPLES) {
+			SLog(EError, "Invalid number of %s spectrum elements!", name.c_str());
+		}
+		char* fend_ptr = NULL;
+		for (size_t i = 0; i < s.size(); ++i) {
+			Float v = (Float)strtod(s[i].c_str(), &fend_ptr);
+			if (*fend_ptr != '\0') {
+				SLog(EError, "Could not parse the %s spectrum!", name.c_str());
+			}
+			if (v < 0) {
+				SLog(EError, "Invalid %s spectrum!", name.c_str());
+			}
+			m[i] = v;
+		}
+	}
+
 	Spectrum eval(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		Spectrum result(0.0f);
 
@@ -186,6 +210,10 @@ public:
 		}
 
 		return result;
+	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		return Spectrum(0.0f);
 	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
@@ -239,6 +267,10 @@ public:
 			return result;
 		}
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		return Spectrum(0.0f);
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &_sample) const {
 		Point2 sample(_sample);
@@ -274,6 +306,10 @@ public:
 			return result;
 		}
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		return Spectrum(0.0f);
+	}
 
 	void addChild(const std::string &name, ConfigurableObject *child) {
 		if (child->getClass()->derivesFrom(MTS_CLASS(BSDF))) {
@@ -289,6 +325,10 @@ public:
 		int bsdfIndex = m_indices[component].first;
 		component = m_indices[component].second;
 		return m_bsdfs[bsdfIndex]->getRoughness(its, component);
+	}
+
+	Spectrum getkChlrel() const {
+		return m_kChlrel;
 	}
 
 	std::string toString() const {
@@ -317,6 +357,8 @@ private:
 	std::vector<int> m_offsets;
 	std::vector<BSDF *> m_bsdfs;
 	DiscreteDistribution m_pdf;
+
+	Spectrum m_kChlrel;
 };
 
 

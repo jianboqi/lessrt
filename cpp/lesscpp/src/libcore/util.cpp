@@ -83,14 +83,40 @@ MTS_NAMESPACE_BEGIN
 int FF(const char* filename, int index)
 {
 	std::ifstream file(filename);
-	int start = 0;
-	int end = 0;
+	Float start = 0;
+	Float end = 0;
 	file >> start;
 	file >> end;
 	if (index == 1)
 		return start;
 	else
 		return end;
+}
+
+int FFEF(const char* filename, int index)
+{
+	std::ifstream file(filename);
+	std::vector<Float> values;
+	while (!file.eof())
+	{
+		Float value = 0;
+		file >> value;
+		values.push_back(value);
+	}
+	return values[index - 1];
+}
+std::vector<int> FFEF(const char* filename)
+{
+	std::ifstream file(filename);
+	std::vector<int> values;
+	while (!file.eof())
+	{
+		int value = 0;
+		file >> value;
+		values.push_back(value);
+	}
+	values.pop_back();
+	return values;
 }
 
 int FFBN(const char* filename){

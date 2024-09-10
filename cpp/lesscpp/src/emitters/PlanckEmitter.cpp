@@ -200,7 +200,15 @@ public:
 
 	Spectrum sampleDirect(DirectSamplingRecord &dRec,
 			const Point2 &sample) const {
-		m_shape->sampleDirect(dRec, sample);
+		m_shape->sampleDirect(dRec, sample, m_worldTransform.get());
+
+		//offset the sampled position to the position of instance
+		/*if (m_worldTransform != nullptr) {
+			const Transform& trafo = m_worldTransform->eval(0);
+			dRec.p = trafo(dRec.p);
+		}*/
+		
+
 		/* Check that the emitter and reference position are oriented correctly
 		   with respect to each other. Note that the >= 0 check
 		   for 'refN' is intentional -- those sampling requests that specify
@@ -252,7 +260,7 @@ public:
 		return m_shape->getAABB();
 	}
 
-	Spectrum getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, bool shaded) const {
+	Spectrum getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, Intersection& its, bool shaded) const {
 
 		if (dRec.pdf == 0) return Spectrum(0.0);
 

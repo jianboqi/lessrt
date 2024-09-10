@@ -61,7 +61,7 @@ ref<Shape> AbstractEmitter::createShape(const Scene *scene) {
 }
 
 
-Spectrum AbstractEmitter::getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec,bool shaded) const {
+Spectrum AbstractEmitter::getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, Intersection& its, bool shaded) const {
 	NotImplementedError("getSpectrumAccordingToTemperature");
 }
 

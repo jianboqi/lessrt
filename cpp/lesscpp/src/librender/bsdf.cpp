@@ -84,6 +84,11 @@ Spectrum BSDF::getDiffuseReflectance(const Intersection &its) const {
 	bRec.typeMask = EDiffuseReflection;
 	return eval(bRec) * M_PI;
 }
+Spectrum BSDF::getDiffuseTransmittance(const Intersection& its) const {
+	BSDFSamplingRecord bRec(its, Vector(0, 0, 1), Vector(0, 0, 1));
+	bRec.typeMask = EDiffuseTransmission;
+	return eval(bRec) * M_PI;
+}
 
 Texture *BSDF::ensureEnergyConservation(Texture *texture,
 		const std::string &paramName, Float max) const {

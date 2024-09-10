@@ -104,11 +104,17 @@ public:
 		 * 4+5. Translate and scale the coordinates once more to account
 		 *     for a cropping window (if there is any)
 		 */
-		m_cameraToSample =
+		/*m_cameraToSample =
 			  Transform::scale(Vector(1.0f / relSize.x, 1.0f / relSize.y, 1.0f))
 			* Transform::translate(Vector(-relOffset.x, -relOffset.y, 0.0f))
 			* Transform::scale(Vector(-0.5f, -0.5f*m_aspect, 1.0f))
 			* Transform::translate(Vector(-1.0f, -1.0f/m_aspect, 0.0f))
+			* Transform::orthographic(m_nearClip, m_farClip);*/
+		m_cameraToSample =
+			Transform::scale(Vector(1.0f / relSize.x, 1.0f / relSize.y, 1.0f))
+			* Transform::translate(Vector(-relOffset.x, -relOffset.y, 0.0f))
+			* Transform::scale(Vector(-0.5f, -0.5f, 1.0f))
+			* Transform::translate(Vector(-1.0f, -1.0f, 0.0f))
 			* Transform::orthographic(m_nearClip, m_farClip);
 
 		m_sampleToCamera = m_cameraToSample.inverse();
@@ -286,10 +292,15 @@ public:
 			2.0f * m_invResolution.x * (aaSample.x-0.5f),
 			2.0f * m_invResolution.y * (aaSample.y-0.5f));
 
-		return m_clipTransform *
+		/*return m_clipTransform *
 			Transform::translate(Vector(offset.x, offset.y, 0.0f)) *
 			Transform::scale(Vector(1.0f, m_aspect, 1.0f)) *
 			Transform::glOrthographic(m_nearClip, m_farClip)*
+			Transform::scale(Vector(1.0f, 1.0f, m_scale));*/
+		return m_clipTransform *
+			Transform::translate(Vector(offset.x, offset.y, 0.0f)) *
+			Transform::scale(Vector(1.0f, 1, 1.0f)) *
+			Transform::glOrthographic(m_nearClip, m_farClip) *
 			Transform::scale(Vector(1.0f, 1.0f, m_scale));
 	}
 

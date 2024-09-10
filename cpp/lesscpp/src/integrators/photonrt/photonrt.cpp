@@ -29,6 +29,14 @@ public:
 
 		m_hasfPARProducts = props.getBoolean("fPARProduct", false);
 
+		m_hasfSunlitLeafProducts = props.getBoolean("fSunlitLeafProduct", false);
+
+		m_boolOutParEachBand = props.getBoolean("boolOutParEachBand", false);
+
+		m_hasFluorProducts = props.getInteger("FluorProduct", 0);
+
+		m_hasFluxMeasureProduct = props.getBoolean("FluxMeasureProduct", false);
+
 		/* Rely on hitting the sensor via ray tracing? */
 		m_bruteForce = props.getBoolean("bruteForce", false);
 
@@ -49,6 +57,9 @@ public:
 		m_hasUpDownProducts = stream->readBool();
 		m_numberOfDirections = stream->readInt();
 		m_hasfPARProducts = stream->readBool();
+		m_hasfSunlitLeafProducts = stream->readBool();
+		m_hasFluorProducts = stream->readInt();
+		m_hasFluxMeasureProduct = stream->readInt();
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -61,6 +72,9 @@ public:
 		stream->writeBool(m_hasUpDownProducts);
 		stream->writeInt(m_numberOfDirections);
 		stream->writeBool(m_hasfPARProducts);
+		stream->writeBool(m_hasfSunlitLeafProducts);
+		stream->writeInt(m_hasFluorProducts);
+		stream->writeInt(m_hasFluxMeasureProduct);
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
@@ -115,7 +129,8 @@ public:
 		ref<ParallelProcess> process = new CapturePhotonProcess(
 			job, queue, m_sampleCount, m_granularity,
 			maxPtracerDepth, m_maxDepth, m_rrDepth, m_bruteForce, m_hasBRFProducts,
-			m_hasUpDownProducts, m_numberOfDirections, m_hasfPARProducts);
+			m_hasUpDownProducts, m_numberOfDirections, m_hasfPARProducts, m_hasfSunlitLeafProducts, m_boolOutParEachBand,
+			m_hasFluorProducts, m_hasFluxMeasureProduct);
 		process->bindResource("scene", sceneResID);
 		process->bindResource("sensor", sensorResID);
 		process->bindResource("sampler", samplerResID);
@@ -152,6 +167,15 @@ protected:
 	int m_numberOfDirections;
 
 	bool m_hasfPARProducts;
+
+	bool m_hasfSunlitLeafProducts;
+
+	bool m_boolOutParEachBand;
+
+	size_t m_hasFluorProducts;
+
+	bool m_hasFluxMeasureProduct;
+
 };
 
 MTS_IMPLEMENT_CLASS_S(PhotonRtTracer, false, Integrator)

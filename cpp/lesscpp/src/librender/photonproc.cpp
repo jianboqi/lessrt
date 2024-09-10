@@ -10,7 +10,7 @@ MTS_NAMESPACE_BEGIN
 PhotonProcess::PhotonProcess(EMode mode, size_t workCount, size_t granularity,
 	const std::string &progressText, const void *progressReporterPayload)
 	: m_mode(mode), m_workCount(workCount), m_numGenerated(0),
-	m_granularity(granularity), m_receivedResultCount(0) {
+	m_granularity(granularity), m_receivedResultCount(0), m_FluorPhotonsNum(0) {
 	/* Choose a suitable work unit granularity if none was specified */
 	if (m_granularity == 0)
 		m_granularity = std::max((size_t)1, workCount /
@@ -43,12 +43,12 @@ PhotonProcess::EStatus PhotonProcess::generateWork(WorkUnit *unit, int worker) {
 	return ESuccess;
 }
 
-void PhotonProcess::increaseResultCount(size_t resultCount) {
+void PhotonProcess::increaseResultCount(size_t resultCount, size_t FluorPhotonsNum) {
 	LockGuard lock(m_resultMutex);
 	m_receivedResultCount += resultCount;
+	m_FluorPhotonsNum += FluorPhotonsNum;
 	m_progress->update(m_receivedResultCount);
 }
-
 
 PhotonTracer::PhotonTracer(int maxDepth, int rrDepth, bool emissionEvents)
 	: m_maxDepth(maxDepth), m_rrDepth(rrDepth), m_emissionEvents(emissionEvents) { }

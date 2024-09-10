@@ -134,10 +134,10 @@ void GeometryConverter::convert(const fs::path &inputFile,
 		m_geometryFile->setByteOrder(Stream::ELittleEndian);
 	}
 
-	if (!fs::exists(textureDirectory)) {
-		SLog(EInfo, "Creating directory \"%s\" ..", textureDirectory.string().c_str());
-		fs::create_directory(textureDirectory);
-	}
+	//if (!fs::exists(textureDirectory)) {
+	//	SLog(EInfo, "Creating directory \"%s\" ..", textureDirectory.string().c_str());
+	//	fs::create_directory(textureDirectory);
+	//}
 
 	if (!fs::exists(meshesDirectory) && !m_packGeometry) {
 		SLog(EInfo, "Creating directory \"%s\" ..", meshesDirectory.string().c_str());
@@ -299,21 +299,22 @@ void GeometryConverter::convert(const fs::path &inputFile,
 		delete memBufIS;
 		delete serializer;
 		parser->release();
-	} else {
-#if defined(__WINDOWS__)
-	//convert narrow bytes (fname) to widestring and using _wfopen
-	//to handle path with Chinese character
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-	std::wstring wideStr = conv.from_bytes(outputFile.string());
-	fs::ofstream ofile(wideStr);
-#else
-		fs::ofstream ofile(outputFile);
-#endif
-		if (ofile.fail())
-			SLog(EError, "Could not write to \"%s\"!", outputFile.string().c_str());
-		ofile << os.str();
-		ofile.close();
-	}
+	} 
+// else {
+//#if defined(__WINDOWS__)
+//	//convert narrow bytes (fname) to widestring and using _wfopen
+//	//to handle path with Chinese character
+//	std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+//	std::wstring wideStr = conv.from_bytes(outputFile.string());
+//	fs::ofstream ofile(wideStr);
+//#else
+//		fs::ofstream ofile(outputFile);
+//#endif
+//		if (ofile.fail())
+//			SLog(EError, "Could not write to \"%s\"!", outputFile.string().c_str());
+//		ofile << os.str();
+//		ofile.close();
+//	}
 	if (m_geometryFile) {
 		for (size_t i=0; i<m_geometryDict.size(); ++i)
 			m_geometryFile->writeULong((uint64_t) m_geometryDict[i]);

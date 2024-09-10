@@ -29,6 +29,15 @@ public:
 		m_maxRange = props.getFloat("maxRange", 60);
 
 		m_batchFile = props.getString("batchFile", "");
+		m_batchStartIndex = props.getInteger("batchStartIndex", 0);
+
+		m_sceneXSzie = props.getFloat("SceneXSize", 100);
+		m_sceneZSize = props.getFloat("SceneZSize", 100);
+
+		m_wavelengths = props.getSpectrum("wavelengths", Spectrum(1500.0));
+
+		m_echoDetectionMode = props.getInteger("echoDetectionMode", 2);
+		m_centerAzimuth = props.getFloat("centerAzimuth", 90);
 	}
 
 	PointCloud(Stream *stream, InstanceManager *manager)
@@ -45,6 +54,11 @@ public:
 		m_durationAtRelativePower = stream->readFloat();
 		m_minRange = stream->readFloat();
 		m_maxRange = stream->readFloat();
+		m_sceneXSzie = stream->readFloat();
+		m_sceneZSize = stream->readFloat();
+		m_batchStartIndex = stream->readInt();
+		m_echoDetectionMode = stream->readInt();
+		m_centerAzimuth = stream->readFloat();
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -61,6 +75,11 @@ public:
 		stream->writeFloat(m_durationAtRelativePower);
 		stream->writeFloat(m_minRange);
 		stream->writeFloat(m_maxRange);
+		stream->writeFloat(m_sceneXSzie);
+		stream->writeFloat(m_sceneZSize);
+		stream->writeInt(m_batchStartIndex);
+		stream->writeInt(m_echoDetectionMode);
+		stream->writeFloat(m_centerAzimuth);
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
@@ -89,16 +108,29 @@ public:
 		ref<PointCloudProcess> process = new PointCloudProcess();
 		m_scene = static_cast<Scene *>(Scheduler::getInstance()->getResource(sceneResID));
 		configureProcess(process);
+		cout << "INFO: Loading LiDAR configurations..." << endl;
 		int numOfPulses = generatePulsesConfiguration(process);
+		cout << "INFO: Loading finished." << endl;
 		process->m_numOfPulses = numOfPulses;
+
+		size_t nCores = scheduler->getCoreCount();
+		AABB aabb = scene->getKDTree()->getAABB();
+		Vector extent = aabb.getExtents();
+		process->setupProgressReporter("Simulating", numOfPulses, job);
+		Log(EInfo, "Starting simulation job (%.2fx%.2f, " "%d" " pulses, " SIZE_T_FMT
+			" %s, " SSE_STR ") ..", extent.x, extent.z,
+			numOfPulses, nCores, nCores == 1 ? "core" : "cores");
 		
 		process->bindResource("scene", sceneResID);
+		process->bindResource("sampler", samplerResID);
 		scheduler->schedule(process);
 		m_process = process;
-
-		scheduler->wait(process);
 		
+		scheduler->wait(process);
+
+		cout << endl << "INFO: Outputing results..." << endl;
 		process->outputPointCloudToOneFile(m_batchFile + ".txt");
+		cout << "INFO: Finished." << endl;;
 		m_process = NULL;
 
 		return process->getReturnStatus() == ParallelProcess::ESuccess;
@@ -138,6 +170,16 @@ public:
 
 		proc->m_outputPath = m_outputPath;
 
+		proc->m_sceneXSzie = m_sceneXSzie;
+		proc->m_sceneZSize = m_sceneZSize;
+		proc->m_batchStartIndex = m_batchStartIndex;
+
+		proc->m_wavelengths = m_wavelengths;
+
+		proc->m_granularityPulses = 500; //Number of pulses for each process core.
+		proc->m_numGeneratedPulses = 0;
+		proc->m_echoDetectionMode = m_echoDetectionMode;
+		proc->m_centerAzimuth = m_centerAzimuth;
 	}
 
 	int generatePulsesConfiguration(PointCloudProcess *process) {
@@ -189,6 +231,7 @@ public:
 		Spectrum w(0.);
 		Float r;
 		CircleBeamGridSampler s(n);
+		s.generate();
 		Vector2 v;
 		while (s.hasNext()) {
 			v = s.next();
@@ -212,8 +255,13 @@ public:
 		Float d = numberOfSigma * sigmaPulse / n;
 		Float s = 0;
 		for (int i = 0; i < 2 * n + 1; i++) {
-			pulse[i] = gaussian(-numberOfSigma * sigmaPulse + d * i, sigmaPulse * sigmaPulse);
+			Float left = (1 / (sqrt(2 * M_PI_DBL) * sigmaPulse)) * gaussian(-numberOfSigma * sigmaPulse + d * (i - 1), sigmaPulse * sigmaPulse);
+			Float right = (1 / (sqrt(2 * M_PI_DBL) * sigmaPulse)) * gaussian(-numberOfSigma * sigmaPulse + d * i, sigmaPulse * sigmaPulse);
+			pulse[i] = (left + right) * (acquisitionRate * 1e9) * 0.5;
 			s += pulse[i];
+		}
+		for (int i = 0; i < 2 * n + 1; i++) {
+			pulse[i] /= s;
 		}
 
 		return pulse;
@@ -244,7 +292,16 @@ protected:
 	Float m_durationAtRelativePower;
 
 	std::string m_batchFile;
+	int m_batchStartIndex;
 	std::string m_outputPath;
+
+	Float m_sceneXSzie;
+	Float m_sceneZSize;
+
+	Spectrum m_wavelengths;
+
+	int m_echoDetectionMode;
+	Float m_centerAzimuth;
 };
 
 MTS_IMPLEMENT_CLASS_S(PointCloud, false, Integrator)

@@ -30,6 +30,8 @@
 MTS_NAMESPACE_BEGIN
 //read external file to config wavelength, bandnumber.
 extern MTS_EXPORT_CORE int FF(const char* filename, int index);
+extern MTS_EXPORT_CORE int FFEF(const char* filename, int index);
+extern MTS_EXPORT_CORE std::vector<int> FFEF(const char* filename);
 extern MTS_EXPORT_CORE int FFBN(const char* filename);
 
 /*! \addtogroup libcore

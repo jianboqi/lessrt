@@ -23,6 +23,7 @@
 #include <mitsuba/core/netobject.h>
 #include <mitsuba/core/properties.h>
 #include <mitsuba/render/shape.h>
+#include <mitsuba/render/bsdf.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -320,6 +321,8 @@ public:
 	 */
 	virtual Spectrum Li(const RayDifferential &ray,
 		RadianceQueryRecord &rRec) const = 0;
+	virtual Spectrum LiWithEF(const RayDifferential& ray,
+		RadianceQueryRecord& rRec, Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const = 0;
 
 	/**
 	 * \brief Estimate the irradiance at a given surface point
@@ -434,7 +437,8 @@ protected:
 	/// Used to temporarily cache a parallel process while it is in operation
 	ref<ParallelProcess> m_process;
 
-	bool m_hasFourComponentProduct;
+	bool m_hasFourComponentProduct;	
+	size_t m_hasFluorProduct;
 };
 
 /*

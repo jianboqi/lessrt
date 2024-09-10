@@ -23,6 +23,7 @@
 #include <mitsuba/render/common.h>
 #include <mitsuba/render/film.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 
 MTS_NAMESPACE_BEGIN
 

@@ -259,7 +259,7 @@ public:
 		ref<Bitmap> bitmap = m_storage->getBitmap()->convert(
 			m_pixelFormat, Bitmap::EFloat);
 
-		Log(EInfo, "Writing image to \"%s\" ..", filename.filename().string().c_str());
+		Log(EInfo, "Writing file to \"%s\" ..", filename.filename().string().c_str());
 
 		if (m_fileFormat == EMathematica || m_fileFormat == EMATLAB) {
 			fs::ofstream os(filename);

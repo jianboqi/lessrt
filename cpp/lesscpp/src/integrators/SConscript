@@ -2,12 +2,20 @@ Import('env', 'sys', 'plugins')
 
 plugins += env.SharedLibrary('adaptive', ['misc/adaptive.cpp'])
 plugins += env.SharedLibrary('path', ['path/path.cpp'])
+plugins += env.SharedLibrary('path_vol', ['path/path_vol.cpp'])
+plugins += env.SharedLibrary('path_dtrans', ['path/path_dtrans.cpp'])
 plugins += env.SharedLibrary('volpath', ['path/volpath.cpp'])
 plugins += env.SharedLibrary('volpath_simple', ['path/volpath_simple.cpp'])
 plugins += env.SharedLibrary('photonrt',['photonrt/photonrt.cpp','photonrt/photonrt_proc.cpp'])
+plugins += env.SharedLibrary('biochemical',['photonrt/biochemical.cpp','photonrt/biochemical_proc.cpp'])
 
-plugins += env.SharedLibrary('waveform', ['lidar/waveform.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp'])
+plugins += env.SharedLibrary('waveform', ['lidar/waveform/waveform.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp'])
 plugins += env.SharedLibrary('pointcloud', ['lidar/pointCloud/pointcloud.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp', 'lidar/PulseGaussianFitting.cpp', 'lidar/mpfit.c'])
 plugins += env.SharedLibrary('singleRay', ['lidar/singleRay/singleRay.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp'])
+plugins += env.SharedLibrary('pointcloudIncident', ['lidar/pointCloudIncident/pointcloudIncident.cpp', 'lidar/lidarsampler.cpp', 'lidar/lidarutils.cpp', 'lidar/PulseGaussianFitting.cpp', 'lidar/mpfit.c'])
+
+plugins += env.SharedLibrary('qpath', ['path/QIntegrator.cpp'])
+
+plugins += env.SharedLibrary('trac', ['instruments/trac.cpp'])
 
 Export('plugins')

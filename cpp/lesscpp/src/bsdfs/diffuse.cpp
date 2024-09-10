@@ -113,6 +113,19 @@ public:
 		return m_reflectance->eval(bRec.its)
 			* (INV_PI * Frame::cosTheta(bRec.wo));
 	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		if (!(bRec.typeMask & EDiffuseReflection) || measure != ESolidAngle
+			|| Frame::cosTheta(bRec.wi) <= 0
+			|| Frame::cosTheta(bRec.wo) <= 0) {
+			m.setFluorMatrixZeros();
+			return Spectrum(0.0f);
+		}
+		Float INV_PI_Frame_cosTheta_bRec_wo_ = INV_PI * Frame::cosTheta(bRec.wo);
+		m.setFluorMatrixBackward_M1(ms, INV_PI_Frame_cosTheta_bRec_wo_);
+		return m_reflectance->eval(bRec.its)
+			* INV_PI_Frame_cosTheta_bRec_wo_;
+	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		if (!(bRec.typeMask & EDiffuseReflection) || measure != ESolidAngle
@@ -134,6 +147,29 @@ public:
 		bRec.sampledType = EDiffuseReflection;
 		return m_reflectance->eval(bRec.its);
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		if (!(bRec.typeMask & EDiffuseReflection) || Frame::cosTheta(bRec.wi) <= 0) {
+			if (IS_FLUSPECT_PRO == 0) {
+				for (int i = 0; i < EFM_LENGTH; i++) {
+					m.m_mi[i] = -1; m.m_mii[i] = -1;
+				}
+			}
+			else {
+				for (int i = 0; i < EFM_LENGTH; i++) {
+					m.m_mi[i] = -1;
+				}
+			}
+			return Spectrum(-1.0f);
+		}
+
+		bRec.wo = warp::squareToCosineHemisphere(sample);
+		bRec.eta = 1.0f;
+		bRec.sampledComponent = 0;
+		bRec.sampledType = EDiffuseReflection;
+		m.setFluorMatrixBackward(ms);
+		return m_reflectance->eval(bRec.its);
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &sample) const {
 		if (!(bRec.typeMask & EDiffuseReflection) || Frame::cosTheta(bRec.wi) <= 0)
@@ -144,7 +180,17 @@ public:
 		bRec.sampledComponent = 0;
 		bRec.sampledType = EDiffuseReflection;
 		pdf = warp::squareToCosineHemispherePdf(bRec.wo);
-		return m_reflectance->eval(bRec.its);
+		return m_reflectance->eval(bRec.its); //返回的是反射率
+	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		bRec.wo = warp::squareToCosineHemisphere(sample);
+		bRec.eta = 1.0f;
+		bRec.sampledComponent = 0;
+		bRec.sampledType = EDiffuseReflection;
+		pdf = warp::squareToCosineHemispherePdf(bRec.wo);
+		m.setFluorMatrixBackward(ms);
+		return m_reflectance->eval(bRec.its); //返回的是反射率
 	}
 
 	void addChild(const std::string &name, ConfigurableObject *child) {

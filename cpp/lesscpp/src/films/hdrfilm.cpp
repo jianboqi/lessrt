@@ -509,7 +509,7 @@ public:
 		if (extension != properExtension)
 			filename.replace_extension(properExtension);
 
-		Log(EInfo, "Writing image to \"%s\" ..", filename.string().c_str());
+		Log(EInfo, "Writing file to \"%s\" ..", filename.string().c_str());
 		ref<FileStream> stream = new FileStream(filename, FileStream::ETruncWrite);
 
 		/*if (m_pixelFormats.size() == 1)

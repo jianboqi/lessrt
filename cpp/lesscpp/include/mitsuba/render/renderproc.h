@@ -38,7 +38,7 @@ MTS_NAMESPACE_BEGIN
 class MTS_EXPORT_RENDER BlockedRenderProcess : public BlockedImageProcess {
 public:
 	BlockedRenderProcess(const RenderJob *parent, RenderQueue *queue,
-		int blockSize, bool hasFourComponentProduct);
+		int blockSize, bool hasFourComponentProduct, size_t hasFluorProduct);
 
 	/**
 	 * \brief Set the pixel format associated with the rendering process
@@ -93,6 +93,11 @@ protected:
 
 	bool m_hasFourComponentProduct;
 	ref<Film> m_fourComponentFilm;
+
+	size_t m_hasFluorProduct;
+	ref<Film> m_FluorAllFilm;
+	ref<Film> m_FluorPSIFilm;
+	ref<Film> m_FluorPSIIFilm;
 };
 
 MTS_NAMESPACE_END

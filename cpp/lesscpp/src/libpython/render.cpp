@@ -172,6 +172,14 @@ static bp::list scene_getEmitters(Scene *scene) {
 	return list;
 }
 
+static bp::list scene_getReferencedObjects(Scene* scene) {
+	bp::list list;
+	ref_vector<ConfigurableObject>& objects = scene->getReferencedObjects();
+	for (size_t i = 0; i < objects.size(); ++i)
+		list.append(cast(objects[i].get()));
+	return list;
+}
+
 static bp::list scene_getMedia(Scene *scene) {
 	bp::list list;
 	ref_vector<Medium> &media = scene->getMedia();
@@ -393,6 +401,7 @@ void export_render() {
 		.def("getSensor", &scene_getSensor, BP_RETURN_VALUE)
 		.def("setSensor", &Scene::setSensor)
 		.def("getSensors", &scene_getSensors)
+		.def("removeEmitter", &Scene::removeEmitter)
 		.def("getIntegrator", &scene_getIntegrator, BP_RETURN_VALUE)
 		.def("setIntegrator", &Scene::setIntegrator)
 		.def("getSampler", scene_getSampler, BP_RETURN_VALUE)
@@ -402,7 +411,9 @@ void export_render() {
 		.def("getMeshes", &scene_getMeshes)
 		.def("getEmitters", &scene_getEmitters)
 		.def("getMedia", &scene_getMedia)
-		.def("getKDTree", scene_getKDTree, BP_RETURN_VALUE);
+		.def("getKDTree", scene_getKDTree, BP_RETURN_VALUE)
+		.def("getReferencedObjects", &scene_getReferencedObjects)
+		.def("removeReferencedObject",&Scene::removeReferencedObject);
 
 	BP_CLASS(Sampler, ConfigurableObject, bp::no_init)
 		.def("clone", &Sampler::clone, BP_RETURN_VALUE)
@@ -613,6 +624,7 @@ void export_render() {
 		.def("isEnvironmentEmitter", &Emitter::isEnvironmentEmitter)
 		.def("evalEnvironment", &Emitter::evalEnvironment, BP_RETURN_VALUE)
 		.def("isCompound", &Emitter::isCompound)
+		.def("isPlanckEmitter", &Emitter::isPlanckEmitter)
 		.def("getElement", &Emitter::getElement, BP_RETURN_VALUE)
 		.def("getBitmap", &Emitter::getBitmap, getBitmap_overloads()[BP_RETURN_VALUE]);
 
@@ -700,6 +712,34 @@ void export_render() {
 		.def("setYFov", &PerspectiveCamera::setYFov)
 		.def("getDiagonalFov", &PerspectiveCamera::getDiagonalFov)
 		.def("setDiagonalFov", &PerspectiveCamera::setDiagonalFov);
+
+	BP_CLASS(PhaseFunction, ConfigurableObject, bp::no_init)
+		.def_readwrite("frontRef", &PhaseFunction::m_frontRef)
+		.def_readwrite("backRef", &PhaseFunction::m_backRef)
+		.def_readwrite("transmittance", &PhaseFunction::m_transmittance)
+		.def_readwrite("ladType", &PhaseFunction::m_ladType)
+		.def_readwrite("opticalName", &PhaseFunction::m_opticalName)
+		.def_readwrite("isConfigured", &PhaseFunction::m_isConfigured)
+		.def("configure", &PhaseFunction::configure);
+	PhaseFunction *(Medium::* medium_getPhaseFunction)(void) = &Medium::getPhaseFunction;
+	BP_CLASS(Medium, NetworkedObject, bp::no_init).
+		def("getPhaseFunction", medium_getPhaseFunction, BP_RETURN_VALUE)
+		.def_readwrite("ladType", &Medium::m_ladType)
+		.def_readwrite("leafAreaDensity", &Medium::m_leafAreaDensity)
+		.def_readwrite("hotspotFactor", &Medium::m_hotSpotFactor);
+
+	BP_SETSCOPE(PhaseFunction_class);
+	bp::enum_<PhaseFunction::ELadType>("ELadType")
+		.value("ESpherical", PhaseFunction::ESpherical)
+		.value("EUniform", PhaseFunction::EUniform)
+		.value("EPlanophile", PhaseFunction::EPlanophile)
+		.value("EErectophile", PhaseFunction::EErectophile)
+		.value("EPlagiophile", PhaseFunction::EPlagiophile)
+		.value("EExtremophile", PhaseFunction::EExtremophile)
+		.value("EINVALIDE", PhaseFunction::EINVALIDE)
+		.export_values();
+	BP_SETSCOPE(renderModule);
+	
 
 	BP_CLASS(Integrator, ConfigurableObject, bp::no_init)
 		.def("preprocess", &Integrator::preprocess)
@@ -809,7 +849,7 @@ void export_render() {
 		.def("clone", &ImageBlock::clone, BP_RETURN_VALUE)
 		.def("copyTo", &ImageBlock::copyTo);
 
-	BP_CLASS(MultipleImageBlock, WorkResult, (bp::init<Bitmap::EPixelFormat, const Vector2i &, bool, bp::optional<const ReconstructionFilter *, int, bool> >()))
+	BP_CLASS(MultipleImageBlock, WorkResult, (bp::init<Bitmap::EPixelFormat, const Vector2i &, bool, bool, bp::optional<const ReconstructionFilter *, int, bool> >()))
 		.def("clear", &MultipleImageBlock::clear)
 		.def("setOffset", &MultipleImageBlock::setOffset)
 		.def("setSize", &MultipleImageBlock::setSize);

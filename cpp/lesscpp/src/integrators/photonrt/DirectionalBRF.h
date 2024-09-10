@@ -32,6 +32,7 @@ public:
 				aziTmp.push_back(Spectrum(0.0));
 			}
 			m_brfs.push_back(aziTmp);
+			
 		}
 	}
 
@@ -136,6 +137,15 @@ public:
 			m_virtualBRFs.push_back(Spectrum(0.0));
 			m_accBRFsPerDirection.push_back(0);
 		}
+
+		m_virtualColSlgBRFs.clear();
+		   m_virtualMltBRFs.clear();
+		 m_virtualUcSlgBRFs.clear();
+		 for (int i = 0; i < m_nVirtualDirections; i++) {
+			 m_virtualColSlgBRFs.push_back(Spectrum(0.0));
+			    m_virtualMltBRFs.push_back(Spectrum(0.0));
+			  m_virtualUcSlgBRFs.push_back(Spectrum(0.0));
+		 }
 	}
 
 
@@ -154,9 +164,33 @@ public:
 		}
 	}
 
-	void putVirtualBRF(int directionIndex, Spectrum value) {
+	void putVirtualBRF(int depth, const Intersection& its, int directionIndex, Spectrum value, bool isMediumInteraction) {
 		m_accBRFsPerDirection[directionIndex]++;
 		m_virtualBRFs[directionIndex] += value;
+
+		//rami 5
+		// co_sgl only the photons interacting once with the leaves or woody elements (and not with the soil) are considered in the computation of BRFs.
+		if (!isMediumInteraction) {
+			string compName = its.shape->getID();
+			if (depth == 1 && !(its.shape->getID() == "terrain")) {
+				m_virtualColSlgBRFs[directionIndex] += value;
+			}
+			else if (depth >= 2) {
+				m_virtualMltBRFs[directionIndex] += value;
+			}
+			else if (depth == 1 && its.shape->getID() == "terrain") {
+				m_virtualUcSlgBRFs[directionIndex] += value;
+			}
+		}
+		else {
+			if (depth == 1) {
+				m_virtualColSlgBRFs[directionIndex] += value;
+			}
+			else if (depth >= 2) {
+				m_virtualMltBRFs[directionIndex] += value;
+			}
+		}
+		
 	}
 
 	void setWavelengths(Spectrum spectrum) {
@@ -216,6 +250,11 @@ public:
 		for (int i = 0; i < dirBRF->m_nVirtualDirections; i++) {
 			m_accBRFsPerDirection[i] += dirBRF->m_accBRFsPerDirection[i];
 			m_virtualBRFs[i] += dirBRF->m_virtualBRFs[i];
+
+			//rami 5
+			m_virtualColSlgBRFs[i] += dirBRF->m_virtualColSlgBRFs[i];
+			   m_virtualMltBRFs[i] += dirBRF->m_virtualMltBRFs[i];
+			 m_virtualUcSlgBRFs[i] += dirBRF->m_virtualUcSlgBRFs[i];
 		}
 
 	}
@@ -257,7 +296,7 @@ public:
 	void develop(double scale=1.0) {
 		//scale irradiance
 		scaleIrradiance(scale*1/ (m_scenBoundPlaneSize.x * m_scenBoundPlaneSize.y));
-		cout << "\nTotal Irradiance: " << m_verticalIrradiance.toString() << endl;
+		//cout << "\nINFO: Total Irradiance: " << m_verticalIrradiance.toString() << endl;
 		if (m_destnationFile != "") {
 			vector<double> zenithAngle(accumulated_ZenithAngle);
 			vector<vector<double>> azimuthAngle(accumulated_azimuthAngle);
@@ -276,7 +315,7 @@ public:
 			if(m_isTheramlMode)
 				out << "Zentih_Angle Azimuth_Angle BrightnessTemperature" << endl;
 			else
-				out << "Zentih_Angle Azimuth_Angle BRF" << endl;
+				out << "Zentih_Angle Azimuth_Angle BRF (Number of Directions="<< m_numOfDirections<<")" << endl;
 			Spectrum Albedo(0.0);
 			for (int i = 1; i < zenithAngle.size(); i++) {
 				for (int j = 1; j < azimuthAngle[i-1].size(); j++) {
@@ -334,8 +373,9 @@ public:
 			for (int i = 0; i < m_nVirtualDirections; i++) {
 				out << rad2degree(m_virtualDirZenith[i]) << " " << rad2degree(m_virtualDirAzimuth[i]) << " ";
 				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
-					if (!m_isTheramlMode)
-						out << m_virtualBRFs[i][k]* scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(m_virtualDirZenith[i]))/ m_verticalIrradiance[k]*PHRT_M_PI<< " ";
+					if (!m_isTheramlMode) {
+						out << m_virtualBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+					}
 					else
 						out << InvertPlanck(m_virtualBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y*std::cos(m_virtualDirZenith[i])),m_wavelengths[k]) << " ";
 				}
@@ -343,6 +383,47 @@ public:
 			}
 
 			out.close();
+
+			//RAMI 5
+			ofstream cosgl_out(m_destnationFile.substr(0, m_destnationFile.length()-4)+"_co_sgl.txt");
+			for (int i = 0; i < m_nVirtualDirections; i++) {
+				cosgl_out << rad2degree(m_virtualDirZenith[i]) << " " << rad2degree(m_virtualDirAzimuth[i]) << " ";
+				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+					if (!m_isTheramlMode)
+						cosgl_out << m_virtualColSlgBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+					else
+						cosgl_out << InvertPlanck(m_virtualColSlgBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])), m_wavelengths[k]) << " ";
+				}
+				cosgl_out << endl;
+			}
+			cosgl_out.close();
+
+			ofstream mlt_out(m_destnationFile.substr(0, m_destnationFile.length() - 4) + "_mlt.txt");
+			for (int i = 0; i < m_nVirtualDirections; i++) {
+				mlt_out << rad2degree(m_virtualDirZenith[i]) << " " << rad2degree(m_virtualDirAzimuth[i]) << " ";
+				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+					if (!m_isTheramlMode)
+						mlt_out << m_virtualMltBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+					else
+						mlt_out << InvertPlanck(m_virtualMltBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])), m_wavelengths[k]) << " ";
+				}
+				mlt_out << endl;
+			}
+			mlt_out.close();
+
+			ofstream ucsgl_out(m_destnationFile.substr(0, m_destnationFile.length() - 4) + "_uc_sgl.txt");
+			for (int i = 0; i < m_nVirtualDirections; i++) {
+				ucsgl_out << rad2degree(m_virtualDirZenith[i]) << " " << rad2degree(m_virtualDirAzimuth[i]) << " ";
+				for (int k = 0; k < SPECTRUM_SAMPLES; k++) {
+					if (!m_isTheramlMode)
+						ucsgl_out << m_virtualUcSlgBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])) / m_verticalIrradiance[k] * PHRT_M_PI << " ";
+					else
+						ucsgl_out << InvertPlanck(m_virtualUcSlgBRFs[i][k] * scale / (m_virtualBoundXZSize.x * m_virtualBoundXZSize.y * std::cos(m_virtualDirZenith[i])), m_wavelengths[k]) << " ";
+				}
+				ucsgl_out << endl;
+			}
+			ucsgl_out.close();
+
 		}
 	}
 
@@ -484,6 +565,15 @@ public:
 			m_accBRFsPerDirection.push_back(0);
 		}
 
+		m_virtualColSlgBRFs.clear();
+		m_virtualMltBRFs.clear();
+		m_virtualUcSlgBRFs.clear();
+		for (int i = 0; i < m_nVirtualDirections; i++) {
+			m_virtualColSlgBRFs.push_back(Spectrum(0.0));
+			m_virtualMltBRFs.push_back(Spectrum(0.0));
+			m_virtualUcSlgBRFs.push_back(Spectrum(0.0));
+		}
+
 	}
 
 	void outputVirtualDirections() {
@@ -509,6 +599,12 @@ public:
 	vector<Spectrum> m_virtualBRFs;
 	vector<int> m_accBRFsPerDirection; //Number of accumulated BRFs for each direction.
 	int m_nVirtualDirections=0;
+
+	//For RAMI 5
+	vector<Spectrum> m_virtualColSlgBRFs; //co_sgl only the photons interacting once with the leaves or woody elements (and not with the soil) are considered in the computation of BRFs.
+	vector<Spectrum> m_virtualMltBRFs; // mlt only the photons which interacted twice with any scatterer in the scene are considered in the computation of BRFs.
+	vector<Spectrum> m_virtualUcSlgBRFs; //uc_sgl only the photons which interacted has interacted once only with the underlying background, i.e. the soil (and with nothing else), are considered in the computation of BRFs.
+
 
 	//virtual detectors
 	int m_numAngularDirection; // number of virtual detectors

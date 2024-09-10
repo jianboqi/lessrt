@@ -292,6 +292,10 @@ public:
 
 		return Li;
 	}
+	Spectrum LiWithEF(const RayDifferential& ray, RadianceQueryRecord& rRec,
+		Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const {
+		return Spectrum(0.0f);
+	}
 
 	inline Float miWeight(Float pdfA, Float pdfB) const {
 		pdfA *= pdfA;

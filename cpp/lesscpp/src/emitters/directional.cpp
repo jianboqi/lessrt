@@ -76,7 +76,7 @@ public:
 				Log(EError, "Scale factors in the emitter-to-world "
 					"transformation are not allowed!");
 		}
-		m_distance = props.getFloat("emitterDistance", 100000);
+		m_distance = props.getFloat("emitterDistance", 10000000);
 	}
 
 	DirectionalEmitter(Stream *stream, InstanceManager *manager)
@@ -100,6 +100,7 @@ public:
 		/* Create a bounding sphere that surrounds the scene */
 		//virtual bounds to narrow the illumination area
 	//	m_hasVirtualPlane = scene->getIntegrator()->getProperties().getBoolean("SceneVirtualPlane", false);
+		m_hasVirtualPlane = false; //Do not use virtual plane here.
 		if (m_hasVirtualPlane) {
 			Vector2 sceneSize = Vector2(scene->getIntegrator()->getProperties().getFloat("subSceneXSize", 100),
 				scene->getIntegrator()->getProperties().getFloat("subSceneZSize", 100));

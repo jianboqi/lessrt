@@ -2,6 +2,7 @@ Import('env', 'plugins')
 
 plugins += env.SharedLibrary('area', ['area.cpp'])
 plugins += env.SharedLibrary('planck', ['PlanckEmitter.cpp'])
+plugins += env.SharedLibrary('planck_texture', ['PlanckEmitterTexture.cpp'])
 plugins += env.SharedLibrary('directional', ['directional.cpp'])
 plugins += env.SharedLibrary('constant', ['constant.cpp'])
 plugins += env.SharedLibrary('envmap', ['envmap.cpp'])

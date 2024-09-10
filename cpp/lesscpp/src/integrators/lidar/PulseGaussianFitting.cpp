@@ -69,27 +69,19 @@ vector<int> peaksDetectFisrtOrderZeroCrosssing(vector<double> y, double thres, i
 //flexion points detection: used for estimating the parameters for each components
 vector<vector<int>> flexion_detect(vector<double> y, vector<int> peaks) {
 	vector<vector<int>> intervals;
-	if (peaks.size() > 1) {
-		for (size_t i = 0; i < peaks.size(); i++) {
-			vector<int> interval;
-			int peak_index = peaks[i];
-			int li = peak_index;
-			while (li > 0 && y[li - 1] <= y[li] && y[li - 1] != 0) {
-				li -= 1;
-			}
-			int ri = peak_index;
-			while (ri < (int)y.size() - 1 && y[ri + 1] <= y[ri] && y[ri + 1] != 0) {
-				ri += 1;
-			}
-			interval.push_back(li);
-			interval.push_back(ri);
-			intervals.push_back(interval);
-		}
-	}
-	else {
+	for (size_t i = 0; i < peaks.size(); i++) {
 		vector<int> interval;
-		interval.push_back(0);
-		interval.push_back(y.size() - 1);
+		int peak_index = peaks[i];
+		int li = peak_index;
+		while (li > 0 && y[li - 1] <= y[li] && y[li - 1] != 0) {
+			li -= 1;
+		}
+		int ri = peak_index;
+		while (ri < (int)y.size() - 1 && y[ri + 1] <= y[ri] && y[ri + 1] != 0) {
+			ri += 1;
+		}
+		interval.push_back(li);
+		interval.push_back(ri);
 		intervals.push_back(interval);
 	}
 	return intervals;

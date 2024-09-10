@@ -2197,6 +2197,7 @@ void export_core() {
 		.def("__getitem__", &DiscreteDistribution_getitem)
 		.def("__repr__", &DiscreteDistribution::toString);
 
+
 	bp::class_<Ray>("Ray", bp::init<>())
 		.def(bp::init<Ray &>())
 		.def(bp::init<Ray &, Float, Float>())

@@ -285,6 +285,10 @@ public:
 	Spectrum Li(const RayDifferential &ray, RadianceQueryRecord &rRec) const {
 		return m_subIntegrator->Li(ray, rRec);
 	}
+	Spectrum LiWithEF(const RayDifferential& ray, RadianceQueryRecord& rRec,
+		Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const {
+		return Spectrum(0.0f);
+	}
 
 	Spectrum E(const Scene *scene, const Intersection &its, const Medium *medium,
 			Sampler *sampler, int nSamples, bool includeIndirect) const {

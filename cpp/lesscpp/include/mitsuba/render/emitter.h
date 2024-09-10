@@ -87,7 +87,7 @@ public:
 	//========================================
 	//addtional interface
 	//========================================
-	virtual Spectrum getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, bool shaded) const;
+	virtual Spectrum getSpectrumAccordingToTemperature(DirectSamplingRecord &dRec, Intersection & its, bool shaded) const;
 	virtual Spectrum getPowerAccordingToTemperature(Point p, int FrontorBack, bool shaded) const; //Front 1 back 0
 
 	// =============================================================
@@ -367,6 +367,10 @@ public:
 
 	/// Return the shape, to which the emitter is currently attached (const version)
 	inline const Shape *getShape() const { return m_shape; }
+
+	inline void setShape(Shape* shape) {
+		m_shape = shape;
+	}
 
 	/**
 	 * \brief Create a special shape that represents the emitter

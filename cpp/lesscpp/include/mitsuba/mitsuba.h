@@ -55,6 +55,7 @@ using std::endl;
 #include <mitsuba/core/point.h>
 #include <mitsuba/core/normal.h>
 #include <mitsuba/core/spectrum.h>
+#include <mitsuba/core/fluor_matrix.h>
 #include <mitsuba/core/util.h>
 
 #endif /* __MITSUBA_MITSUBA_H_ */

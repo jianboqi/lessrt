@@ -398,6 +398,10 @@ public:
 		avgPathLength += rRec.depth;
 		return Li;
 	}
+	Spectrum LiWithEF(const RayDifferential& ray, RadianceQueryRecord& rRec,
+		Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const {
+		return Spectrum(0.0f);
+	}
 
 	/**
 	 * This function is called by the recursive ray tracing above after

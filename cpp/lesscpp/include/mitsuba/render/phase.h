@@ -127,6 +127,16 @@ public:
 		ENonSymmetric    = 0x08
 	};
 
+	enum ELadType {
+		ESpherical,  /// 球型分布
+		EUniform,   /// 统一型
+		EPlanophile,   /// 平面型
+		EErectophile,   /// 竖直型
+		EPlagiophile,  /// 倾斜型
+		EExtremophile,  ///极端型
+		EINVALIDE,      ///无效类型，如果该类型，则不进行计算
+	};
+
 	/**
 	 * \brief Return information flags of this phase function,
 	 * combined binary OR.
@@ -144,6 +154,8 @@ public:
 	 * pair of directions (wi, wo)
 	 */
 	virtual Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const = 0;
+	virtual Spectrum evalWithEF(const PhaseFunctionSamplingRecord& pRec,
+		FluorMatrix& phasePSVal) const = 0;
 
 	/**
 	 * \brief Sample the phase function and return the importance weight (i.e. the
@@ -176,6 +188,29 @@ public:
 	 */
 	virtual Float sample(PhaseFunctionSamplingRecord &pRec,
 		Float &pdf, Sampler *sampler) const = 0;
+
+	///Extended version for vegetation, the sampled value could be different for each band
+	virtual Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler) const = 0;
+
+	virtual Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler, int depth) const = 0;
+
+	virtual Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Float& pdf, Sampler* sampler) const = 0;
+
+	///Extended version for vegetation fluor, the sampled value could be different for each band
+	virtual Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler,
+		FluorMatrix& phasePSVal) const = 0;
+
+	virtual Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler, int depth,
+		FluorMatrix& phasePSVal) const = 0;
+
+	virtual Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Float& pdf, Sampler* sampler,
+		FluorMatrix& phasePSVal) const = 0;
 
 	/**
 	 * \brief Calculate the probability of sampling wo (given wi).
@@ -247,6 +282,12 @@ protected:
 protected:
 	unsigned int m_type;
 	int m_sampleSpecIndex;//依据哪一个波段进行采样
+public:
+	// Jianboqi: This two variables are used for vegphase, exporting for python
+	ELadType m_ladType;
+	Spectrum m_frontRef, m_backRef, m_transmittance;
+	std::string m_opticalName;
+	bool m_isConfigured=false;
 };
 
 

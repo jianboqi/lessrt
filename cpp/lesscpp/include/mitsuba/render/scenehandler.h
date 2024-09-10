@@ -141,7 +141,7 @@ private:
 	enum ETag {
 		EScene, EShape, ESampler, EFilm,
 		EIntegrator, ETexture, ESensor,
-		EEmitter, ESubsurface, EMedium,
+		EEmitter, EBioemitter, ESubsurface, EMedium,
 		EVolume, EPhase, EBSDF, ERFilter,
 		ENull, EReference, EInteger, EFloat,
 		EBoolean, EString, ETranslate, ERotate,
