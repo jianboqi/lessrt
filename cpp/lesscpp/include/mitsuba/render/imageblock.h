@@ -180,7 +180,9 @@ public:
 			temp[i] = spec[i];
 		temp[SPECTRUM_SAMPLES] = alpha;
 
-		temp[SPECTRUM_SAMPLES + 1] = 1.0f;
+		//This is for averaging the radiance value, i.e., count how many values have been accumulated.
+		//Float weight = fmtconv.cpp, line 1041, convertScalar<Float>(*source++), invWeight = (weight != 0) ? 1 / weight : weight;
+		temp[SPECTRUM_SAMPLES + 1] = 1.0f; 
 		Float * value = temp.data();
 
 		const int channels = m_bitmap->getChannelCount();
@@ -344,13 +346,18 @@ protected:
 //Date: 2018.7
 class MTS_EXPORT_RENDER MultipleImageBlock :public WorkResult {
 public:
-	MultipleImageBlock(Bitmap::EPixelFormat fmt, const Vector2i &size,bool hasFourComponentProduct,
-		const ReconstructionFilter *filter = NULL, int channels = -1, bool warn = true):m_hasFourComponentProduct(hasFourComponentProduct){
+	MultipleImageBlock(Bitmap::EPixelFormat fmt, const Vector2i& size, bool hasFourComponentProduct, size_t hasFluorProduct,
+		const ReconstructionFilter *filter = NULL, int channels = -1, bool warn = true):m_hasFourComponentProduct(hasFourComponentProduct), m_hasFluorProduct(hasFluorProduct) {
 
 		m_mainImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
 
 		if (m_hasFourComponentProduct) {
 			m_fourComponentImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
+		}
+		if (m_hasFluorProduct) {
+			m_FluorAllImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
+			m_FluorPSIImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
+			m_FluorPSIIImageBlock = new ImageBlock(fmt, size, filter, channels, warn);
 		}
 	}
 
@@ -358,12 +365,22 @@ public:
 		m_mainImageBlock->clear();
 		if (m_hasFourComponentProduct)
 			m_fourComponentImageBlock->clear();
+		if (m_hasFluorProduct) {
+			m_FluorAllImageBlock->clear();
+			m_FluorPSIImageBlock->clear();
+			m_FluorPSIIImageBlock->clear();
+		}
 	}
 
 	inline void setOffset(const Point2i &offset) {
 		m_mainImageBlock->setOffset(offset);
 		if (m_hasFourComponentProduct)
 			m_fourComponentImageBlock->setOffset(offset);
+		if (m_hasFluorProduct) {
+			m_FluorAllImageBlock->setOffset(offset);
+			m_FluorPSIImageBlock->setOffset(offset);
+			m_FluorPSIIImageBlock->setOffset(offset);
+		}
 	}
 
 	/// Set the current block size
@@ -371,10 +388,27 @@ public:
 		m_mainImageBlock->setSize(size);
 		if (m_hasFourComponentProduct)
 			m_fourComponentImageBlock->setSize(size);
+		if (m_hasFluorProduct) {
+			m_FluorAllImageBlock->setSize(size);
+			m_FluorPSIImageBlock->setSize(size);
+			m_FluorPSIIImageBlock->setSize(size);
+		}
 	}
 
 	FINLINE bool putInMainImageBlock(const Point2 &pos, const Spectrum &spec, Float alpha) {
 		return m_mainImageBlock->put(pos, spec, alpha);
+	}
+
+	FINLINE bool putInFluorAllImageBlock(const Point2& pos, const Spectrum& spec, Float alpha) {
+		return m_FluorAllImageBlock->put(pos, spec, alpha);
+	}
+
+	FINLINE bool putInFluorPSIImageBlock(const Point2& pos, const Spectrum& spec, Float alpha) {
+		return m_FluorPSIImageBlock->put(pos, spec, alpha);
+	}
+
+	FINLINE bool putInFluorPSIIImageBlock(const Point2& pos, const Spectrum& spec, Float alpha) {
+		return m_FluorPSIIImageBlock->put(pos, spec, alpha);
 	}
 
 	FINLINE bool putInFourComponentImageBlock(const Point2 &pos, const Spectrum &spec, Float alpha) {
@@ -387,6 +421,30 @@ public:
 
 	inline const ImageBlock* getMainImageBlock() const{
 		return m_mainImageBlock.get();
+	}
+
+	inline ImageBlock* getFluorAllImageBlock() {
+		return m_FluorAllImageBlock.get();
+	}
+
+	inline const ImageBlock* getFluorAllImageBlock() const {
+		return m_FluorAllImageBlock.get();
+	}
+
+	inline ImageBlock* getFluorPSIImageBlock() {
+		return m_FluorPSIImageBlock.get();
+	}
+
+	inline const ImageBlock* getFluorPSIImageBlock() const {
+		return m_FluorPSIImageBlock.get();
+	}
+
+	inline ImageBlock* getFluorPSIIImageBlock() {
+		return m_FluorPSIIImageBlock.get();
+	}
+
+	inline const ImageBlock* getFluorPSIIImageBlock() const {
+		return m_FluorPSIIImageBlock.get();
 	}
 
 	inline ImageBlock* getFourComponentImageBlock() {
@@ -412,8 +470,12 @@ protected:
 	virtual ~MultipleImageBlock();
 protected:
 	ref<ImageBlock> m_mainImageBlock;
+	ref<ImageBlock> m_FluorAllImageBlock;
+	ref<ImageBlock> m_FluorPSIImageBlock;
+	ref<ImageBlock> m_FluorPSIIImageBlock;
 	ref<ImageBlock> m_fourComponentImageBlock;
 	bool m_hasFourComponentProduct;
+	size_t m_hasFluorProduct;
 };
 
 

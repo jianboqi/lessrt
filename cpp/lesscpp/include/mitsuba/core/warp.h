@@ -39,6 +39,8 @@ namespace warp {
 	/// Uniformly sample a vector on the unit sphere with respect to solid angles
 	extern MTS_EXPORT_CORE Vector squareToUniformSphere(const Point2 &sample);
 
+	extern MTS_EXPORT_CORE Vector squareToUniformSphereExt(const Point2& sample);
+
 	/// Density of \ref squareToUniformSphere() with respect to solid angles
 	extern MTS_EXPORT_CORE inline Float squareToUniformSpherePdf() { return INV_FOURPI; }
 

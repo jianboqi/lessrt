@@ -28,6 +28,7 @@
 #include <mitsuba/render/medium.h>
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -51,6 +52,7 @@ TriMesh::TriMesh(const std::string &name, size_t triangleCount,
 	m_colors = hasVertexColors ? new Color3[m_vertexCount] : NULL;
 	m_tangents = NULL;
 	m_surfaceArea = m_invSurfaceArea = -1;
+	m_trianglesArea = NULL;
 	m_mutex = new Mutex();
 }
 
@@ -73,6 +75,7 @@ TriMesh::TriMesh(const Properties &props)
 
 	m_triangles = NULL;
 	m_surfaceArea = m_invSurfaceArea = -1;
+	m_trianglesArea = NULL;
 	m_mutex = new Mutex();
 }
 
@@ -140,6 +143,7 @@ TriMesh::TriMesh(Stream *stream, InstanceManager *manager)
 		m_triangleCount * sizeof(Triangle)/sizeof(uint32_t));
 	m_flipNormals = false;
 	m_surfaceArea = m_invSurfaceArea = -1;
+	m_trianglesArea = NULL;
 	m_mutex = new Mutex();
 	configure();
 }
@@ -191,8 +195,9 @@ void TriMesh::loadCompressed(Stream *_stream, int index) {
 	stream->setByteOrder(Stream::ELittleEndian);
 
 	uint32_t flags = stream->readUInt();
-	if (version == MTS_FILEFORMAT_VERSION_V4)
-		m_name = stream->readString();
+	if (version == MTS_FILEFORMAT_VERSION_V4)  //do not to change the name to group name, keep as it is
+		stream->readString();
+		//m_name = stream->readString();
 	m_vertexCount = stream->readSize();
 	m_triangleCount = stream->readSize();
 
@@ -248,6 +253,7 @@ void TriMesh::loadCompressed(Stream *_stream, int index) {
 		m_triangleCount * sizeof(Triangle)/sizeof(uint32_t));
 
 	m_surfaceArea = m_invSurfaceArea = -1;
+	m_trianglesArea = NULL;
 	m_flipNormals = false;
 }
 
@@ -395,8 +401,12 @@ void TriMesh::prepareSamplingTable() {
 	if (m_surfaceArea < 0) {
 		/* Generate a PDF for sampling wrt. area */
 		m_areaDistr.reserve(m_triangleCount);
-		for (size_t i=0; i<m_triangleCount; i++)
-			m_areaDistr.append(m_triangles[i].surfaceArea(m_positions));
+		m_trianglesArea = new Float[m_triangleCount];
+		for (size_t i = 0; i < m_triangleCount; i++) {
+			Float area = m_triangles[i].surfaceArea(m_positions);
+			m_areaDistr.append(area);
+			m_trianglesArea[i] = area;
+		}
 		m_surfaceArea = m_areaDistr.normalize();
 		m_invSurfaceArea = 1.0f / m_surfaceArea;
 	}
@@ -407,6 +417,13 @@ Float TriMesh::getSurfaceArea() const {
 		const_cast<TriMesh *>(this)->prepareSamplingTable();
 
 	return m_surfaceArea;
+}
+
+Float* TriMesh::getTrianglesArea(int& triangleCount) const {
+	if (EXPECT_NOT_TAKEN(!m_trianglesArea))
+		const_cast<TriMesh*>(this)->prepareSamplingTable();
+	triangleCount = m_triangleCount;
+	return m_trianglesArea;
 }
 
 void TriMesh::samplePosition(PositionSamplingRecord &pRec,
@@ -1201,6 +1218,7 @@ std::string TriMesh::toString() const {
 			<< "  exteriorMedium = " << indent(m_exteriorMedium.toString()) << "," << endl;
 	oss << "  subsurface = " << indent(m_subsurface.toString()) << "," << endl
 		<< "  emitter = " << indent(m_emitter.toString()) << endl
+		<< "  bioemitter = " << indent(m_bioemitter.toString()) << endl
 		<< "]";
 	return oss.str();
 }

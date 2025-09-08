@@ -20,6 +20,7 @@
 #include <mitsuba/render/renderjob.h>
 #include <mitsuba/core/plugin.h>
 #include <mitsuba/core/statistics.h>
+#include "../shapes/instance.h"
 
 #define DEFAULT_BLOCKSIZE 32
 
@@ -94,6 +95,7 @@ Scene::Scene(Scene *scene) : NetworkedObject(Properties()) {
 	m_sensors = scene->m_sensors;
 	m_meshes = scene->m_meshes;
 	m_emitters = scene->m_emitters;
+	m_bioemitters = scene->m_bioemitters;
 	m_media = scene->m_media;
 	m_ssIntegrators = scene->m_ssIntegrators;
 	m_objects = scene->m_objects;
@@ -101,6 +103,8 @@ Scene::Scene(Scene *scene) : NetworkedObject(Properties()) {
 	m_specialShapes = scene->m_specialShapes;
 	m_degenerateSensor = scene->m_degenerateSensor;
 	m_degenerateEmitters = scene->m_degenerateEmitters;
+	m_repetitiveSceneNum = scene->m_repetitiveSceneNum;
+	m_sceneBounds = scene->m_sceneBounds;
 }
 
 Scene::Scene(Stream *stream, InstanceManager *manager)
@@ -144,6 +148,9 @@ Scene::Scene(Stream *stream, InstanceManager *manager)
 	m_emitters.reserve(count);
 	for (size_t i=0; i<count; ++i)
 		m_emitters.push_back(static_cast<Emitter *>(manager->getInstance(stream)));
+	m_bioemitters.reserve(count);
+	for (size_t i = 0; i < count; ++i)
+		m_bioemitters.push_back(static_cast<Bioemitter*>(manager->getInstance(stream)));
 	count = stream->readSize();
 	m_media.reserve(count);
 	for (size_t i=0; i<count; ++i)
@@ -210,6 +217,10 @@ void Scene::serialize(Stream *stream, InstanceManager *manager) const {
 	for (size_t i=0; i<m_emitters.size(); ++i)
 		manager->serialize(stream, m_emitters[i].get());
 
+	stream->writeSize(m_bioemitters.size());
+	for (size_t i = 0; i < m_bioemitters.size(); ++i)
+		manager->serialize(stream, m_bioemitters[i].get());
+
 	stream->writeSize(m_media.size());
 	for (ref_vector<Medium>::const_iterator it = m_media.begin();
 			it != m_media.end(); ++it)
@@ -247,6 +258,37 @@ void Scene::wakeup(ConfigurableObject *,
 			it != m_netObjects.end(); ++it)
 		(*it)->wakeup(this, params);
 }
+
+void Scene::removeEmitter(Emitter* emitter){
+	if (!emitter)
+		return;
+	ref<Emitter> oldEmitter = emitter;
+	if (oldEmitter->isEnvironmentEmitter()) {
+		m_environmentEmitter = NULL;
+	}
+	m_emitters.erase(std::remove(m_emitters.begin(),
+		m_emitters.end(), oldEmitter));
+}
+
+void Scene::removeBioemitter(Bioemitter* bioemitter) {
+	if (!bioemitter)
+		return;
+	ref<Bioemitter> oldBioemitter = bioemitter;
+	//if (oldBioemitter->isEnvironmentEmitter()) {
+	//	m_environmentEmitter = NULL;
+	//}
+	m_bioemitters.erase(std::remove(m_bioemitters.begin(),
+		m_bioemitters.end(), oldBioemitter));
+}
+
+void Scene::removeReferencedObject(ConfigurableObject* obj) {
+	if (!obj)
+		return;
+	ref<ConfigurableObject> oldObj = obj;
+	m_objects.erase(std::remove(m_objects.begin(),
+		m_objects.end(), oldObj));
+}
+
 
 void Scene::setSensor(Sensor *sensor) {
 	m_sensor = sensor;
@@ -350,6 +392,7 @@ void Scene::initialize() {
 
 	/* Make sure that there are no duplicates */
 	m_emitters.ensureUnique();
+	m_bioemitters.ensureUnique();
 	m_media.ensureUnique();
 	m_ssIntegrators.ensureUnique();
 	m_objects.ensureUnique();
@@ -381,6 +424,19 @@ void Scene::initialize() {
 		m_emitterPDF.normalize();
 	}
 
+	AABB scene_bound = this->getKDTree()->getAABB();
+	Properties integratorProps = this->getIntegrator()->getProperties();
+	Vector2 sceneSize = Vector2(integratorProps.getFloat("subSceneXSize", scene_bound.getExtents().x),
+		integratorProps.getFloat("subSceneZSize", scene_bound.getExtents().z));
+	double sceneMaxY = scene_bound.max.y;
+	double sceneMinY = scene_bound.min.y;
+	double x_min = -0.5 * sceneSize.x - SceneBoundEpsilon; //a small offset to handle repititive scene when using pure medium
+	double x_max = 0.5 * sceneSize.x + SceneBoundEpsilon;
+	double z_min = -0.5 * sceneSize.y - SceneBoundEpsilon;
+	double z_max = 0.5 * sceneSize.y + SceneBoundEpsilon;
+	m_sceneBounds = AABB(Point(x_min, sceneMinY, z_min), Point(x_max, sceneMaxY, z_max));
+	m_repetitiveSceneNum = integratorProps.getInteger("RepetitiveScene", 0);
+
 	initializeBidirectional();
 }
 
@@ -400,8 +456,8 @@ void Scene::initializeBidirectional() {
 
 	AABB aabb(m_aabb);
 	for (ref_vector<Emitter>::iterator it = m_emitters.begin();
-			it != m_emitters.end(); ++it) {
-		Emitter *emitter = it->get();
+		it != m_emitters.end(); ++it) {
+		Emitter* emitter = it->get();
 
 		ref<Shape> shape = emitter->createShape(this);
 		if (shape != NULL)
@@ -410,7 +466,19 @@ void Scene::initializeBidirectional() {
 		aabb.expandBy(emitter->getAABB());
 		if (!(emitter->getType() & Emitter::EDeltaPosition))
 			m_degenerateEmitters = false;
-}
+	}
+	for (ref_vector<Bioemitter>::iterator it = m_bioemitters.begin();
+		it != m_bioemitters.end(); ++it) {
+		Bioemitter* bioemitter = it->get();
+
+		ref<Shape> shape = bioemitter->createShape(this);
+		if (shape != NULL)
+			m_specialShapes.push_back(shape);
+
+		aabb.expandBy(bioemitter->getAABB());
+		//if (!(bioemitter->getType() & Emitter::EDeltaPosition))
+		//	m_degenerateEmitters = false;
+	}
 	m_aabb = aabb;
 }
 
@@ -516,7 +584,31 @@ void Scene::addChild(const std::string &name, ConfigurableObject *child) {
 		
 		m_emitters.push_back(emitter);
 		
-	} else if (cClass->derivesFrom(MTS_CLASS(Shape))) {
+	}
+	else if (cClass->derivesFrom(MTS_CLASS(Bioemitter))) {
+		Bioemitter* bioemitter = static_cast<Bioemitter*>(child);
+
+		if (bioemitter->isCompound()) {
+			size_t index = 0;
+			do {
+				ref<Bioemitter> element = bioemitter->getElement(index++);
+				if (element == NULL)
+					break;
+				addChild(name, element);
+			} while (true);
+			return;
+		}
+
+		//if (bioemitter->isEnvironmentEmitter()) {
+		//	if (m_environmentEmitter != NULL)
+		//		Log(EError, "The scene may only contain one environment emitter");
+		//	m_environmentEmitter = emitter;
+		//}
+
+		m_bioemitters.push_back(bioemitter);
+
+	}
+	else if (cClass->derivesFrom(MTS_CLASS(Shape))) {
 		Shape *shape = static_cast<Shape *>(child);
 		if (shape->isSensor()) // determine sensors as early as possible
 			addSensor(shape->getSensor());
@@ -571,9 +663,43 @@ void Scene::addShape(Shape *shape) {
 			m_sensors.push_back(shape->getSensor());
 		// && !shape->getEmitter()->isPlanckEmitter()
 		if (shape->isEmitter()) {
-			m_emitters.push_back(shape->getEmitter());
+			
+			if (shape->getClass()->getName() == "Instance") {
+				for (int i = 0; i < shape->getShapeGroupEmitters().size(); i++) {
+					Emitter* shape_emitter = shape->getShapeGroupEmitters()[i];
+					Emitter* new_emitter = static_cast<Emitter*> (PluginManager::getInstance()->
+						createObject(MTS_CLASS(Emitter), shape_emitter->getProperties()));
+					AnimatedTransform* trans = const_cast<AnimatedTransform*>(((Instance*)shape)->getAnimatedTransform());
+					new_emitter->setWorldTransform(trans);
+					new_emitter->setShape(shape_emitter->getShape());
+					m_emitters.push_back(new_emitter);
+				}
+			}
+			else {
+				m_emitters.push_back(shape->getEmitter());
+			}
+			
 		}
 			
+		if (shape->isBioemitter()) {
+			if (shape->getClass()->getName() == "Instance") {
+				for (int i = 0; i < shape->getShapeGroupBioemitters().size(); i++) {
+					Bioemitter* shape_bioemitter = shape->getShapeGroupBioemitters()[i];
+					Bioemitter* new_bioemitter = static_cast<Bioemitter*> (PluginManager::getInstance()->
+						createObject(MTS_CLASS(Bioemitter), shape_bioemitter->getProperties()));
+					AnimatedTransform* trans = const_cast<AnimatedTransform*>(((Instance*)shape)->getAnimatedTransform());
+					new_bioemitter->setWorldTransform(trans);
+					new_bioemitter->setShape(shape_bioemitter->getShape());
+					new_bioemitter->set_triangleCount(shape_bioemitter->get_triangleCount());
+					new_bioemitter->set_trianglesArea(shape_bioemitter->get_trianglesArea());
+					m_bioemitters.push_back(new_bioemitter);
+				}
+			}
+			else {
+				m_bioemitters.push_back(shape->getBioemitter());
+			}
+		}
+
 		if (shape->hasSubsurface()) {
 			m_netObjects.push_back(shape->getSubsurface());
 			m_ssIntegrators.push_back(shape->getSubsurface());
@@ -607,6 +733,7 @@ std::string Scene::toString() const {
 		<< "  environmentEmitter = " << indent(m_environmentEmitter.toString()) << "," << endl
 		<< "  shapes = " << indent(containerToString(m_shapes.begin(), m_shapes.end())) << "," << endl
 		<< "  emitters = " << indent(containerToString(m_emitters.begin(), m_emitters.end())) << "," << endl
+		<< "  bioemitters = " << indent(containerToString(m_bioemitters.begin(), m_bioemitters.end())) << "," << endl
 		<< "  media = " << indent(containerToString(m_media.begin(), m_media.end())) << "," << endl
 		<< "  sensors = " << indent(containerToString(m_sensors.begin(), m_sensors.end())) << "," << endl
 		<< "  ssIntegrators = " << indent(containerToString(m_ssIntegrators.begin(), m_ssIntegrators.end())) << "," << endl
@@ -666,6 +793,300 @@ Spectrum Scene::evalTransmittance(const Point &p1, bool p1OnSurface, const Point
 				return Spectrum(0.0f);
 			}
 			medium = its.getTargetMedium(d);
+		}
+
+		if (++interactions > 100) { /// Just a precaution..
+			Log(EWarn, "evalTransmittance(): round-off error issues?");
+			break;
+		}
+
+		ray.o = ray(its.t);
+		remaining -= its.t;
+		ray.maxt = remaining * lengthFactor;
+		ray.mint = Epsilon;
+	}
+
+	return transmittance;
+}
+
+// evaluate the transmittance of the direct illumination considering turbid medium
+Spectrum Scene::evalTransmittanceWithHotspot(const Point& p1, bool p1OnSurface,
+	const Point& p2, bool p2OnSurface, Float time, const Medium* medium,
+	int& interactions, int depth, Point& previousPoint,bool has_medium_in_single_path, Sampler* sampler) const {
+	Vector d = p2 - p1;
+	Float remaining = d.length();
+	d /= remaining;
+
+	bool consider_hotspot = true;
+	if (!has_medium_in_single_path) {
+		if (!medium)
+			consider_hotspot = false;
+	}
+	
+
+	Float lengthFactor = p2OnSurface ? (1 - ShadowEpsilon) : 1;
+	Ray ray(p1, d, p1OnSurface ? Epsilon : 0, remaining * lengthFactor, time);
+
+	Vector solar_d = p1 - previousPoint;
+	solar_d /= solar_d.length();
+	Ray solarRay(p1, solar_d, time);
+	Spectrum transmittance(1.0f);
+	Intersection its;
+	int maxInteractions = interactions;
+	interactions = 0;
+	Float maxRange = (previousPoint - ray.o).length();
+	std::vector<const Medium*> meeted_mediums;
+	if (medium) {
+		meeted_mediums.push_back(medium);
+	}
+	while (remaining > 0) {
+		bool intersected = rayIntersect(ray, its.t, its.shape, its.geoFrame.n, its.uv);
+		if (!intersected) { //repetitive
+			for (int iter = 0; iter < m_repetitiveSceneNum; iter++) {
+				Float tNear, tFar;
+				int exitFace;
+				Vector boundExtend = m_sceneBounds.getExtents();
+				m_sceneBounds.rayIntersectExt(ray, tNear, tFar, exitFace);
+				Point its_p = ray.o + tFar * ray.d;
+				if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+					//repetitive ray tracing
+					if (exitFace == 0) {
+						if (ray.d.x > 0) {
+							ray.o = its_p + Vector(-boundExtend.x, 0, 0);
+						}
+						else {
+							ray.o = its_p + Vector(boundExtend.x, 0, 0);
+						}
+					}
+					else if (exitFace == 2) {
+						if (ray.d.z > 0) {
+							ray.o = its_p + Vector(0, 0, -boundExtend.z);
+						}
+						else {
+							ray.o = its_p + Vector(0, 0, boundExtend.z);
+						}
+					}
+					/*if (m_scene->rayIntersect(occludeRay)) {*/
+					if (this->rayIntersect(ray, its)) {
+						intersected = true;
+						break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		if (intersected && (interactions == maxInteractions ||
+			!(its.getBSDF()->getType() & BSDF::ENull))) {
+			/* Encountered an occluder -- zero transmittance. */
+			return Spectrum(0.0f);
+		}
+		if (medium) {
+			if (depth == 1 && consider_hotspot) {
+				transmittance *= medium->evalTransmittanceWithHotspot(solarRay,
+					Ray(ray, 0, std::min(its.t, remaining)), p1, p1OnSurface, maxRange, sampler);
+			}
+			else {
+				transmittance *= medium->evalTransmittance(
+					Ray(ray, 0, std::min(its.t, remaining)), sampler);
+			}
+
+		}
+
+		if (!intersected || transmittance.isZero())
+			break;
+
+		const BSDF* bsdf = its.getBSDF();
+
+		its.p = ray.o;
+		its.geoFrame = Frame(its.geoFrame.n);
+		its.hasUVPartials = false;
+		Vector wo = its.geoFrame.toLocal(ray.d);
+		BSDFSamplingRecord bRec(its, -wo, wo, ERadiance);
+		bRec.typeMask = BSDF::ENull;
+		transmittance *= bsdf->eval(bRec, EDiscrete);
+
+		if (its.isMediumTransition()) {
+			if (medium != its.getTargetMedium(-d)) {
+				++mediumInconsistencies;
+				return Spectrum(0.0f);
+			}
+			medium = its.getTargetMedium(d);
+			if (medium) {
+				meeted_mediums.push_back(medium);
+			}
+			else {
+				if (meeted_mediums.size() == 1) {
+					meeted_mediums.clear();
+				}
+				else if (meeted_mediums.size() > 0) {
+					const Medium* tmp = its.getTargetMedium(-wo);
+					auto itr = remove_if(meeted_mediums.begin(), meeted_mediums.end(), [&](const Medium* x) {return x == tmp; });
+					if (itr >= meeted_mediums.begin() && itr < meeted_mediums.end()) {
+						meeted_mediums.erase(itr);
+						if (meeted_mediums.size() > 0) {
+							medium = meeted_mediums[meeted_mediums.size() - 1];
+						}
+					}
+				}
+
+			}
+		}
+
+		if (++interactions > 100) { /// Just a precaution..
+			Log(EWarn, "evalTransmittance(): round-off error issues?");
+			break;
+		}
+
+		ray.o = ray(its.t);
+		remaining -= its.t;
+		ray.maxt = remaining * lengthFactor;
+		ray.mint = Epsilon;
+	}
+
+	return transmittance;
+}
+
+// evaluate the transmittance of the direct illumination considering turbid medium
+//It also considers multiple mediums that have overlapping
+Spectrum Scene::evalTransmittanceWithHotspot(const Point& p1, bool p1OnSurface,
+	const Point& p2, bool p2OnSurface, Float time, const Medium* medium, std::vector<const Medium*> meeted_mediums,
+	int& interactions, int depth, Point& previousPoint, bool has_medium_in_single_path, Sampler* sampler) const {
+	Vector d = p2 - p1;
+	Float remaining = d.length();
+	d /= remaining;
+
+	bool consider_hotspot = true;
+	if (!has_medium_in_single_path) {
+		if (!medium)
+			consider_hotspot = false;
+	}
+
+	Float lengthFactor = p2OnSurface ? (1 - ShadowEpsilon) : 1;
+	Ray ray(p1, d, p1OnSurface ? Epsilon : 0, remaining * lengthFactor, time);
+
+	Vector solar_d = p1 - previousPoint;
+	solar_d /= solar_d.length();
+	Ray solarRay(p1, solar_d, time);
+	Spectrum transmittance(1.0f);
+	Intersection its;
+	int maxInteractions = interactions;
+	interactions = 0;
+	Float maxRange = (previousPoint - ray.o).length();
+	//std::vector<const Medium*> meeted_mediums;
+	while (remaining > 0) {
+		bool intersected = rayIntersect(ray, its.t, its.shape, its.geoFrame.n, its.uv);
+		if (!intersected) { //repetitive
+			for (int iter = 0; iter < m_repetitiveSceneNum; iter++) {
+				Float tNear, tFar;
+				int exitFace;
+				Vector boundExtend = m_sceneBounds.getExtents();
+				m_sceneBounds.rayIntersectExt(ray, tNear, tFar, exitFace);
+				Point its_p = ray.o + tFar * ray.d;
+				if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+					//repetitive ray tracing
+					if (exitFace == 0) {
+						if (ray.d.x > 0) {
+							ray.o = its_p + Vector(-boundExtend.x, 0, 0);
+						}
+						else {
+							ray.o = its_p + Vector(boundExtend.x, 0, 0);
+						}
+					}
+					else if (exitFace == 2) {
+						if (ray.d.z > 0) {
+							ray.o = its_p + Vector(0, 0, -boundExtend.z);
+						}
+						else {
+							ray.o = its_p + Vector(0, 0, boundExtend.z);
+						}
+					}
+					/*if (m_scene->rayIntersect(occludeRay)) {*/
+					if (this->rayIntersect(ray, its)) {
+						intersected = true;
+						break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		if (intersected && (interactions == maxInteractions ||
+			!(its.getBSDF()->getType() & BSDF::ENull))) {
+			/* Encountered an occluder -- zero transmittance. */
+			return Spectrum(0.0f);
+		}
+		if (medium) {
+			Float sigmaT = 0, GValueSensor=0, GValueSolar=0;
+			if (meeted_mediums.size() == 1) {
+				sigmaT = medium->getVegetationSigmaT(ray);
+				GValueSensor = medium->getVegetationG(ray);
+				GValueSolar = medium->getVegetationG(solarRay);
+			}
+			else {
+				for (int i = 0; i < meeted_mediums.size(); ++i) {
+					Float eachSigmaT = meeted_mediums[i]->getVegetationSigmaT(ray);
+					sigmaT += eachSigmaT;
+					GValueSensor += eachSigmaT * meeted_mediums[i]->getVegetationG(ray);
+					GValueSolar += eachSigmaT * meeted_mediums[i]->getVegetationG(solarRay);
+				}
+				GValueSolar /= sigmaT;
+				GValueSensor /= sigmaT;
+			}
+			if (depth == 1 && consider_hotspot) {
+				transmittance *= medium->evalTransmittanceWithHotspotWithSigmaT(solarRay,
+					Ray(ray, 0, std::min(its.t, remaining)), p1, p1OnSurface, maxRange, sigmaT, GValueSensor, GValueSolar, sampler);
+			}
+			else {
+				/*transmittance *= medium->evalTransmittance(
+					Ray(ray, 0, std::min(its.t, remaining)), sampler);*/
+				Float negLength = -std::min(its.t, remaining);
+				Float tmp = sigmaT != 0 ? math::fastexp(sigmaT * negLength) : (Float)1.0f;
+				transmittance *= tmp;
+			}
+
+		}
+
+		if (!intersected || transmittance.isZero())
+			break;
+
+		const BSDF* bsdf = its.getBSDF();
+
+		its.p = ray.o;
+		its.geoFrame = Frame(its.geoFrame.n);
+		its.hasUVPartials = false;
+		Vector wo = its.geoFrame.toLocal(ray.d);
+		BSDFSamplingRecord bRec(its, -wo, wo, ERadiance);
+		bRec.typeMask = BSDF::ENull;
+		transmittance *= bsdf->eval(bRec, EDiscrete);
+
+		if (its.isMediumTransition()) {
+			//if (medium != its.getTargetMedium(-d)) {
+			//	++mediumInconsistencies;
+			//	return Spectrum(0.0f);
+			//}
+			medium = its.getTargetMedium(d);
+			if (medium) {
+				meeted_mediums.emplace_back(medium);
+			}
+			else {
+				if (meeted_mediums.size() == 1) {
+					meeted_mediums.clear();
+				}
+				else if (meeted_mediums.size() > 0) {
+					const Medium* tmp = its.getTargetMedium(-d);
+					auto itr = remove_if(meeted_mediums.begin(), meeted_mediums.end(), [&](const Medium* x) {return x == tmp; });
+					if (itr >= meeted_mediums.begin() && itr < meeted_mediums.end()) {
+						meeted_mediums.erase(itr);
+						if (meeted_mediums.size() > 0) {
+							medium = meeted_mediums[meeted_mediums.size() - 1];
+						}
+					}
+				}
+
+			}
 		}
 
 		if (++interactions > 100) { /// Just a precaution..
@@ -877,6 +1298,54 @@ Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord &dRec,
 	}
 }
 
+//extended version medium variant
+Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+	const Medium* medium, int& interactions, int depth, Point& previousPoint, const Point2& _sample,bool has_medium_in_single_path,
+	Sampler* sampler) const {
+	Point2 sample(_sample);
+
+	/* Randomly pick an emitter */
+	Float emPdf;
+	size_t index = m_emitterPDF.sampleReuse(sample.x, emPdf);
+	const Emitter* emitter = m_emitters[index].get();
+	Spectrum value = emitter->sampleDirect(dRec, sample);
+	if (dRec.pdf != 0) {
+		value *= evalTransmittanceWithHotspot(dRec.ref, false,
+			dRec.p, emitter->isOnSurface(), dRec.time, medium,
+			interactions, depth, previousPoint, has_medium_in_single_path, sampler) / emPdf;
+		dRec.object = emitter;
+		dRec.pdf *= emPdf;
+		return value;
+	}
+	else {
+		return Spectrum(0.0f);
+	}
+}
+
+//extended version medium variant
+Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+	const Medium* medium, std::vector<const Medium*>& meeted_mediums, int& interactions, int depth, Point& previousPoint, const Point2& _sample, bool has_medium_in_single_path,
+	Sampler* sampler) const {
+	Point2 sample(_sample);
+
+	/* Randomly pick an emitter */
+	Float emPdf;
+	size_t index = m_emitterPDF.sampleReuse(sample.x, emPdf);
+	const Emitter* emitter = m_emitters[index].get();
+	Spectrum value = emitter->sampleDirect(dRec, sample);
+	if (dRec.pdf != 0) {
+		value *= evalTransmittanceWithHotspot(dRec.ref, false,
+			dRec.p, emitter->isOnSurface(), dRec.time, medium, meeted_mediums,
+			interactions, depth, previousPoint, has_medium_in_single_path, sampler) / emPdf;
+		dRec.object = emitter;
+		dRec.pdf *= emPdf;
+		return value;
+	}
+	else {
+		return Spectrum(0.0f);
+	}
+}
+
 Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord &dRec,
 		const Intersection &its, const Medium *medium, int &interactions,
 		const Point2 &_sample, Sampler *sampler) const {
@@ -897,6 +1366,32 @@ Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord &dRec,
 		dRec.pdf *= emPdf;
 		return value;
 	} else {
+		return Spectrum(0.0f);
+	}
+}
+
+// extended version, surface variant
+Spectrum Scene::sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+	const Intersection& its, const Medium* medium, std::vector<const Medium*>& meeted_mediums, int& interactions, int depth, Point& previousPoint,
+	const Point2& _sample,bool has_medium_in_single_path, Sampler* sampler) const {
+	Point2 sample(_sample);
+
+	/* Randomly pick an emitter */
+	Float emPdf;
+	size_t index = m_emitterPDF.sampleReuse(sample.x, emPdf);
+	const Emitter* emitter = m_emitters[index].get();
+	Spectrum value = emitter->sampleDirect(dRec, sample);
+
+	if (dRec.pdf != 0) {
+		if (its.shape && its.isMediumTransition())
+			medium = its.getTargetMedium(dRec.d);
+		value *= evalTransmittanceWithHotspot(its.p, true, dRec.p, emitter->isOnSurface(),
+			dRec.time, medium, meeted_mediums, interactions,depth, previousPoint, has_medium_in_single_path, sampler) / emPdf;
+		dRec.object = emitter;
+		dRec.pdf *= emPdf;
+		return value;
+	}
+	else {
 		return Spectrum(0.0f);
 	}
 }

@@ -28,11 +28,12 @@
 
 MTS_NAMESPACE_BEGIN
 //const static int SPECTRUM_SAMPLES = FFBN("bands.cfg");
-const static int SPECTRUM_MIN_WAVELENGTH = FF(".less/range.cfg", 1);
-const static int SPECTRUM_MAX_WAVELENGTH = FF(".less/range.cfg", 2);
+const static Float SPECTRUM_MIN_WAVELENGTH = FF(".less/range.cfg", 1);
+const static Float SPECTRUM_MAX_WAVELENGTH = FF(".less/range.cfg", 2);
 const static int SPECTRUM_SAMPLES = FFBN(".less/num.cfg");
 #define SPECTRUM_RANGE                \
 	(SPECTRUM_MAX_WAVELENGTH-SPECTRUM_MIN_WAVELENGTH)
+
 
 /**
  * \brief Abstract continous spectral power distribution data type,
@@ -442,6 +443,10 @@ public:
 	inline friend TSpectrum operator/(Scalar f, TSpectrum &spec) {
 		return TSpectrum(f) / spec;
 	}
+	/// Divide by a scalar
+	inline friend TSpectrum operator/(Scalar f, const TSpectrum& spec) {
+		return TSpectrum(f) / spec;
+	}
 
 	/// Divide by a scalar
 	inline TSpectrum& operator/=(Scalar f) {
@@ -483,6 +488,14 @@ public:
 		for (int i = 0; i<SPECTRUM_SAMPLES; i++)
 			result += s[i];
 		return result * (1.0f / SPECTRUM_SAMPLES);
+	}
+
+	/// Return the sum over all wavelengths
+	inline Scalar sum() const {
+		Scalar result = 0.0f;
+		for (int i = 0; i < SPECTRUM_SAMPLES; i++)
+			result += s[i];
+		return result;
 	}
 
 	/// Component-wise absolute value

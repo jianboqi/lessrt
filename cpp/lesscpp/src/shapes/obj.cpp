@@ -21,6 +21,7 @@
 #include <mitsuba/core/fresolver.h>
 #include <mitsuba/core/timer.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/subsurface.h>
 #include <mitsuba/render/medium.h>
@@ -194,7 +195,9 @@ public:
 		ref<FileResolver> fileResolver = Thread::getThread()->getFileResolver()->clone();
 		fs::path path = fileResolver->resolve(props.getString("filename"));
 
-		m_name = path.stem().string();
+		std::string comp_name = (props.getID() != "unnamed") ? props.getID()
+			: formatString("%s", path.stem().string().c_str());
+		m_name = comp_name;
 
 		/* By default, any existing normals will be used for
 		   rendering. If no normals are found, Mitsuba will
@@ -293,7 +296,7 @@ public:
 				} else {
 					nameBeforeGeometry = true;
 				}
-				name = newName;
+				//name = newName;  // do not use group name as component name
 			} else if (buf == "usemtl") {
 				/* Flush if necessary */
 				if (triangles.size() > 0 && !m_collapse) {
@@ -766,7 +769,16 @@ public:
 						"'%s', which does not occur in the OBJ file!", name.c_str());
 			}
 			m_bsdf->setParent(NULL);
-		} else if (cClass->derivesFrom(MTS_CLASS(Emitter))) {
+		}
+		else if (cClass->derivesFrom(MTS_CLASS(Bioemitter))) {
+			if (m_meshes.size() > 1)
+				Log(EError, "Cannot attach an emitter to an OBJ file "
+					"containing multiple objects!");
+			m_bioemitter = static_cast<Bioemitter*>(child);
+			child->setParent(m_meshes[0]);
+			m_meshes[0]->addChild(name, child);
+		}
+		else if (cClass->derivesFrom(MTS_CLASS(Emitter))) {
 			if (m_meshes.size() > 1)
 				Log(EError, "Cannot attach an emitter to an OBJ file "
 					"containing multiple objects!");

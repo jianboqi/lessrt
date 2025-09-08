@@ -25,6 +25,7 @@
 #include <mitsuba/core/transform.h>
 #include <mitsuba/core/frame.h>
 #include <mitsuba/core/aabb.h>
+#include <mitsuba/render/bioemitter.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -208,6 +209,7 @@ public:
 	 * The default implementation throws an exception
 	 */
 	virtual Float getSurfaceArea() const;
+	virtual Float* getTrianglesArea(int& triangleCount) const;
 
 	/// Return a bounding box containing the shape
 	virtual AABB getAABB() const = 0;
@@ -402,7 +404,7 @@ public:
 	 *     A uniformly distributed 2D vector
 	 */
 	virtual void sampleDirect(DirectSamplingRecord &dRec,
-			const Point2 &sample) const;
+			const Point2 &sample, const AnimatedTransform* transform=NULL) const;
 
 	/**
 	 * \brief Query the probability density of \ref sampleDirect() for
@@ -452,6 +454,18 @@ public:
 	inline const Emitter *getEmitter() const { return m_emitter.get(); }
 	/// Set the emitter of this shape
 	inline void setEmitter(Emitter *emitter) { m_emitter = emitter; }
+
+	/// Is this shape also an area emitter?
+	inline bool isBioemitter() const { return m_bioemitter.get() != NULL; }
+	/// Return the associated emitter (if any)
+	inline Bioemitter* getBioemitter() { return m_bioemitter; }
+	/// Return the associated emitter (if any)
+	inline const Bioemitter* getBioemitter() const { return m_bioemitter.get(); }
+	/// Set the emitter of this shape
+	inline void setBioemitter(Bioemitter* bioemitter) { m_bioemitter = bioemitter; }
+
+	inline ref_vector<Emitter>& getShapeGroupEmitters() { return m_shapegroup_emitters; }
+	inline ref_vector<Bioemitter>& getShapeGroupBioemitters() { return m_shapegroup_bioemitters; }
 
 	/// Is this shape also an area sensor?
 	inline bool isSensor() const { return m_sensor.get() != NULL; }
@@ -525,6 +539,9 @@ protected:
 	ref<BSDF> m_bsdf;
 	ref<Subsurface> m_subsurface;
 	ref<Emitter> m_emitter;
+	ref_vector<Emitter> m_shapegroup_emitters; // specially for shapegroup, which may have multiple emitters
+	ref<Bioemitter> m_bioemitter;
+	ref_vector<Bioemitter> m_shapegroup_bioemitters; // specially for shapegroup, which may have multiple emitters
 	ref<Sensor> m_sensor;
 	ref<Medium> m_interiorMedium;
 	ref<Medium> m_exteriorMedium;

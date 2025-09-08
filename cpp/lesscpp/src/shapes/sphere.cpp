@@ -19,6 +19,7 @@
 #include <mitsuba/render/shape.h>
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 #include <mitsuba/render/sensor.h>
 #include <mitsuba/render/subsurface.h>
 #include <mitsuba/render/trimesh.h>
@@ -475,6 +476,7 @@ public:
 			oss << "  interiorMedium = " << indent(m_interiorMedium.toString()) << "," << endl
 				<< "  exteriorMedium = " << indent(m_exteriorMedium.toString()) << "," << endl;
 		oss << "  emitter = " << indent(m_emitter.toString()) << "," << endl
+			<< "  bioemitter = " << indent(m_bioemitter.toString()) << "," << endl
 			<< "  sensor = " << indent(m_sensor.toString()) << "," << endl
 			<< "  subsurface = " << indent(m_subsurface.toString()) << endl
 			<< "]";

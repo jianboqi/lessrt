@@ -24,7 +24,7 @@ protected:
 		size_t granularity, const std::string &progressText,
 		const void* progressReporterPayload);
 
-	void increaseResultCount(size_t resultCount);
+	void increaseResultCount(size_t resultCount, size_t FluorPhotonsNum);
 
 	/// Virtual destructor
 	virtual ~PhotonProcess();
@@ -37,6 +37,7 @@ protected:
 	size_t m_granularity;
 	ref<Mutex> m_resultMutex;
 	size_t m_receivedResultCount;
+	size_t m_FluorPhotonsNum;
 };
 
 

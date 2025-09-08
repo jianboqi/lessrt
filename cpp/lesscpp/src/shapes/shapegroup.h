@@ -20,6 +20,7 @@
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/subsurface.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -71,9 +72,13 @@ public:
 	/// Return a string representation
 	std::string toString() const;
 
+	void samplePosition(PositionSamplingRecord& pRec,const Point2& sample) const;
+
 	MTS_DECLARE_CLASS()
 private:
 	ref<ShapeKDTree> m_kdtree;
+
+	DiscreteDistribution m_shapePDF;
 };
 
 MTS_NAMESPACE_END

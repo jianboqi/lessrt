@@ -128,6 +128,18 @@ public:
 		m_isThermal = props.getBoolean("isThermal", false);
 
 		m_isOnlyMultiScattering = props.getBoolean("isOnlyMultiScattering", false);
+
+		m_isOrthPhoto = props.hasProperty("reference_height");
+		if (m_isOrthPhoto) {
+			m_reference_height = props.getFloat("reference_height", 0);
+			m_sensor_direction = props.getVector("sensor_direction", Vector(0, -1, 0));
+		}
+
+		m_has_img_layer = props.hasProperty("layer_img_bottom");
+		if (m_has_img_layer) {
+			m_layer_img_bottom = props.getFloat("layer_img_bottom", 0);
+			m_layer_img_upper = props.getFloat("layer_img_upper", 1);
+		}
 	}
 
 	void serialize(Stream *stream, InstanceManager *manager) const {
@@ -141,6 +153,9 @@ public:
 		stream->writeDouble(m_virtualPlane_size_z);
 		stream->writeInt(m_repetitiveSceneNum);
 		stream->writeBool(m_isThermal);
+		stream->writeBool(m_isOrthPhoto);
+		stream->writeFloat(m_reference_height);
+		m_sensor_direction.serialize(stream);
 	}
 
 	/// Unserialize from a binary data stream
@@ -155,6 +170,9 @@ public:
 		m_virtualPlane_size_z = stream->readDouble();
 		m_repetitiveSceneNum = stream->readInt();
 		m_isThermal = stream->readBool();
+		m_isOrthPhoto = stream->readBool();
+		m_reference_height = stream->readFloat();
+		m_sensor_direction = Vector(stream);
 	}
 
 	bool preprocess(const Scene *scene, RenderQueue *queue,
@@ -229,6 +247,8 @@ public:
 
 		//ray plane test
 		double H = ray.o[1] - m_sceneBounds.max.y;
+		if (H <= 0)  // for fisheye simulation, when ray.o is under the cnaopy, rayRepetitiveInit is not needed
+			return;
 		double a = ray.d.x;
 		double b = ray.d.y;
 		double c = ray.d.z;
@@ -274,41 +294,41 @@ public:
 	}
 
 	void rayRepetitive(RayDifferential &ray, Intersection &its, const Scene *scene) const{
-			if (!its.isValid()) {
-				for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
-					Float tNear, tFar;
-					int exitFace;
-					Vector boundExtend = m_sceneBounds.getExtents();
-					m_sceneBounds.rayIntersectExt(ray, tNear, tFar, exitFace);
-					Point its_p = ray.o + tFar * ray.d;
-					if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
-						//offset the ray
-						if (exitFace == 0) {
-							if (ray.d.x > 0) {
-								ray.o = its_p + Vector(-boundExtend.x, 0, 0);
-							}
-							else {
-								ray.o = its_p + Vector(boundExtend.x, 0, 0);
-							}
+		if (!its.isValid()) {
+			for (int iteration = 0; iteration < m_repetitiveSceneNum; iteration++) {
+				Float tNear, tFar;
+				int exitFace;
+				Vector boundExtend = m_sceneBounds.getExtents();
+				m_sceneBounds.rayIntersectExt(ray, tNear, tFar, exitFace);
+				Point its_p = ray.o + tFar * ray.d;
+				if (its_p.y < m_sceneBounds.max.y && exitFace != 1) {
+					//offset the ray
+					if (exitFace == 0) {
+						if (ray.d.x > 0) {
+							ray.o = its_p + Vector(-boundExtend.x, 0, 0);
 						}
-						else if (exitFace == 2) {
-							if (ray.d.z > 0) {
-								ray.o = its_p + Vector(0, 0, -boundExtend.z);
-							}
-							else {
-								ray.o = its_p + Vector(0, 0, boundExtend.z);
-							}
+						else {
+							ray.o = its_p + Vector(boundExtend.x, 0, 0);
 						}
-						//	cout << "new Pos: " << ray.toString() << endl;
-						scene->rayIntersect(ray, its);
-						if (its.t < std::numeric_limits<Float>::infinity())
-							break;
 					}
-					else {
+					else if (exitFace == 2) {
+						if (ray.d.z > 0) {
+							ray.o = its_p + Vector(0, 0, -boundExtend.z);
+						}
+						else {
+							ray.o = its_p + Vector(0, 0, boundExtend.z);
+						}
+					}
+					//	cout << "new Pos: " << ray.toString() << endl;
+					scene->rayIntersect(ray, its);
+					if (its.t < std::numeric_limits<Float>::infinity())
 						break;
-					}
+				}
+				else {
+					break;
 				}
 			}
+		}
 	}
 
 	Spectrum Li(const RayDifferential &r, RadianceQueryRecord &rRec) const {
@@ -318,6 +338,19 @@ public:
 		RayDifferential ray(r);
 		Spectrum Li(0.0f);
 		bool scattered = false;
+		if (m_isOrthPhoto) {
+			Ray up_ray(ray.o, Vector(0, 1, 0), 0);  //query the terrain height
+			Intersection up_its;
+			scene->rayIntersect(up_ray, up_its);
+			Float demHeight = 0;
+			if (up_its.isValid()) {
+				demHeight = up_its.t;
+			}
+			Float orth_height = m_reference_height + demHeight;
+			Float d = 100000;
+			ray = Ray(ray.o + Vector(0, orth_height, 0) - d * m_sensor_direction, m_sensor_direction, 0);
+		}
+		
 
 		//jianboqi:
 		//handle virtual plane
@@ -328,13 +361,13 @@ public:
 			double z_min = m_virtualPlane_vz - 0.5*m_virtualPlane_size_z;
 			double z_max = m_virtualPlane_vz + 0.5*m_virtualPlane_size_z;
 
-			double H = r.o[1] - m_virtualBounds.max.y;
+			double H = ray.o[1] - m_virtualBounds.max.y;
 			if (H > 0)
 			{
-				double a = r.d.x;
-				double b = r.d.y;
-				double c = r.d.z;
-				Point its_p = r.o + Point(-a / b*H, -H, -c / b*H);
+				double a = ray.d.x;
+				double b = ray.d.y;
+				double c = ray.d.z;
+				Point its_p = ray.o + Point(-a / b*H, -H, -c / b*H);
 				if (!(its_p.x > x_min && its_p.x < x_max
 					&& its_p.z > z_min && its_p.z < z_max
 					))
@@ -375,13 +408,15 @@ public:
 				break;
 			}
 
+
 			const BSDF *bsdf = its.getBSDF(ray);
+
 
 			/* Possibly include emitted radiance if requested */
 			if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance)
 				&& (!m_hideEmitters || scattered)) {
 				//For thermal direct emitted
-				if (its.shape->getEmitter()->getProperties().hasProperty("temperature") &&
+				if (its.shape->getEmitter()->getProperties().hasProperty("deltaTemperature") &&
 					its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
 					Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
 					//test occlusion. temperature will be different when shaded or not shaded
@@ -396,7 +431,14 @@ public:
 						its.shaded = isRepetitiveOccluded;
 					}
 				}
-				Li += throughput * its.Le(-ray.d);
+				//for layer image
+				if (m_has_img_layer) {
+					if (its.p.y >= m_layer_img_bottom && its.p.y <= m_layer_img_upper) {
+						Li += throughput * its.Le(-ray.d);
+					}
+				}else{
+					Li += throughput * its.Le(-ray.d);
+				}
 			}
 				
 
@@ -436,11 +478,12 @@ public:
 				else {//thermal
 					//First, try to sample a point on a emitter
 					value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+					//cout << dRec.p.x << " " << dRec.p.y << " " << dRec.p.z << endl;
 					//if it is a planck emitter, try to decide its status of shade to assign different temperatures
 					if (!value.isZero()) {
 						const Emitter *emitter = static_cast<const Emitter *>(dRec.object);
-						if (emitter->getProperties().hasProperty("temperature") && 
-							(emitter->getProperties().getFloat("deltaTemperature", 0) != 0)) {
+						if (emitter->getProperties().hasProperty("deltaTemperature") &&
+							emitter->getProperties().getFloat("deltaTemperature", 0) != 0) {
 							//determined shaded or not
 							Vector sunDirection = emitter->getProperties().getVector("direction");
 							Ray occludeRay(dRec.p, -sunDirection, 0);
@@ -451,7 +494,7 @@ public:
 								repetitiveOcclude(Spectrum(0.0), dRec.p, -sunDirection, scene, isRepetitiveOccluded);
 								shaded = isRepetitiveOccluded;
 							}
-							value = emitter->getSpectrumAccordingToTemperature(dRec, shaded);
+							value = emitter->getSpectrumAccordingToTemperature(dRec, its, shaded);
 						}
 						else { // when the sampled emitter is sky emitter, consider the repetitive
 							bool tmp;
@@ -503,7 +546,16 @@ public:
 
 						}
 						else {
-							Li += throughput * value * bsdfVal * weight;
+							//for layer image
+							if (m_has_img_layer) {
+								if (its.p.y >= m_layer_img_bottom && its.p.y <= m_layer_img_upper) {
+									Li += throughput * value * bsdfVal * weight;
+								}
+							}
+							else {
+								Li += throughput * value * bsdfVal * weight;
+							}
+							
 						}
 						
 					}
@@ -540,7 +592,7 @@ public:
 				/* Intersected something - check if it was a luminaire */
 				if (its.isEmitter()) {
 					//For thermal direct emitted
-					if (its.shape->getEmitter()->getProperties().hasProperty("temperature") &&
+					if (its.shape->getEmitter()->getProperties().hasProperty("deltaTemperature") &&
 						its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
 						Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
 						//test occlusion. temperature will be different when shaded or not shaded
@@ -587,7 +639,16 @@ public:
 				   implemented direct illumination sampling technique */
 				const Float lumPdf = (!(bRec.sampledType & BSDF::EDelta)) ?
 					scene->pdfEmitterDirect(dRec) : 0;
-				Li += throughput * value * miWeight(bsdfPdf, lumPdf);
+				//for layer image
+				if (m_has_img_layer) {
+					if (its.p.y >= m_layer_img_bottom && its.p.y <= m_layer_img_upper) {
+						Li += throughput * value * miWeight(bsdfPdf, lumPdf);
+					}
+				}
+				else {
+					Li += throughput * value * miWeight(bsdfPdf, lumPdf);
+				}
+				
 			}
 
 			/* ==================================================================== */
@@ -609,6 +670,416 @@ public:
 				if (rRec.nextSample1D() >= q)
 					break;
 				throughput /= q;
+			}
+		}
+
+		/* Store statistics */
+		avgPathLength.incrementBase();
+		avgPathLength += rRec.depth;
+
+		return Li;
+	}
+	Spectrum LiWithEF(const RayDifferential& r, RadianceQueryRecord& rRec,
+		Spectrum& LiAll, Spectrum& LiPSI, Spectrum& LiPSII) const {
+		/* Some aliases and local variables */
+		const Scene* scene = rRec.scene;
+		Intersection& its = rRec.its;
+		RayDifferential ray(r);
+		Spectrum Li(0.0f);
+		bool scattered = false;
+		if (m_isOrthPhoto) {
+			Ray up_ray(ray.o, Vector(0, 1, 0), 0);  //query the terrain height
+			Intersection up_its;
+			scene->rayIntersect(up_ray, up_its);
+			Float demHeight = 0;
+			if (up_its.isValid()) {
+				demHeight = up_its.t;
+			}
+			Float orth_height = m_reference_height + demHeight;
+			Float d = 100000;
+			ray = Ray(ray.o + Vector(0, orth_height, 0) - d * m_sensor_direction, m_sensor_direction, 0);
+		}
+
+
+		//jianboqi:
+		//handle virtual plane
+		if (m_virtualPlane)
+		{
+			double x_min = m_virtualPlane_vx - 0.5 * m_virtualPlane_size_x;
+			double x_max = m_virtualPlane_vx + 0.5 * m_virtualPlane_size_x;
+			double z_min = m_virtualPlane_vz - 0.5 * m_virtualPlane_size_z;
+			double z_max = m_virtualPlane_vz + 0.5 * m_virtualPlane_size_z;
+
+			double H = ray.o[1] - m_virtualBounds.max.y;
+			if (H > 0)
+			{
+				double a = ray.d.x;
+				double b = ray.d.y;
+				double c = ray.d.z;
+				Point its_p = ray.o + Point(-a / b * H, -H, -c / b * H);
+				if (!(its_p.x > x_min && its_p.x < x_max
+					&& its_p.z > z_min && its_p.z < z_max
+					))
+				{
+					LiAll = Spectrum(m_NoDataValue);
+					LiPSI = Spectrum(m_NoDataValue);
+					LiPSII = Spectrum(m_NoDataValue);
+					return Spectrum(m_NoDataValue);
+				}
+			}
+			else
+			{
+				LiAll = Spectrum(m_NoDataValue);
+				LiPSI = Spectrum(m_NoDataValue);
+				LiPSII = Spectrum(m_NoDataValue);
+				return Spectrum(m_NoDataValue);
+			}
+		}
+
+		/* Perform the first ray intersection (or ignore if the
+		   intersection has already been provided). */
+		rRec.rayIntersect(ray);
+		ray.mint = Epsilon;
+		rayRepetitiveInit(ray, its, scene);
+		rayRepetitive(ray, its, scene);
+
+		Spectrum throughput(1.0f);
+		Float eta = 1.0f;
+
+		Float Addmimii = 0;//
+		FluorMatrix m; 
+		m.setFluorMatrixZeros();
+		FluorMatrix mt;
+		FluorMatrixs ms;
+
+		while (rRec.depth <= m_maxDepth || m_maxDepth < 0) {
+
+			if (!its.isValid()) {
+				/* If no intersection could be found, potentially return
+				   radiance from a environment luminaire if it exists */
+				   //如果隐藏了emiter，则返回-1. 只有多波段模式才启用。
+				if (m_hideEmitters)
+				{
+					LiAll = Spectrum(m_NoDataValue);
+					LiPSI = Spectrum(m_NoDataValue);
+					LiPSII = Spectrum(m_NoDataValue);
+					Li = Spectrum(m_NoDataValue);
+					break;
+				}
+				if ((rRec.type & RadianceQueryRecord::EEmittedRadiance)
+					&& (!m_hideEmitters || scattered)) {
+					Spectrum throughput_scene_evalEnvironment_ray_ = throughput * scene->evalEnvironment(ray);
+					Spectrum powerPSIt(0.0f);
+					Spectrum powerPSIIt(0.0f);
+					m.compute_MbxPower(scene->evalEnvironment(ray), powerPSIt, powerPSIIt, LiAll, LiPSI, LiPSII);
+					LiAll += throughput_scene_evalEnvironment_ray_;
+					Li += throughput_scene_evalEnvironment_ray_;
+				}
+				break;
+			}
+
+			const BSDF* bsdf = its.getBSDF(ray);
+			bool isFluor2MixtureBSDF = bsdf->getClass()->getName() == "Fluor2MixtureBSDF";
+			if (isFluor2MixtureBSDF)
+				ms = bsdf->getFluorMatrixs();
+
+			/* Possibly include emitted radiance if requested */
+			if (its.isEmitter() && (rRec.type & RadianceQueryRecord::EEmittedRadiance)
+				&& (!m_hideEmitters || scattered)) {
+				//For thermal direct emitted
+				if (its.shape->getEmitter()->getProperties().hasProperty("deltaTemperature") &&
+					its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
+					Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
+					//test occlusion. temperature will be different when shaded or not shaded
+					Ray occludeRay(its.p, -sunDirection, 0);
+					if (scene->rayIntersect(occludeRay)) {
+						its.shaded = true;
+					}
+					else {
+						// further determine for repetitive occlusion
+						bool isRepetitiveOccluded = false;
+						repetitiveOcclude(Spectrum(0.0), its.p, -sunDirection, scene, isRepetitiveOccluded);
+						its.shaded = isRepetitiveOccluded;
+					}
+				}
+				Spectrum throughput_its_Le__ray_d_ = throughput * its.Le(-ray.d);
+				Spectrum powerPSIt(0.0f);
+				Spectrum powerPSIIt(0.0f);
+				m.compute_MbxPower(its.Le(-ray.d), powerPSIt, powerPSIIt, LiAll, LiPSI, LiPSII);
+				LiAll += throughput_its_Le__ray_d_;
+				Li += throughput_its_Le__ray_d_;
+			}
+
+
+			/* Include radiance from a subsurface scattering model if requested */
+			if (its.hasSubsurface() && (rRec.type & RadianceQueryRecord::ESubsurfaceRadiance)) {
+				Spectrum throughput_its_LoSub_scene_rRec_sampler__ray_d_rRec_depth_ = throughput * its.LoSub(scene, rRec.sampler, -ray.d, rRec.depth);
+				Spectrum powerPSIt(0.0f);
+				Spectrum powerPSIIt(0.0f);
+				m.compute_MbxPower(its.LoSub(scene, rRec.sampler, -ray.d, rRec.depth), powerPSIt, powerPSIIt, LiAll, LiPSI, LiPSII);
+				LiAll += throughput_its_LoSub_scene_rRec_sampler__ray_d_rRec_depth_;
+				Li += throughput_its_LoSub_scene_rRec_sampler__ray_d_rRec_depth_;
+			}
+
+			if ((rRec.depth >= m_maxDepth && m_maxDepth > 0)
+				|| (m_strictNormals && dot(ray.d, its.geoFrame.n)
+					* Frame::cosTheta(its.wi) >= 0)) {
+
+				/* Only continue if:
+				   1. The current path length is below the specifed maximum
+				   2. If 'strictNormals'=true, when the geometric and shading
+					  normals classify the incident direction to the same side */
+				break;
+			}
+
+			/* ==================================================================== */
+			/*                     Direct illumination sampling                     */
+			/* ==================================================================== */
+
+			/* Estimate the direct illumination if this is requested */
+			DirectSamplingRecord dRec(its);
+
+			if (rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance &&
+				(bsdf->getType() & BSDF::ESmooth)) {
+				Spectrum value;
+				if (!m_isThermal) {
+					value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+					//determine repetitive of sample sun rays
+					if (!value.isZero()) {
+						bool tmp;
+						value = repetitiveOcclude(value, its.p, dRec.d, scene, tmp);
+					}
+				}
+				else {//thermal
+					//First, try to sample a point on a emitter
+					value = scene->sampleEmitterDirect(dRec, rRec.nextSample2D());
+					//cout << dRec.p.x << " " << dRec.p.y << " " << dRec.p.z << endl;
+					//if it is a planck emitter, try to decide its status of shade to assign different temperatures
+					if (!value.isZero()) {
+						const Emitter* emitter = static_cast<const Emitter*>(dRec.object);
+						if (emitter->getProperties().hasProperty("deltaTemperature") &&
+							emitter->getProperties().getFloat("deltaTemperature", 0) != 0) {
+							//determined shaded or not
+							Vector sunDirection = emitter->getProperties().getVector("direction");
+							Ray occludeRay(dRec.p, -sunDirection, 0);
+							bool shaded = scene->rayIntersect(occludeRay);
+							if (!shaded) {
+								// further determine for repetitive occlusion
+								bool isRepetitiveOccluded = false;
+								repetitiveOcclude(Spectrum(0.0), dRec.p, -sunDirection, scene, isRepetitiveOccluded);
+								shaded = isRepetitiveOccluded;
+							}
+							value = emitter->getSpectrumAccordingToTemperature(dRec, its, shaded);
+						}
+						else { // when the sampled emitter is sky emitter, consider the repetitive
+							bool tmp;
+							value = repetitiveOcclude(value, its.p, dRec.d, scene, tmp);
+						}
+					}
+
+				}
+
+				//four component
+				if (m_hasFourComponentProduct && rRec.depth == 1) {
+					if (!value.isZero()) {//illuminated area
+						if (its.shape->getName() == "terrain") {//intersect with terrain
+							rRec.extra = 1; // illuminated soil
+						}
+						else {
+							rRec.extra = 2; // illuminated object (leaf)
+						}
+					}
+					else {//shaded area
+						if (its.shape->getName() == "terrain") {//intersect with terrain
+							rRec.extra = 3; // shaded soil
+						}
+						else {
+							rRec.extra = 4; // shaded object (leaf)
+						}
+					}
+				}
+
+				if (!value.isZero()) {
+					const Emitter* emitter = static_cast<const Emitter*>(dRec.object);
+
+					/* Allocate a record for querying the BSDF */
+					BSDFSamplingRecord bRec(its, its.toLocal(dRec.d), ERadiance);
+
+					/* Evaluate BSDF * cos(theta) */
+					//const Spectrum bsdfVal = bsdf->eval(bRec);
+					Spectrum bsdfVal;
+					FluorMatrix ttm;
+					ttm.setFluorMatrixZeros();
+					if (isFluor2MixtureBSDF) {
+						bsdfVal = bsdf->evalWithEF(bRec, ms, ttm);
+					}
+					else {
+						bsdfVal = bsdf->eval(bRec);
+					}
+
+					/* Prevent light leaks due to the use of shading normals */
+					if (!bsdfVal.isZero() && (!m_strictNormals
+						|| dot(its.geoFrame.n, dRec.d) * Frame::cosTheta(bRec.wo) > 0)) {
+						/* Calculate prob. of having generated that direction
+						   using BSDF sampling */
+						Float bsdfPdf = (emitter->isOnSurface() && dRec.measure == ESolidAngle)
+							? bsdf->pdf(bRec) : 0;
+						/* Weight using the power heuristic */
+						Float weight = miWeight(dRec.pdf, bsdfPdf);
+						if (m_isOnlyMultiScattering && rRec.depth == 1) {
+
+						}
+						else {
+							Spectrum throughput_value_weight_bsdfVal = throughput * value * bsdfVal * weight;
+							if (isFluor2MixtureBSDF) {
+								m.compute_Mb1xMb2_isFluor2Mixture_mt(mt, throughput, ttm, bsdfVal);
+							}
+							else {
+								m.compute_Mb1xMb2_isNotFluor2Mixture_mt(mt, bsdfVal);
+							}
+							Spectrum powerPSIt(0.0f);
+							Spectrum powerPSIIt(0.0f);
+							mt.compute_MbxPower(value, powerPSIt, powerPSIIt, LiAll, LiPSI, LiPSII, weight);
+							LiAll += throughput_value_weight_bsdfVal;
+							Li += throughput_value_weight_bsdfVal;
+						}
+
+					}
+				}
+			}
+
+			/* ==================================================================== */
+			/*                            BSDF sampling                             */
+			/* ==================================================================== */
+
+			/* Sample BSDF * cos(theta) */
+			Float bsdfPdf;
+			BSDFSamplingRecord bRec(its, rRec.sampler, ERadiance);
+			FluorMatrix tm; tm.setFluorMatrixZeros();
+			Spectrum bsdfWeight;
+
+			if (isFluor2MixtureBSDF) {
+				bsdfWeight = bsdf->sampleWithEF(bRec, bsdfPdf, rRec.nextSample2D(), ms, tm);
+			}
+			else {
+				bsdfWeight = bsdf->sample(bRec, bsdfPdf, rRec.nextSample2D());
+			}
+			if (bsdfWeight.isZero())
+				break;
+
+			scattered |= bRec.sampledType != BSDF::ENull;
+
+			/* Prevent light leaks due to the use of shading normals */
+			const Vector wo = its.toWorld(bRec.wo);
+			Float woDotGeoN = dot(its.geoFrame.n, wo);
+			if (m_strictNormals && woDotGeoN * Frame::cosTheta(bRec.wo) <= 0)
+				break;
+
+			bool hitEmitter = false;
+			Spectrum value;
+
+			/* Trace a ray in this direction */
+			ray = Ray(its.p, wo, ray.time);
+			scene->rayIntersect(ray, its);
+			rayRepetitive(ray, its, scene);
+			if (its.isValid()) {
+				/* Intersected something - check if it was a luminaire */
+				if (its.isEmitter()) {
+					//For thermal direct emitted
+					if (its.shape->getEmitter()->getProperties().hasProperty("deltaTemperature") &&
+						its.shape->getEmitter()->getProperties().getFloat("deltaTemperature", 0) != 0) {
+						Vector sunDirection = its.shape->getEmitter()->getProperties().getVector("direction");
+						//test occlusion. temperature will be different when shaded or not shaded
+						Ray occludeRay(its.p, -sunDirection, 0);
+						if (scene->rayIntersect(occludeRay)) {
+							its.shaded = true;
+						}
+						else {// further determine for repetitive occlusion
+							bool isRepetitiveOccluded = false;
+							repetitiveOcclude(Spectrum(0.0), its.p, -sunDirection, scene, isRepetitiveOccluded);
+							its.shaded = isRepetitiveOccluded;
+						}
+					}
+					value = its.Le(-ray.d);
+					dRec.setQuery(ray, its);
+					hitEmitter = true;
+				}
+			}
+			else {
+				/* Intersected nothing -- perhaps there is an environment map? */
+				const Emitter* env = scene->getEnvironmentEmitter();
+				if (env) {
+					if (m_hideEmitters && !scattered)
+						break;
+
+					value = env->evalEnvironment(ray);
+					if (!env->fillDirectSamplingRecord(dRec, ray))
+						break;
+					hitEmitter = true;
+				}
+				else {
+					break;
+				}
+			}
+
+			/* Keep track of the throughput and relative
+			   refractive index along the path */
+			if (isFluor2MixtureBSDF) {
+				m.compute_Mb1xMb2_isFluor2Mixture(throughput, tm, bsdfWeight);
+			}
+			else {
+				m.compute_Mb1xMb2_isNotFluor2Mixture(bsdfWeight);
+			}
+			throughput *= bsdfWeight;
+			eta *= bRec.eta;
+
+			/* If a luminaire was hit, estimate the local illumination and
+			   weight using the power heuristic */
+			if (hitEmitter &&
+				(rRec.type & RadianceQueryRecord::EDirectSurfaceRadiance)) {
+				/* Compute the prob. of generating that direction using the
+				   implemented direct illumination sampling technique */
+				const Float lumPdf = (!(bRec.sampledType & BSDF::EDelta)) ?
+					scene->pdfEmitterDirect(dRec) : 0;
+				Float miWeight_bsdfPdf_lumPdf_ = miWeight(bsdfPdf, lumPdf);
+				Spectrum throughput_value_miWeight_bsdfPdf_lumPdf_ = throughput * value * miWeight_bsdfPdf_lumPdf_;
+				Spectrum powerPSIt(0.0f);
+				Spectrum powerPSIIt(0.0f);
+				mt.compute_MbxPower(value, powerPSIt, powerPSIIt, LiAll, LiPSI, LiPSII, miWeight_bsdfPdf_lumPdf_);
+				LiAll += throughput_value_miWeight_bsdfPdf_lumPdf_;
+				Li += throughput_value_miWeight_bsdfPdf_lumPdf_;
+			}
+
+			/* ==================================================================== */
+			/*                         Indirect illumination                        */
+			/* ==================================================================== */
+
+			/* Set the recursive query type. Stop if no surface was hit by the
+			   BSDF sample or if indirect illumination was not requested */
+			if (!its.isValid() || !(rRec.type & RadianceQueryRecord::EIndirectSurfaceRadiance))
+				break;
+			rRec.type = RadianceQueryRecord::ERadianceNoEmission;
+			if (rRec.depth++ >= m_rrDepth) {
+				/* Russian roulette: try to keep path weights equal to one,
+				   while accounting for the solid angle compression at refractive
+				   index boundaries. Stop with at least some probability to avoid
+				   getting stuck (e.g. due to total internal reflection) */
+
+				Float q = std::min(throughput.max() * eta * eta, (Float)0.95f);
+				if (rRec.nextSample1D() >= q)
+					break;
+				throughput /= q;
+				if (m.isFluorMatrixNotZeros()) {
+					//Float max_mi = 0; Float max_mii = 0;
+					//for (register size_t i = 0.1860 * EXCITATION_SAMPLES; i < 0.5582 * EXCITATION_SAMPLES; ++i) {
+					//	for (register size_t j = 0.6338 * FLUOR_SAMPLES; j < 0.8311 * FLUOR_SAMPLES; ++j) {
+					//		max_mi = mi[i * FLUOR_SAMPLES + j] > max_mi ? mi[i * FLUOR_SAMPLES + j] : max_mi;
+					//		max_mii = mi[i * FLUOR_SAMPLES + j] > max_mii ? mii[i * FLUOR_SAMPLES + j] : max_mii;
+					//	}
+					//}
+					//for (int i = 0; i < EFM_LENGTH; i++) { mi[i] /= max_mi; mii[i] /= max_mii; 
+					m.compute_DivideEqual(q);
+				}
 			}
 		}
 
@@ -654,9 +1125,19 @@ protected:
 	AABB m_sceneBounds;
 	AABB m_virtualBounds;
 
+	//for orth images
+	bool m_isOrthPhoto;
+	Float m_reference_height;
+	Vector m_sensor_direction;
+
+	//for layer image
+	bool m_has_img_layer;
+	Float m_layer_img_bottom, m_layer_img_upper;
+
 	bool m_isThermal;
 
 	bool m_isOnlyMultiScattering; //Only records the multiple scattering energy for a image
+	
 };
 
 MTS_IMPLEMENT_CLASS_S(MIPathTracer, false, MonteCarloIntegrator)

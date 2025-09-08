@@ -33,6 +33,6 @@ import sys, os
 sys.path.append(os.path.abspath('../data/scons'))
 from detect_python import detect_python
 detected_python3 = detect_python()
-print detected_python3
+print(detected_python3)
 locals().update(detected_python3)
 

@@ -27,6 +27,12 @@ namespace singleRay {
 			m_maxRange = props.getFloat("maxRange", 60);
 
 			m_batchFile = props.getString("batchFile", "");
+			m_batchStartIndex = props.getInteger("batchStartIndex", 0);
+
+			m_sceneXSzie = props.getFloat("SceneXSize", 100);
+			m_sceneZSize = props.getFloat("SceneZSize", 100);
+
+			m_wavelengths = props.getSpectrum("wavelengths", Spectrum(1500.0));
 		}
 
 		Waveform(Stream *stream, InstanceManager *manager)
@@ -41,6 +47,9 @@ namespace singleRay {
 			m_area = stream->readFloat();
 			m_minRange = stream->readFloat();
 			m_maxRange = stream->readFloat();
+			m_sceneXSzie = stream->readFloat();
+			m_sceneZSize = stream->readFloat();
+			m_batchStartIndex = stream->readInt();
 		}
 
 		void serialize(Stream *stream, InstanceManager *manager) const {
@@ -55,6 +64,9 @@ namespace singleRay {
 			stream->writeFloat(m_area);
 			stream->writeFloat(m_minRange);
 			stream->writeFloat(m_maxRange);
+			stream->writeFloat(m_sceneXSzie);
+			stream->writeFloat(m_sceneZSize);
+			stream->writeInt(m_batchStartIndex);
 		}
 
 		bool preprocess(const Scene *scene, RenderQueue *queue, const RenderJob *job,
@@ -80,12 +92,26 @@ namespace singleRay {
 			const RenderJob *job, int sceneResID, int sensorResID, int samplerResID) {
 
 			ref<Scheduler> scheduler = Scheduler::getInstance();
+
+			size_t nCores = scheduler->getCoreCount();
+
 			ref<WaveformProcess> process = new WaveformProcess();
 			m_scene = static_cast<Scene *>(Scheduler::getInstance()->getResource(sceneResID));
 			configureProcess(process);
+			cout << "INFO: Loading LiDAR configurations..." << endl;
 			int numOfPulses = generatePulsesConfiguration(process);
+			cout << "INFO: Loading finished. Total Pulses: "<< numOfPulses << endl;
 			process->m_numOfPulses = numOfPulses;
 			process->m_waveforms.resize(process->m_numOfPulses);
+
+			AABB aabb = scene->getKDTree()->getAABB();
+			Vector extent = aabb.getExtents();
+			process->setupProgressReporter("Simulating", numOfPulses, job);
+			Log(EInfo, "Starting simulation job (%.2fx%.2f, " "%d" " pulses, " SIZE_T_FMT
+				" %s, " SSE_STR ") ..", extent.x, extent.z,
+				numOfPulses, nCores, nCores == 1 ? "core" : "cores");
+
+
 			process->bindResource("scene", sceneResID);
 			scheduler->schedule(process);
 			m_process = process;
@@ -93,7 +119,9 @@ namespace singleRay {
 
 			scheduler->wait(process);
 			
+			cout << endl << "INFO: Outputing results..." << endl;
 			process->outputWaveformToOneFile(m_batchFile + ".txt");
+			cout << "INFO: Finished." << endl;;
 			m_process = NULL;
 
 			return process->getReturnStatus() == ParallelProcess::ESuccess;
@@ -129,6 +157,14 @@ namespace singleRay {
 			proc->m_maxRange = m_maxRange;
 
 			proc->m_outputPath = m_outputPath;
+
+			proc->m_sceneXSzie = m_sceneXSzie;
+			proc->m_sceneZSize = m_sceneZSize;
+			proc->m_wavelengths = m_wavelengths;
+
+			proc->m_granularityPulses = 20000; //Number of pulses for each process core.
+			proc->m_numGeneratedPulses = 0;
+			proc->m_batchStartIndex = m_batchStartIndex;
 
 		}
 
@@ -181,6 +217,7 @@ namespace singleRay {
 			Spectrum w(0.);
 			Float r;
 			CircleBeamGridSampler s(n);
+			s.generate();
 			Vector2 v;
 			while (s.hasNext()) {
 				v = s.next();
@@ -217,7 +254,13 @@ namespace singleRay {
 		Float m_maxRange;
 
 		std::string m_batchFile;
+		int m_batchStartIndex;
 		std::string m_outputPath;
+
+		Spectrum m_wavelengths;
+
+		Float m_sceneXSzie;
+		Float m_sceneZSize;
 	};
 
 	MTS_IMPLEMENT_CLASS_S(Waveform, false, Integrator)

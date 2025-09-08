@@ -22,6 +22,7 @@
 
 #include <mitsuba/mitsuba.h>
 #include <mitsuba/core/half.h>
+#include <mitsuba/core/fluor_matrix.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -173,6 +174,8 @@ public:
 
 	/// Write a signed int (32 bit) to the stream
 	void writeInt(int value);
+	/// Write a fluorescence matrix to the stream
+	void writeEFMatrix(std::vector<Float> value, size_t size);
 
 	/// Write an array of signed ints (32 bit) to the stream
 	void writeIntArray(const int *values, size_t size);
@@ -326,6 +329,9 @@ public:
 
 	/// Read a signed int (32 bit) from the stream
 	int readInt();
+
+	/// Read a fluorescence matrix from the stream
+	FluorMatrixs readEFMatrix(size_t size);
 
 	/// Read an array of signed ints (32 bit) from the stream
 	void readIntArray(int *dst, size_t size);

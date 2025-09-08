@@ -343,7 +343,7 @@ public:
 		if (extension != expectedExtension)
 			filename.replace_extension(expectedExtension);
 
-		Log(EInfo, "Writing image to \"%s\" ..", filename.string().c_str());
+		Log(EInfo, "Writing file to \"%s\" ..", filename.string().c_str());
 		ref<FileStream> stream = new FileStream(filename, FileStream::ETruncWrite);
 
 		//annotate(scene, m_properties, bitmap, renderTime, m_gamma);

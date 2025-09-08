@@ -25,6 +25,8 @@
 #include <mitsuba/core/properties.h>
 #include <mitsuba/render/common.h>
 #include <mitsuba/render/shader.h>
+#include <mitsuba/core/spectrum.h>
+#include <mitsuba/core/fluor_matrix.h>
 
 MTS_NAMESPACE_BEGIN
 
@@ -192,7 +194,6 @@ public:
 	int sampledComponent;
 };
 
-
 /**
  * \brief Abstract %BSDF base-class.
  *
@@ -335,10 +336,38 @@ public:
 
 	/// Return the diffuse reflectance value (if any)
 	virtual Spectrum getDiffuseReflectance(const Intersection &its) const;
+	/// Return the diffuse transmittance value (if any)
+	virtual Spectrum getDiffuseTransmittance(const Intersection& its) const;
 
 	/// Return the specular reflectance value (if any)
 	virtual Spectrum getSpecularReflectance(const Intersection &its) const {
 		return Spectrum(0.0f);
+	}
+
+	/// Return the single scattering albedo at the intersection
+	virtual Spectrum getSingleScatteringAlbedo(const Intersection& its) const {
+		NotImplementedError("eval");
+	}
+
+	/// Return fluorescence matrixs
+	virtual FluorMatrixs getFluorMatrixs() const {
+		NotImplementedError("getFluorMatrixs");
+	}
+	/// Return kChlrel
+	virtual Spectrum getkChlrel() const {
+		NotImplementedError("getkChlrel");
+	}
+	/// Return phi
+	virtual void getphi(Spectrum& phiI, Spectrum& phiII) const {
+		NotImplementedError("getphi");
+	}
+	/// Return fqe
+	virtual void getfqe(Float& fqeI, Float& fqeII) const {
+		NotImplementedError("getfqe");
+	}
+	/// Return epsilon
+	virtual Spectrum getepsilon(const Intersection& its) const {
+		NotImplementedError("getepsilon");
 	}
 
 	/**
@@ -367,6 +396,8 @@ public:
 	 *
 	 */
 	virtual Spectrum sample(BSDFSamplingRecord &bRec, const Point2 &sample) const = 0;
+	virtual Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const = 0;
 
 	/**
 	 * \brief Sample the BSDF and return the probability density \a and the
@@ -396,6 +427,8 @@ public:
 	 */
 	virtual Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf,
 		const Point2 &sample) const = 0;
+	virtual Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const = 0;
 
 	/**
 	 * \brief Evaluate the BSDF f(wi, wo) or its adjoint version f^{*}(wi, wo)
@@ -416,6 +449,8 @@ public:
 	 */
 	virtual Spectrum eval(const BSDFSamplingRecord &bRec,
 		EMeasure measure = ESolidAngle) const = 0;
+	virtual Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure = ESolidAngle) const = 0;
 
 	/**
 	 * \brief Compute the probability of sampling \c bRec.wo (given

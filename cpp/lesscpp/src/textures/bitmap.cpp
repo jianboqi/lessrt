@@ -169,9 +169,9 @@ public:
 	typedef TSpectrum<half> SpectrumHalf;
 	typedef TMIPMap<Spectrum, SpectrumHalf> MIPMap;
 
-	//typedef TSpectrumColor< Float, 1> Color1;
+	typedef TSpectrumColor< Float, 1> Color1;
 	//typedef TSpectrumColor< Float, 3> Color3;
-	//typedef TSpectrumColor< half, 1>  Color1h;
+	typedef TSpectrumColor< half, 1>  Color1h;
 	//typedef TSpectrumColor< half, 3>  Color3h;
 	//typedef TMIPMap< Color1, Color1h> MIPMap1;
 	//typedef TMIPMap< Color3, Color3h> MIPMap3;
@@ -180,7 +180,7 @@ public:
 	//typedef TSpectrum<Float> Color3;
 	//typedef TSpectrum<half>  Color1h;
 	//typedef TSpectrum<half>  Color3h;
-	//typedef TMIPMap<Color1, Color1h> MIPMap1;
+	typedef TMIPMap<Color1, Color1h> MIPMap1;
 	//typedef TMIPMap<Color3, Color3h> MIPMap3;
 
 	BitmapTexture(const Properties &props) : Texture2D(props) {
@@ -248,7 +248,7 @@ public:
 		} else if (tryReuseCache && MIPMap::validateCacheFile(cacheFile, timestamp,
 				Bitmap::ELuminance, m_wrapModeU, m_wrapModeV, m_filterType, m_gamma)) {
 			/* Reuse an existing MIP map cache file */
-			m_mipmap1 = new MIPMap(cacheFile, m_maxAnisotropy);
+			m_mipmap1 = new MIPMap1(cacheFile, m_maxAnisotropy);
 		} else {
 			if (bitmap == NULL) {
 				/* Load the input image if necessary */
@@ -303,7 +303,7 @@ public:
 				bitmap->getSize().x * bitmap->getSize().y > 1024*1024);
 
 			if (pixelFormat == Bitmap::ELuminance)
-				m_mipmap1 = new MIPMap(bitmap, pixelFormat, Bitmap::EFloat,
+				m_mipmap1 = new MIPMap1(bitmap, pixelFormat, Bitmap::EFloat,
 					rfilter, m_wrapModeU, m_wrapModeV, m_filterType, m_maxAnisotropy,
 					createCache ? cacheFile : fs::path(), timestamp);
 			else
@@ -406,7 +406,7 @@ public:
 		}
 
 		if (pixelFormat == Bitmap::ELuminance)
-			m_mipmap1 = new MIPMap(bitmap, pixelFormat, Bitmap::EFloat,
+			m_mipmap1 = new MIPMap1(bitmap, pixelFormat, Bitmap::EFloat,
 				rfilter, m_wrapModeU, m_wrapModeV, m_filterType, m_maxAnisotropy,
 				fs::path(), 0);
 		else
@@ -461,7 +461,7 @@ public:
 				
 			//result.fromLinearRGB(value[0], value[1], value[2]);
 		} else {
-			Spectrum value;			
+			Color1 value;
 			if (m_mipmap1->getFilterType() != ENearest)
 				value = m_mipmap1->evalBilinear(0, uv);
 			else
@@ -486,7 +486,7 @@ public:
 				gradient[0] = gradient[1] = Spectrum(0.0f);
 			}
 		} else {
-			Spectrum result[2];
+			Color1 result[2];
 			if (m_mipmap1->getFilterType() != ENearest) {
 				m_mipmap1->evalGradientBilinear(0, uv, result);
 				gradient[0] = Spectrum(result[0][0]);
@@ -510,7 +510,7 @@ public:
 		if (m_mipmap3.get()) {
 			result = m_mipmap3->eval(uv, d0, d1);
 		} else {
-			Spectrum value = m_mipmap1->eval(uv, d0, d1);
+			Color1 value = m_mipmap1->eval(uv, d0, d1);
 			result = Spectrum(value[0]);
 		}
 		return result;
@@ -521,7 +521,7 @@ public:
 		if (m_mipmap3.get()) {
 			result = m_mipmap3->getAverage();
 		} else {
-			Spectrum value = m_mipmap1->getAverage();
+			Color1 value = m_mipmap1->getAverage();
 			result = Spectrum(value[0]);
 		}
 		return result;
@@ -532,7 +532,7 @@ public:
 		if (m_mipmap3.get()) {
 			result = m_mipmap3->getMaximum();
 		} else {
-			Spectrum value = m_mipmap1->getMaximum();
+			Color1 value = m_mipmap1->getMaximum();
 			result = Spectrum(value[0]);
 		}
 		return result;
@@ -543,7 +543,7 @@ public:
 		if (m_mipmap3.get()) {
 			result = m_mipmap3->getMinimum();
 		} else {
-			Spectrum value = m_mipmap1->getMinimum();
+			Color1 value = m_mipmap1->getMinimum();
 			result = Spectrum(value[0]);
 		}
 		return result;
@@ -593,7 +593,7 @@ public:
 
 	MTS_DECLARE_CLASS()
 protected:
-	ref<MIPMap> m_mipmap1;
+	ref<MIPMap1> m_mipmap1;
 	ref<MIPMap> m_mipmap3;
 	EMIPFilterType m_filterType;
 	ReconstructionFilter::EBoundaryCondition m_wrapModeU;

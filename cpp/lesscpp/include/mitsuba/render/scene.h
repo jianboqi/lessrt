@@ -291,6 +291,19 @@ public:
 		const Point &p2, bool p2OnSurface, Float time, const Medium *medium,
 		int &interactions, Sampler *sampler = NULL) const;
 
+	//This is an extended version of scene->evalTransmittance to handle repetitive scene
+	// and also hotspot
+	Spectrum evalTransmittanceWithHotspot(const Point& p1, bool p1OnSurface,
+		const Point& p2, bool p2OnSurface, Float time, const Medium* medium,
+		int& interactions,int depth, Point& previousPoint,bool has_medium_in_single_path, Sampler* sampler = NULL) const;
+
+	//This is an extended version of scene->evalTransmittance to handle repetitive scene
+	// and also hotspot
+	// It also considers multi-medium that have overlapping areas
+	Spectrum evalTransmittanceWithHotspot(const Point& p1, bool p1OnSurface,
+		const Point& p2, bool p2OnSurface, Float time, const Medium* medium, std::vector<const Medium*> meeted_mediums,
+		int& interactions, int depth, Point& previousPoint, bool has_medium_in_single_path, Sampler* sampler = NULL) const;
+
 	//! @}
 	// =============================================================
 
@@ -559,6 +572,23 @@ public:
 			const Medium *medium, int &interactions, const Point2 &sample,
 			Sampler *sampler = NULL) const;
 
+	/*
+	* Extended version by Jianbo Qi, this version considers the repetitive scene and hotspot, thus it
+	* needs an extra information depth to determine whether hotspot is considered
+	*/
+	Spectrum sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+		const Medium* medium, int& interactions,int depth, Point& previousPoint,const Point2& sample,bool has_medium_in_single_path,
+		Sampler* sampler = NULL) const;
+
+	/*
+	* Extended version by Jianbo Qi, this version considers the repetitive scene and hotspot, thus it
+	* needs an extra information depth to determine whether hotspot is considered
+	* It also considers the multiple mediums that have overlapping areas;
+	*/
+	Spectrum sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+		const Medium* medium, std::vector<const Medium*>& meeted_mediums, int& interactions, int depth, Point& previousPoint, const Point2& sample, bool has_medium_in_single_path,
+		Sampler* sampler = NULL) const;
+
 	/**
 	 * \brief "Direct illumination" sampling routine for the main scene sensor
 	 * with support for participating media (medium variant)
@@ -660,6 +690,14 @@ public:
 	Spectrum sampleAttenuatedEmitterDirect(DirectSamplingRecord &dRec,
 			const Intersection &its, const Medium *medium, int &interactions,
 			const Point2 &sample, Sampler *sampler = NULL) const;
+
+	/*
+	* Extended version by Jianbo Qi, this version considers the repetitive scene and hotspot, thus it
+	* needs an extra information depth to determine whether hotspot is considered
+	*/
+	Spectrum sampleAttenuatedEmitterDirect(DirectSamplingRecord& dRec,
+		const Intersection& its, const Medium* medium, std::vector<const Medium*>& meeted_mediums, int& interactions,int depth, Point& previousPoint,
+		const Point2& sample, bool has_medium_in_single_path, Sampler* sampler = NULL) const;
 
 	/**
 	 * \brief "Direct illumination" sampling routine for the main scene sensor
@@ -1094,6 +1132,18 @@ public:
 	inline ref_vector<Emitter> &getEmitters() { return m_emitters; }
 	/// Return the scene's emitters
 	inline const ref_vector<Emitter> &getEmitters() const { return m_emitters; }
+	///new Added Function by Jianbo QI: 2021/11/12
+	void removeEmitter(Emitter* emitter);
+
+	/// Return the scene's emitters
+	inline ref_vector<Bioemitter>& getBioemitters() { return m_bioemitters; }
+	/// Return the scene's emitters
+	inline const ref_vector<Bioemitter>& getBioemitters() const { return m_bioemitters; }
+	///new Added Function by Jianbo QI: 2021/11/12
+	void removeBioemitter(Bioemitter* bioemitter);
+
+	//new added by Jianbo 2023.4.11
+	void removeReferencedObject(ConfigurableObject* obj);
 	/// Return the scene's participating media
 	inline ref_vector<Medium> &getMedia() { return m_media; }
 	/// Return the scene's participating media
@@ -1153,6 +1203,7 @@ private:
 	ref_vector<Shape> m_specialShapes;
 	ref_vector<Sensor> m_sensors;
 	ref_vector<Emitter> m_emitters;
+	ref_vector<Bioemitter> m_bioemitters;
 	ref_vector<ConfigurableObject> m_objects;
 	ref_vector<NetworkedObject> m_netObjects;
 	ref_vector<Subsurface> m_ssIntegrators;
@@ -1165,6 +1216,8 @@ private:
 	uint32_t m_blockSize;
 	bool m_degenerateSensor;
 	bool m_degenerateEmitters;
+	AABB m_sceneBounds;//by jianboqi, 2021/12/6 for storing the scene bounds defined by user, initialized in scene.configure()
+	int m_repetitiveSceneNum;//by jianboqi
 };
 
 MTS_NAMESPACE_END

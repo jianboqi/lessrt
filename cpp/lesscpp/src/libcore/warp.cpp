@@ -30,6 +30,14 @@ Vector squareToUniformSphere(const Point2 &sample) {
 	return Vector(r * cosPhi, r * sinPhi, z);
 }
 
+Vector squareToUniformSphereExt(const Point2& sample) {
+	Float z = 1.0f - 2.0f * sample.y;
+	Float r = math::safe_sqrt(1.0f - z * z);
+	Float sinPhi, cosPhi;
+	math::sincos(2.0f * M_PI * sample.x, &sinPhi, &cosPhi);
+	return Vector(-r * cosPhi, z, r * sinPhi);
+}
+
 Vector squareToUniformHemisphere(const Point2 &sample) {
 	Float z = sample.x;
 	Float tmp = math::safe_sqrt(1.0f - z*z);

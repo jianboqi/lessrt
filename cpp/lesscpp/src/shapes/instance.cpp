@@ -101,6 +101,15 @@ void Instance::addChild(const std::string &name, ConfigurableObject *child) {
 		m_shapeGroup = static_cast<ShapeGroup *>(child);
 		if (m_shapeGroup->isEmitter()) {
 			m_emitter = m_shapeGroup->getEmitter();
+			for (int i = 0; i < m_shapeGroup->getShapeGroupEmitters().size(); i++) {
+				m_shapegroup_emitters.push_back(m_shapeGroup->getShapeGroupEmitters()[i]);
+			}
+		}
+		if (m_shapeGroup->isBioemitter()) {
+			m_bioemitter = m_shapeGroup->getBioemitter();
+			for (int i = 0; i < m_shapeGroup->getShapeGroupBioemitters().size(); i++) {
+				m_shapegroup_bioemitters.push_back(m_shapeGroup->getShapeGroupBioemitters()[i]);
+			}
 		}
 	} else {
 		Shape::addChild(name, child);
@@ -187,6 +196,20 @@ void Instance::getNormalDerivative(const Intersection &its,
 
 	dndu -= tn * dot(tn, dndu);
 	dndv -= tn * dot(tn, dndv);
+}
+
+
+void Instance::samplePosition(PositionSamplingRecord& pRec,const Point2& sample) const {
+	m_shapeGroup->samplePosition(pRec, sample);
+	//When generated position by m_shapeGroup->samplePosition, the p is always in the local coordinates, thus
+	//it should be tranformed to the correct world space by the transformaton matrix of instance object.
+	const Transform& trafo = m_transform->eval(0);
+	pRec.p = trafo(pRec.p);
+}
+
+
+Float Instance::getSurfaceArea() const {
+	return m_shapeGroup->getSurfaceArea();
 }
 
 MTS_IMPLEMENT_CLASS_S(Instance, false, Shape)

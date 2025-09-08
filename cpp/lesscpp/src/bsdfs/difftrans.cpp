@@ -72,7 +72,9 @@ public:
 			| (m_transmittance->isConstant() ? 0 : ESpatiallyVarying));
 		BSDF::configure();
 	}
-
+	Spectrum getDiffuseTransmittance(const Intersection& its) const {
+		return m_transmittance->eval(its);
+	}
 	Spectrum eval(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		if (!(bRec.typeMask & EDiffuseTransmission) || measure != ESolidAngle
 			|| Frame::cosTheta(bRec.wi) * Frame::cosTheta(bRec.wo) >= 0)
@@ -80,6 +82,18 @@ public:
 
 		return m_transmittance->eval(bRec.its)
 			* (INV_PI * std::abs(Frame::cosTheta(bRec.wo)));
+	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		if (!(bRec.typeMask & EDiffuseTransmission) || measure != ESolidAngle
+			|| Frame::cosTheta(bRec.wi) * Frame::cosTheta(bRec.wo) >= 0) {
+			m.setFluorMatrixZeros();
+			return Spectrum(0.0f);
+		}
+		Float INV_PI_std_abs_Frame_cosTheta_bRec_wo_ = INV_PI * std::abs(Frame::cosTheta(bRec.wo));
+		m.setFluorMatrixForward_M1(ms, INV_PI_std_abs_Frame_cosTheta_bRec_wo_);
+		return m_transmittance->eval(bRec.its)
+			* INV_PI_std_abs_Frame_cosTheta_bRec_wo_;
 	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
@@ -101,6 +115,19 @@ public:
 		bRec.sampledType = EDiffuseTransmission;
 		return m_transmittance->eval(bRec.its);
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		if (!(bRec.typeMask & EDiffuseTransmission))
+			return Spectrum(0.0f);
+		bRec.wo = warp::squareToCosineHemisphere(sample);
+		if (Frame::cosTheta(bRec.wi) > 0)
+			bRec.wo.z *= -1;
+		bRec.eta = 1.0f;
+		bRec.sampledComponent = 0;
+		bRec.sampledType = EDiffuseTransmission;
+		m.setFluorMatrixForward(ms);
+		return m_transmittance->eval(bRec.its);
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &sample) const {
 		if (!(bRec.typeMask & m_combinedType))
@@ -112,6 +139,20 @@ public:
 		bRec.sampledComponent = 0;
 		bRec.sampledType = EDiffuseTransmission;
 		pdf = std::abs(Frame::cosTheta(bRec.wo)) * INV_PI;
+		return m_transmittance->eval(bRec.its);
+	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		if (!(bRec.typeMask & m_combinedType))
+			return Spectrum(0.0f);
+		bRec.wo = warp::squareToCosineHemisphere(sample);
+		if (Frame::cosTheta(bRec.wi) > 0)
+			bRec.wo.z *= -1;
+		bRec.eta = 1.0f;
+		bRec.sampledComponent = 0;
+		bRec.sampledType = EDiffuseTransmission;
+		pdf = std::abs(Frame::cosTheta(bRec.wo)) * INV_PI;
+		m.setFluorMatrixForward(ms);
 		return m_transmittance->eval(bRec.its);
 	}
 

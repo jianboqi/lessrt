@@ -96,6 +96,8 @@ public:
 
 	/// Return the total surface area
 	Float getSurfaceArea() const;
+	/// Return the triangles area
+	Float* getTrianglesArea(int& triangleCount) const;
 
 	/// Return a bounding box containing the mesh
 	AABB getAABB() const;
@@ -367,6 +369,7 @@ protected:
 
 	/* Surface and distribution -- generated on demand */
 	DiscreteDistribution m_areaDistr;
+	Float* m_trianglesArea;
 	Float m_surfaceArea;
 	Float m_invSurfaceArea;
 	ref<Mutex> m_mutex;

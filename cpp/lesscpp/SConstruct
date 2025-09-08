@@ -77,6 +77,8 @@ build('src/films/SConscript')
 build('src/sensors/SConscript')
 # Emitters
 build('src/emitters/SConscript')
+# Biomitters
+build('src/bioemitters/SConscript')
 # Participating media
 build('src/medium/SConscript')
 # Volumetric data sources

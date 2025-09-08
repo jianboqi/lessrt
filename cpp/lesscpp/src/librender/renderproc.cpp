@@ -27,9 +27,9 @@ MTS_NAMESPACE_BEGIN
 class BlockRenderer : public WorkProcessor {
 public:
 	BlockRenderer(Bitmap::EPixelFormat pixelFormat, int channelCount, int blockSize,
-		int borderSize, bool warnInvalid,bool hasFourComponentProduct) : m_pixelFormat(pixelFormat),
+		int borderSize, bool warnInvalid, bool hasFourComponentProduct, size_t hasFluorProduct) : m_pixelFormat(pixelFormat),
 		m_channelCount(channelCount), m_blockSize(blockSize),
-		m_borderSize(borderSize), m_warnInvalid(warnInvalid), m_hasFourComponentProduct(hasFourComponentProduct){ }
+		m_borderSize(borderSize), m_warnInvalid(warnInvalid), m_hasFourComponentProduct(hasFourComponentProduct), m_hasFluorProduct(hasFluorProduct) { }
 
 	BlockRenderer(Stream *stream, InstanceManager *manager) {
 		m_pixelFormat = (Bitmap::EPixelFormat) stream->readInt();
@@ -49,7 +49,7 @@ public:
 			m_sensor->getFilm()->getReconstructionFilter(),
 			m_channelCount, m_warnInvalid);*/
 		return new MultipleImageBlock(m_pixelFormat,
-			Vector2i(m_blockSize), m_hasFourComponentProduct,//fourcomponents
+			Vector2i(m_blockSize), m_hasFourComponentProduct, m_hasFluorProduct, /*fourcomponents*/
 			m_sensor->getFilm()->getReconstructionFilter(), 
 			m_channelCount, m_warnInvalid);
 	}
@@ -100,7 +100,7 @@ public:
 
 	ref<WorkProcessor> clone() const {
 		return new BlockRenderer(m_pixelFormat, m_channelCount,
-			m_blockSize, m_borderSize, m_warnInvalid,m_hasFourComponentProduct);
+			m_blockSize, m_borderSize, m_warnInvalid,m_hasFourComponentProduct, m_hasFluorProduct);
 	}
 
 	MTS_DECLARE_CLASS()
@@ -119,10 +119,11 @@ private:
 	HilbertCurve2D<uint8_t> m_hilbertCurve;
 
 	bool m_hasFourComponentProduct;
+	size_t m_hasFluorProduct;
 };
 
 BlockedRenderProcess::BlockedRenderProcess(const RenderJob *parent, RenderQueue *queue,
-		int blockSize, bool hasFourComponentProduct) : m_queue(queue), m_parent(parent), m_resultCount(0), m_progress(NULL) {
+		int blockSize, bool hasFourComponentProduct, size_t hasFluorProduct) : m_queue(queue), m_parent(parent), m_resultCount(0), m_progress(NULL) {
 	m_blockSize = blockSize;
 	m_resultMutex = new Mutex();
 	m_pixelFormat = Bitmap::ESpectrumAlphaWeight;
@@ -130,6 +131,7 @@ BlockedRenderProcess::BlockedRenderProcess(const RenderJob *parent, RenderQueue 
 	m_warnInvalid = true;
 
 	m_hasFourComponentProduct = hasFourComponentProduct;
+	m_hasFluorProduct = hasFluorProduct;
 }
 
 BlockedRenderProcess::~BlockedRenderProcess() {
@@ -145,7 +147,7 @@ void BlockedRenderProcess::setPixelFormat(Bitmap::EPixelFormat pixelFormat, int 
 
 ref<WorkProcessor> BlockedRenderProcess::createWorkProcessor() const {
 	return new BlockRenderer(m_pixelFormat, m_channelCount,
-			m_blockSize, m_borderSize, m_warnInvalid, m_hasFourComponentProduct);
+			m_blockSize, m_borderSize, m_warnInvalid, m_hasFourComponentProduct, m_hasFluorProduct);
 }
 
 void BlockedRenderProcess::processResult(const WorkResult *result, bool cancelled) {
@@ -157,6 +159,12 @@ void BlockedRenderProcess::processResult(const WorkResult *result, bool cancelle
 	if (m_hasFourComponentProduct) {
 		m_fourComponentFilm->put(multipleImageBlock->getFourComponentImageBlock());
 	}
+	if (m_hasFluorProduct) {
+		m_FluorAllFilm->put(multipleImageBlock->getFluorAllImageBlock());
+		m_FluorPSIFilm->put(multipleImageBlock->getFluorPSIImageBlock());
+		if(m_hasFluorProduct==1)
+			m_FluorPSIIFilm->put(multipleImageBlock->getFluorPSIIImageBlock());
+	}
 
 	m_progress->update(++m_resultCount);
 	lock.unlock();
@@ -165,6 +173,12 @@ void BlockedRenderProcess::processResult(const WorkResult *result, bool cancelle
 	if (m_resultCount == m_numBlocksTotal) {
 		if(m_hasFourComponentProduct)
 			m_fourComponentFilm->develop(m_scene, 0);
+		if (m_hasFluorProduct) {
+			m_FluorAllFilm->develop(m_scene, 0);
+			m_FluorPSIFilm->develop(m_scene, 0);
+			if (m_hasFluorProduct == 1)
+				m_FluorPSIIFilm->develop(m_scene, 0);
+		}
 	}
 }
 
@@ -201,8 +215,41 @@ void BlockedRenderProcess::bindResource(const std::string &name, int id) {
 
 			m_fourComponentFilm = static_cast<Film *>(PluginManager::getInstance()->createObject(
 				MTS_CLASS(Film), filmProps));
+			m_fourComponentFilm->clear();
 			std::string fourCompFile_file = m_scene->getDestinationFile().string() + "_4Components";
 			m_fourComponentFilm->setDestinationFile(fourCompFile_file, m_scene->getBlockSize());
+		}
+		if (m_hasFluorProduct) {
+			Properties filmProps("mfilm");
+			filmProps.setInteger("width", size.x);
+			filmProps.setInteger("height", size.y);
+			filmProps.setString("fileFormat", "numpy");
+			filmProps.setString("pixelFormat", "spectrum");
+
+			m_FluorAllFilm = static_cast<Film*>(PluginManager::getInstance()->createObject(
+				MTS_CLASS(Film), filmProps));
+			m_FluorAllFilm->clear();
+			std::string m_FluorAllFilm_file = m_scene->getDestinationFile().string() + "_All_Radiance_with_Fluor";
+			m_FluorAllFilm->setDestinationFile(m_FluorAllFilm_file, m_scene->getBlockSize());
+
+			m_FluorPSIFilm = static_cast<Film*>(PluginManager::getInstance()->createObject(
+				MTS_CLASS(Film), filmProps));
+			m_FluorPSIFilm->clear();
+			std::string m_FluorPSIFilm_file;
+			if(m_hasFluorProduct==1)
+				m_FluorPSIFilm_file = m_scene->getDestinationFile().string() + "_FluorPSI";
+			else if(m_hasFluorProduct == 2)
+				m_FluorPSIFilm_file = m_scene->getDestinationFile().string() + "_Fluor";
+			m_FluorPSIFilm->setDestinationFile(m_FluorPSIFilm_file, m_scene->getBlockSize());
+
+
+			if (m_hasFluorProduct == 1){
+				m_FluorPSIIFilm = static_cast<Film*>(PluginManager::getInstance()->createObject(
+					MTS_CLASS(Film), filmProps));
+				m_FluorPSIIFilm->clear();
+				std::string m_FluorPSIIFilm_file = m_scene->getDestinationFile().string() + "_FluorPSII";
+				m_FluorPSIIFilm->setDestinationFile(m_FluorPSIIFilm_file, m_scene->getBlockSize());
+			}
 		}
 		
 		if (m_blockSize < m_borderSize)

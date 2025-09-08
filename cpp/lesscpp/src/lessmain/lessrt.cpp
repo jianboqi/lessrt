@@ -392,6 +392,7 @@ int mitsuba_app(int argc, char **argv) {
 				scene, renderQueue, -1, -1, -1, true, flushTimer > 0);
 			thr->start();
 
+			//numParallelScenes: the number of scenes that are simulated simutaneously
 			renderQueue->waitLeft(numParallelScenes-1);
 			if (i+1 < argc && numParallelScenes == 1)
 				Statistics::getInstance()->resetAll();

@@ -77,6 +77,11 @@ public:
 
 	void adjustTime(Intersection &its, Float time) const;
 
+	void samplePosition(PositionSamplingRecord& pRec,
+		const Point2& sample) const;
+
+	Float getSurfaceArea() const;
+
 	//! @}
 	// =============================================================
 

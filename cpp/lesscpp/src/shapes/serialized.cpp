@@ -156,8 +156,12 @@ public:
 		int shapeIndex = props.getInteger("shapeIndex", 0);
 		AssertEx(shapeIndex >= 0, "Shape index must be nonnegative!");
 
-		std::string name = (props.getID() != "unnamed") ? props.getID()
-			: formatString("%s@%i", filePath.stem().string().c_str(), shapeIndex);
+		/*std::string name = (props.getID() != "unnamed") ? props.getID()
+			: formatString("%s@%i", filePath.stem().string().c_str(), shapeIndex);*/
+
+		std::string comp_name = (props.getID() != "unnamed") ? props.getID()
+			: formatString("%s", filePath.stem().string().c_str());
+		m_name = comp_name;
 
 		/* Load the geometry */
 		Log(EInfo, "Loading shape %i from \"%s\" ..", shapeIndex, filePath.filename().string().c_str());
@@ -166,8 +170,7 @@ public:
 		Log(EDebug, "Done (" SIZE_T_FMT " triangles, " SIZE_T_FMT " vertices, %i ms)",
 			m_triangleCount, m_vertexCount, timer->getMilliseconds());
 
-		if (m_name.empty())
-			m_name = name;
+		
 
 		/* By default, any existing normals will be used for
 		   rendering. If no normals are found, Mitsuba will

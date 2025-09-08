@@ -4,13 +4,22 @@ Import('env', 'plugins')
 plugins += env.SharedLibrary('diffuse', ['diffuse.cpp'])
 
 # Materials that act as modifiers
+plugins += env.SharedLibrary('mask', ['mask.cpp'])
 plugins += env.SharedLibrary('twosided', ['twosided.cpp'])
 plugins += env.SharedLibrary('mixturebsdf', ['mixturebsdf.cpp'])
+plugins += env.SharedLibrary('fluor2mixturebsdf', ['fluor2mixturebsdf.cpp'])
 
 # Other materials
 plugins += env.SharedLibrary('difftrans', ['difftrans.cpp'])
 plugins += env.SharedLibrary('null', ['null.cpp'])
 
 plugins += env.SharedLibrary('soilspect', ['soilspect.cpp'])
+
+plugins += env.SharedLibrary('dielectric', ['dielectric.cpp'])
+
+plugins += env.SharedLibrary('rpv', ['rpv.cpp'])
+plugins += env.SharedLibrary('art', ['art/art.cpp'])
+plugins += env.SharedLibrary('artf', ['art/artf.cpp'])
+plugins += env.SharedLibrary('hapke_marmit2', ['hapke_marmit2/hapke_marmit2.cpp'])
 
 Export('plugins')

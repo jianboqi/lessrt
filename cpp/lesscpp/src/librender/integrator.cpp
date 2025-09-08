@@ -45,16 +45,19 @@ const Integrator *Integrator::getSubIntegrator(int idx) const { return NULL; }
 SamplingIntegrator::SamplingIntegrator(const Properties &props)
  : Integrator(props) {
 	m_hasFourComponentProduct = props.getBoolean("hasFourComponentProduct", false);
+	m_hasFluorProduct = props.getInteger("hasFluorProduct", false);
 }
 
 SamplingIntegrator::SamplingIntegrator(Stream *stream, InstanceManager *manager)
  : Integrator(stream, manager) {
 	m_hasFourComponentProduct = stream->readBool();
+	m_hasFluorProduct = stream->readBool();
 }
 
 void SamplingIntegrator::serialize(Stream *stream, InstanceManager *manager) const {
 	Integrator::serialize(stream, manager);
 	stream->writeBool(m_hasFourComponentProduct);
+	stream->writeInt(m_hasFluorProduct);
 }
 
 Spectrum SamplingIntegrator::E(const Scene *scene, const Intersection &its,
@@ -115,7 +118,7 @@ bool SamplingIntegrator::render(Scene *scene,
 
 	/* This is a sampling-based integrator - parallelize */
 	ref<ParallelProcess> proc = new BlockedRenderProcess(job,
-		queue, scene->getBlockSize(), m_hasFourComponentProduct);
+		queue, scene->getBlockSize(), m_hasFourComponentProduct, m_hasFluorProduct);
 	int integratorResID = sched->registerResource(this);
 	proc->bindResource("integrator", integratorResID);
 	proc->bindResource("scene", sceneResID);
@@ -169,7 +172,6 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 		Point2i offset = Point2i(points[i]) + Vector2i(multiImageblock->getMainImageBlock()->getOffset());
 		if (stop)
 			break;
-
 		sampler->generate(offset);
 		std::vector<int> fourcomps;
 		if (m_hasFourComponentProduct) {
@@ -191,14 +193,31 @@ void SamplingIntegrator::renderBlock(const Scene *scene,
 
 			Spectrum spec = sensor->sampleRayDifferential(
 				sensorRay, samplePos, apertureSample, timeSample);
+			Spectrum specFluorAll(0.0f);
+			Spectrum specFluorPSI(0.0f);
+			Spectrum specFluorPSII(0.0f);
 
 
 			sensorRay.scaleDifferential(diffScaleFactor);
+			//if (i == 116 && j==180) {
+			//	cout << "L: " << j << endl;
+			//}
 
-			spec *= Li(sensorRay, rRec); 
-			//multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
-			multiImageblock->getMainImageBlock()->put_no_filter(Point2i(points[i]), spec, rRec.alpha);
-			if (m_hasFourComponentProduct && rRec.extra > 0) {
+			if (m_hasFluorProduct) {
+				spec *= LiWithEF(sensorRay, rRec, specFluorAll, specFluorPSI, specFluorPSII);
+				//multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
+				multiImageblock->getMainImageBlock()->put_no_filter(Point2i(points[i]), spec, rRec.alpha);
+				multiImageblock->getFluorAllImageBlock()->put_no_filter(Point2i(points[i]), specFluorAll, rRec.alpha);
+				multiImageblock->getFluorPSIImageBlock()->put_no_filter(Point2i(points[i]), specFluorPSI, rRec.alpha);
+				if (m_hasFluorProduct==1)
+					multiImageblock->getFluorPSIIImageBlock()->put_no_filter(Point2i(points[i]), specFluorPSII, rRec.alpha);
+			}
+			else {
+				spec *= Li(sensorRay, rRec);
+				//multiImageblock->getMainImageBlock()->put(samplePos, spec, rRec.alpha);
+				multiImageblock->getMainImageBlock()->put_no_filter(Point2i(points[i]), spec, rRec.alpha);
+			}
+			if (m_hasFourComponentProduct && rRec.extra >= 1 && rRec.extra <= 4) {
 				fourcomps[rRec.extra - 1]++;
 			}
 			sampler->advance();

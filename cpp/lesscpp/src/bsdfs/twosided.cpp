@@ -118,6 +118,20 @@ public:
 			return m_nestedBRDF[1]->eval(b, measure);
 		}
 	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		BSDFSamplingRecord b(bRec);
+		if (Frame::cosTheta(b.wi) > 0) {
+			return m_nestedBRDF[0]->evalWithEF(b, ms, m, measure);
+		}
+		else {
+			if (b.component != -1)
+				b.component -= m_nestedBRDF[0]->getComponentCount();
+			b.wi.z *= -1;
+			b.wo.z *= -1;
+			return m_nestedBRDF[1]->evalWithEF(b, ms, m, measure);
+		}
+	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		BSDFSamplingRecord b(bRec);
@@ -157,6 +171,31 @@ public:
 
 		return result;
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		bool flipped = false;
+
+		if (Frame::cosTheta(bRec.wi) < 0) {
+			bRec.wi.z *= -1;
+			flipped = true;
+			if (bRec.component != -1)
+				bRec.component -= m_nestedBRDF[0]->getComponentCount();
+		}
+
+		Spectrum result = m_nestedBRDF[flipped ? 1 : 0]->sampleWithEF(bRec, sample, ms, m);
+
+		if (flipped) {
+			bRec.wi.z *= -1;
+			if (bRec.component != -1)
+				bRec.component += m_nestedBRDF[0]->getComponentCount();
+			if (!result.isZero()) {
+				bRec.wo.z *= -1;
+				bRec.sampledComponent += m_nestedBRDF[0]->getComponentCount();
+			}
+		}
+
+		return result;
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &sample) const {
 		bool flipped = false;
@@ -168,6 +207,30 @@ public:
 		}
 
 		Spectrum result = m_nestedBRDF[flipped ? 1 : 0]->sample(bRec, pdf, sample);
+
+		if (flipped) {
+			bRec.wi.z *= -1;
+
+			if (bRec.component != -1)
+				bRec.component += m_nestedBRDF[0]->getComponentCount();
+			if (!result.isZero() && pdf != 0) {
+				bRec.wo.z *= -1;
+				bRec.sampledComponent += m_nestedBRDF[0]->getComponentCount();
+			}
+		}
+		return result;
+	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		bool flipped = false;
+		if (Frame::cosTheta(bRec.wi) < 0) {
+			bRec.wi.z *= -1;
+			flipped = true;
+			if (bRec.component != -1)
+				bRec.component -= m_nestedBRDF[0]->getComponentCount();
+		}
+
+		Spectrum result = m_nestedBRDF[flipped ? 1 : 0]->sampleWithEF(bRec, pdf, sample, ms, m);
 
 		if (flipped) {
 			bRec.wi.z *= -1;

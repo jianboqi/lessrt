@@ -99,15 +99,19 @@ void ShapeGroup::configure() {
 		m_kdtree->setLogLevel(ETrace);
 	if (!m_kdtree->isBuilt())
 		m_kdtree->build();
+
+	m_shapePDF.clear();
+	const std::vector<const Shape*>& shapes = m_kdtree->getShapes();
+	for (int i = 0; i < shapes.size(); i++) {
+		m_shapePDF.append(shapes[i]->getSurfaceArea());
+	}
+	m_shapePDF.normalize();
 }
 
 AABB ShapeGroup::getAABB() const {
 	return AABB();
 }
 
-Float ShapeGroup::getSurfaceArea() const {
-	return 0.0f;
-}
 
 void ShapeGroup::addChild(const std::string &name, ConfigurableObject *child) {
 	const Class *cClass = child->getClass();
@@ -118,7 +122,12 @@ void ShapeGroup::addChild(const std::string &name, ConfigurableObject *child) {
 		/*if (shape->isEmitter())
 			Log(EError, "Instancing of emitters is not supported");*/
 		if (shape->isEmitter()) {
-			m_emitter = shape->getEmitter();
+			m_emitter = shape->getEmitter();//only used to determine if shapegroup is emitter
+			m_shapegroup_emitters.push_back(shape->getEmitter());
+		}
+		if (shape->isBioemitter()) {
+			m_bioemitter = shape->getBioemitter();//only used to determine if shapegroup is emitter
+			m_shapegroup_bioemitters.push_back(shape->getBioemitter());
 		}
 		if (shape->isSensor())
 			Log(EError, "Instancing of sensors is not supported");
@@ -155,6 +164,25 @@ size_t ShapeGroup::getPrimitiveCount() const {
 
 size_t ShapeGroup::getEffectivePrimitiveCount() const {
 	return 0;
+}
+
+void ShapeGroup::samplePosition(PositionSamplingRecord& pRec, const Point2& sample) const {
+	const std::vector<const Shape*>& shapes = m_kdtree->getShapes();
+	Point2 sampleNew(sample);
+	Float emPdf;
+	size_t index = m_shapePDF.sampleReuse(sampleNew.x, emPdf);
+	const Shape* chosenShape = shapes[index];
+	chosenShape->samplePosition(pRec, sample);
+	pRec.object = chosenShape;
+}
+
+Float ShapeGroup::getSurfaceArea() const {
+	const std::vector<const Shape*>& shapes = m_kdtree->getShapes();
+	Float totArea = 0;
+	for (int i = 0; i < shapes.size(); i++) {
+		totArea += shapes[i]->getSurfaceArea();
+	}
+	return totArea;
 }
 
 std::string ShapeGroup::toString() const {

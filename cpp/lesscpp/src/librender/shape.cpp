@@ -22,6 +22,7 @@
 #include <mitsuba/render/bsdf.h>
 #include <mitsuba/render/subsurface.h>
 #include <mitsuba/render/emitter.h>
+#include <mitsuba/render/bioemitter.h>
 #include <mitsuba/render/medium.h>
 #include <mitsuba/render/sensor.h>
 
@@ -38,6 +39,7 @@ Shape::Shape(Stream *stream, InstanceManager *manager)
 	m_bsdf = static_cast<BSDF *>(manager->getInstance(stream));
 	m_subsurface = static_cast<Subsurface *>(manager->getInstance(stream));
 	m_emitter = static_cast<Emitter *>(manager->getInstance(stream));
+	m_bioemitter = static_cast<Bioemitter*>(manager->getInstance(stream));
 	m_sensor = static_cast<Sensor *>(manager->getInstance(stream));
 	m_interiorMedium = static_cast<Medium *>(manager->getInstance(stream));
 	m_exteriorMedium = static_cast<Medium *>(manager->getInstance(stream));
@@ -100,9 +102,15 @@ AABB Shape::getClippedAABB(const AABB &box) const {
 }
 
 void Shape::sampleDirect(DirectSamplingRecord &dRec,
-			const Point2 &sample) const {
+			const Point2 &sample,const AnimatedTransform* transform) const {
 	/* Piggyback on sampleArea() */
 	samplePosition(dRec, sample);
+
+	if (transform) {
+		const Transform& trafo = transform->eval(0);
+		dRec.p = trafo(dRec.p);
+		dRec.n = normalize(trafo(dRec.n));
+	}
 
 	dRec.d = dRec.p - dRec.ref;
 
@@ -140,7 +148,20 @@ void Shape::addChild(const std::string &name, ConfigurableObject *child) {
 				emitter->setMedium(m_exteriorMedium);
 		}
 		m_emitter = emitter;
-	} else if (cClass->derivesFrom(MTS_CLASS(Sensor))) {
+	}
+	else if (cClass->derivesFrom(MTS_CLASS(Bioemitter))) {
+		Bioemitter* bioemitter = static_cast<Bioemitter*>(child);
+		if (m_bioemitter != NULL)
+			Log(EError, "Tried to attach multiple bioemitters to a shape!");
+		//if (bioemitter) {
+		//	if (!emitter->isOnSurface())
+		//		Log(EError, "Tried to attach an incompatible emitter to a surface!");
+		//	if (m_exteriorMedium)
+		//		emitter->setMedium(m_exteriorMedium);
+		//}
+		m_bioemitter = bioemitter;
+	}
+	else if (cClass->derivesFrom(MTS_CLASS(Sensor))) {
 		Sensor *sensor = static_cast<Sensor *>(child);
 		if (m_sensor != NULL)
 			Log(EError, "Tried to attach multiple sensors to a shape!");
@@ -159,7 +180,8 @@ void Shape::addChild(const std::string &name, ConfigurableObject *child) {
 		m_subsurface = static_cast<Subsurface *>(child);
 	} else if (cClass->derivesFrom(MTS_CLASS(Medium))) {
 		if (name == "interior") {
-			Assert(m_interiorMedium == NULL || m_interiorMedium == child);
+			// comment the following line to allow to update interior medium by addChild, espeically from python
+			//Assert(m_interiorMedium == NULL || m_interiorMedium == child);  
 			if (m_subsurface != NULL)
 				Log(EError, "Shape \"%s\" has both an interior medium "
 					"and a subsurface scattering model -- please choose one or the other!", getName().c_str());
@@ -190,12 +212,14 @@ void Shape::serialize(Stream *stream, InstanceManager *manager) const {
 	manager->serialize(stream, m_bsdf.get());
 	manager->serialize(stream, m_subsurface.get());
 	manager->serialize(stream, m_emitter.get());
+	manager->serialize(stream, m_bioemitter.get());
 	manager->serialize(stream, m_sensor.get());
 	manager->serialize(stream, m_interiorMedium.get());
 	manager->serialize(stream, m_exteriorMedium.get());
 }
 
 Float Shape::getSurfaceArea() const { NotImplementedError("getSurfaceArea"); }
+Float* Shape::getTrianglesArea(int& triangleCount) const { NotImplementedError("getTrianglesArea"); }
 bool Shape::rayIntersect(const Ray &ray, Float mint,
 		Float maxt, Float &t, void *temp) const { NotImplementedError("rayIntersect"); }
 bool Shape::rayIntersect(const Ray &ray, Float mint,
@@ -240,6 +264,7 @@ Float Shape::pdfPosition(const PositionSamplingRecord &pRec) const {
 void Shape::copyAttachments(Shape *shape) {
 	m_bsdf = shape->getBSDF();
 	m_emitter = shape->getEmitter();
+	m_bioemitter = shape->getBioemitter();
 	m_sensor = shape->getSensor();
 	m_subsurface = shape->getSubsurface();
 	m_interiorMedium = shape->getInteriorMedium();

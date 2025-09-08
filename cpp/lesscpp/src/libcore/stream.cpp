@@ -53,6 +53,19 @@ void Stream::writeInt(int value) {
 	write(&value, sizeof(int));
 }
 
+void Stream::writeEFMatrix(std::vector<Float> value, size_t size)
+{
+	if (m_byteOrder != m_hostByteOrder) {
+		std::vector<Float> temp = value;
+		for (size_t i = 0; i < size; ++i) {
+			temp[i] = endianness_swap(value[i]);
+		}
+		write(&temp, sizeof(std::vector<Float>));
+	}else {
+		write(&value, sizeof(std::vector<Float>));
+	}
+}
+
 void Stream::writeIntArray(const int *data, size_t size) {
 	if (m_byteOrder != m_hostByteOrder) {
 		int *temp = new int[size];
@@ -269,6 +282,25 @@ int Stream::readInt() {
 	read(&value, sizeof(int));
 	if (m_byteOrder != m_hostByteOrder)
 		value = endianness_swap(value);
+	return value;
+}
+
+FluorMatrixs Stream::readEFMatrix(size_t size){
+	FluorMatrixs value;
+	read(&value, sizeof(std::vector<Float>));
+	if (m_byteOrder != m_hostByteOrder)
+		if (IS_FLUSPECT_PRO)
+			for (size_t i = 0; i < size; ++i) {
+				value.m_Mbi[i] = endianness_swap(value.m_Mbi[i]);
+				value.m_Mfi[i] = endianness_swap(value.m_Mfi[i]);
+			}
+		else
+			for (size_t i = 0; i < size; ++i) {
+				value.m_Mbi[i] = endianness_swap(value.m_Mbi[i]);
+				value.m_Mfi[i] = endianness_swap(value.m_Mfi[i]);
+				value.m_Mbii[i] = endianness_swap(value.m_Mbii[i]);
+				value.m_Mfii[i] = endianness_swap(value.m_Mfii[i]);
+			}
 	return value;
 }
 

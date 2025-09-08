@@ -65,6 +65,15 @@ public:
 	}
 
 	ref<Shape> createShape(const Scene *scene) {
+		/*std::cout << "INFO: sceneBSphere: " << scene->getAABB().getBSphere().radius << std::endl;
+		std::cout << "INFO: geoBSphere: " << scene->getKDTree()->getAABB().getBSphere().radius << std::endl;*/
+
+		/*
+		* Usually scene->getAABB() will be larger than scene->getKDTree()->getAABB()
+		* because in the function of Scene::initializeBidirectional(), it will expand getKDTree()->getAABB()
+		* by the aabb of sensor and emitters.
+		*/
+
 		/* Create a bounding sphere that surrounds the scene */
 		BSphere sceneBSphere(scene->getAABB().getBSphere());
 		sceneBSphere.radius = std::max(Epsilon, sceneBSphere.radius * 1.5f);

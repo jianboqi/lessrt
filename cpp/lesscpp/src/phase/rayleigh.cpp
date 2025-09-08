@@ -84,10 +84,44 @@ public:
 		return 1.0f;
 	}
 
+	Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler) const {
+		return Spectrum(0.0); // divided by (1/4pi)
+	}
+
+	Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler, int depth) const {
+		return Spectrum(1.0); // divided by (1/4pi)
+	}
+
+	Spectrum sampleSpec(PhaseFunctionSamplingRecord& pRec,
+		Float& pdf, Sampler* sampler) const {
+		return Spectrum(0.0);
+	}
+
+	Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler, int depth,
+		FluorMatrix& phasePSVal) const {
+		return Spectrum(0.0f);
+	}
+	Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Sampler* sampler,
+		FluorMatrix& phasePSVal) const {
+		return Spectrum(0.0f);
+	}
+	Spectrum sampleEFSpec(PhaseFunctionSamplingRecord& pRec,
+		Float& pdf, Sampler* sampler,
+		FluorMatrix& phasePSVal) const {
+		return Spectrum(0.0f);
+	}
 
 	Spectrum eval(const PhaseFunctionSamplingRecord &pRec) const {
 		Float mu = dot(pRec.wi, pRec.wo);
 		return Spectrum((3.0f/(16.0f*M_PI)) * (1+mu*mu));
+	}
+	Spectrum evalWithEF(const PhaseFunctionSamplingRecord& pRec,
+		FluorMatrix& phasePSVal) const {
+		return Spectrum(0.0f);
 	}
 
 	std::string toString() const {

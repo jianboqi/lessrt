@@ -113,6 +113,10 @@ public:
 			return Spectrum(0.0f);
 		return computeDirectinalRelectance(bRec) * (INV_PI * Frame::cosTheta(bRec.wo));
 	}
+	Spectrum evalWithEF(const BSDFSamplingRecord& bRec,
+		FluorMatrixs ms,FluorMatrix& m, EMeasure measure) const {
+		return Spectrum(0.0f);
+	}
 
 	Float pdf(const BSDFSamplingRecord &bRec, EMeasure measure) const {
 		if (!(bRec.typeMask & EDiffuseReflection) || measure != ESolidAngle
@@ -133,6 +137,10 @@ public:
 		bRec.sampledType = EGlossyReflection;
 		return computeDirectinalRelectance(bRec);
 	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		return Spectrum(0.0f);
+	}
 
 	Spectrum sample(BSDFSamplingRecord &bRec, Float &pdf, const Point2 &sample) const {
 		if (!(bRec.typeMask & EGlossyReflection) || Frame::cosTheta(bRec.wi) <= 0)
@@ -143,6 +151,10 @@ public:
 		bRec.sampledType = EGlossyReflection;
 		pdf = warp::squareToCosineHemispherePdf(bRec.wo);
 		return computeDirectinalRelectance(bRec);
+	}
+	Spectrum sampleWithEF(BSDFSamplingRecord& bRec, Float& pdf, const Point2& sample,
+		FluorMatrixs ms, FluorMatrix& m) const {
+		return Spectrum(0.0f);
 	}
 
 

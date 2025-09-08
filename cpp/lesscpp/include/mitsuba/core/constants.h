@@ -24,9 +24,11 @@
 #ifdef DOUBLE_PRECISION
 #define Epsilon 1e-7
 #define ShadowEpsilon 1e-5
+#define SceneBoundEpsilon 1e-5
 #else
 #define Epsilon 1e-4f
 #define ShadowEpsilon 1e-3f
+#define SceneBoundEpsilon 1e-4f
 #endif
 #define DeltaEpsilon 1e-3f
 
