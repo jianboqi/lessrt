@@ -1,12 +1,10 @@
-# coding: utf-8
-from LESS3Simulation import LESS3Simulation
-from SimulationHelper import SimulationHelper
-from Simulation import Simulation
-import os
-from DiffRenderConfig import DiffRenderConfig
+## How to use LESS3
+#### This document does not guide you in configuring the environment
+#### You need NVIDIA GPU for this project.
+
+step1: You can look at the main.py file.
 
 
-if __name__ == '__main__':
     sim_dir = r"D:\LESS\LESS_project\scene\scene\HLS"
     sim_helper = SimulationHelper(r"D:/LESS/LESS-2.1.7-11-22/LESS")  # Create SimulationHelper with LESS installation root directory as the parameter
     sim = Simulation(sim_dir, sim_helper)  # Simulation
@@ -26,4 +24,12 @@ if __name__ == '__main__':
     less3sim.start_diff_spectrum(diff_render_config)
 
 
+step2: Change the "sim_dir" and the "sim_helper" to your own "sim_dir" and "sim_helper".
+Choose the "optimize_params" you want to invert.
 
+step3: Run the main.py file.
+
+step4: You can find the result in the "result_dir_path".
+
+step5: You can look the "optimize_params_199.xlsx" and "origin_params.xlsx" 
+to see the result of inversion. Pay attention to the parameters to be inverted in the scene
