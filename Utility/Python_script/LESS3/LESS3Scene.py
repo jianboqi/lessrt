@@ -18,6 +18,7 @@ class LESS3Scene(object):
         self.less_scene = less_scene
         # self.result_folder_path = os.path.dirname(self.less_scene.get_sim().get_dist_file())
         self.__dist_file = self.less_scene.get_sim().get_dist_file()
+        self.brf_image_path = ""
 
     def render(self, xml_file="", n_dict=None, export_xml=False):
         scene_dict = self.__load_less3scene_dict()
@@ -90,7 +91,7 @@ class LESS3Scene(object):
             irr_file.write(BOA_SUN_SKY_str)
 
         PostProcessing.radiance2brf(self.less_scene.get_sim().get_sim_dir(), new_distFile, new_distFile + "_BRF")
-
+        self.brf_image_path = new_distFile + "_BRF"
         # self.__test_LESS3_LESS()
         if img.shape[0] == 1 and img.shape[1] == 1:
             pass
@@ -102,7 +103,7 @@ class LESS3Scene(object):
 
 
 
-    def render_diff_spectrum(self, diff_render_config: DiffRenderConfig):
+    def render_diff_spectrum_test(self, diff_render_config: DiffRenderConfig):
         raise Exception("备份代码--render_diff_spectrum")
         scene_dict = self.__load_less3scene_dict()
         # mi.xml.dict_to_xml(scene_dict, (os.path.join(self.less_scene.get_sim().get_parameters_dir(), "_scenefile", "LESS3.xml")))
@@ -129,7 +130,7 @@ class LESS3Scene(object):
         origin_params_result = {'wavelength': spectral_bands}
         optimize_params_result = {'wavelength': spectral_bands}
 
-        optimize_params = diff_render_config.optmize_params
+        optimize_params = diff_render_config.optimize_params
 
         all_optimize_spectral_params = []
         optimize_spectral_params_output_names = []
@@ -397,7 +398,7 @@ class LESS3Scene(object):
                     optimize_params_result[optimize_spectral_params_output_names[i]] = dr.cuda.ad.Float.copy_(params[optimize_params[i]])
                     # print(type(params[optimize_param[i]]), type(true_params_result[optimize_param[i]]))
                     # optimize_params_result[optimize_param[i]] = params[optimize_param[i]]
-                    if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+                    if diff_render_config.is_open_comparison_between_opt_and_origin:
                         temp_value = optimize_params_result[optimize_spectral_params_output_names[i]] - origin_params_result[
                             optimize_spectral_params_output_names[i]]
                         print(optimize_params[i], optimize_spectral_params_output_names[i], 'Maximum_difference：'
@@ -406,7 +407,7 @@ class LESS3Scene(object):
                         params_diff_value = max(max(abs(temp_value)), params_diff_value)
                         current_epoch_all_params_every_bands_rmse = [current_epoch_all_params_every_bands_rmse[i_band] + (temp_value[i_band]**2) for i_band in range(len(spectral_bands))]
                         current_epoch_all_params_every_bands_rrmse = [current_epoch_all_params_every_bands_rrmse[i_band] + (optimize_params_result[optimize_spectral_params_output_names[i]][i_band]**2) for i_band in range(len(spectral_bands))]
-                if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+                if diff_render_config.is_open_comparison_between_opt_and_origin:
                     current_epoch_all_params_every_bands_rrmse = [np.sqrt((current_epoch_all_params_every_bands_rmse[i_band]/len(optimize_params)/current_epoch_all_params_every_bands_rrmse[i_band])) for i_band in range(len(spectral_bands))]
                     current_epoch_all_params_every_bands_rmse = [
                         np.sqrt(current_epoch_all_params_every_bands_rmse[i_band] / len(optimize_params)) for i_band in
@@ -427,7 +428,7 @@ class LESS3Scene(object):
             #             optimize_params[transmittance_to_reflectance_index[trans_index]]]
 
             # Track the difference between the current color and the true value
-            if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+            if diff_render_config.is_open_comparison_between_opt_and_origin:
                 all_epoch_all_params_every_bands_rmse.append(current_epoch_all_params_every_bands_rmse)
                 diff_render_log.info(f"当前各波段rmse:\n{current_epoch_all_params_every_bands_rmse}")
                 diff_render_log.info(f"当前各波段rrmse:\n{current_epoch_all_params_every_bands_rrmse}")
@@ -438,8 +439,8 @@ class LESS3Scene(object):
         diff_render_log.info(f"\nbest_epoch = {best_epoch}  lowest_loss = {lowest_loss}")
         diff_render_log.info(f"\nOptimization complete.")
 
-        # plot rmse for different bands if is_oepn_comparison_between_opt_and_origin=True
-        if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+        # plot rmse for different bands if is_open_comparison_between_opt_and_origin=True
+        if diff_render_config.is_open_comparison_between_opt_and_origin:
             print("Start generating RMSE iteration graph")
             if not os.path.exists(os.path.join(per_optimize_result_dir, "Parameters_RMSE_linegraph")):
                 os.makedirs(os.path.join(per_optimize_result_dir, "Parameters_RMSE_linegraph"))
@@ -530,7 +531,7 @@ class LESS3Scene(object):
         # img = mi.render(scene)
 
     # 将多角度反演分出来，主要是为了测试，后面可以与render_diff_spectrum合并在一起
-    def render_diff_spectrum_multi_angle(self, diff_render_config: DiffRenderConfig):
+    def render_diff_spectrum(self, diff_render_config: DiffRenderConfig):
         init_epoch = diff_render_config.init_epoch
         stop_epoch = diff_render_config.stop_epoch
 
@@ -681,7 +682,7 @@ class LESS3Scene(object):
         origin_params_result = {'wavelength': spectral_bands}
         optimize_params_result = {'wavelength': spectral_bands}
 
-        optimize_params = diff_render_config.optmize_params
+        optimize_params = diff_render_config.optimize_params
 
         all_optimize_spectral_params = []
         optimize_spectral_params_output_names = []
@@ -891,20 +892,21 @@ class LESS3Scene(object):
                         mi.util.write_bitmap(os.path.join(per_optimize_result_dir, f"ref_image_band-3_epoch-{init_epoch}-{stop_epoch - 1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"), np.array(ref_brf_images)[i][:, :, [2,1,0]])
                         mi.util.write_bitmap(os.path.join(per_optimize_result_dir, f"init_image_band-3_epoch-{init_epoch}-{stop_epoch - 1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"), np.array(opt_brf_images)[i][:, :, [2,1,0]])
 
-                if not os.path.exists(os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison")):
-                    os.makedirs(os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison"))
-                Utils.brf_image_pixel_scatter_plot(np.array(ref_brf_images[i]), np.array(opt_brf_images[i]),
-                                                   save_path=os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison",
-                                                                          f'init_Image_Camparison_result_epoch-{init_epoch}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png'))
+                # if not os.path.exists(os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison")):
+                #     os.makedirs(os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison"))
+                # Utils.brf_image_pixel_scatter_plot(np.array(ref_brf_images[i]), np.array(opt_brf_images[i]),
+                #                                    save_path=os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison",
+                #                                                           f'init_Image_Camparison_result_epoch-{init_epoch}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png'))
 
-                if len(diff_render_config.image_diff_abs_bands) > 0:
-                    for k in diff_render_config.image_diff_abs_bands:
-                        Utils.image_diff_abs_plot(np.array(ref_brf_images[i][:,:,k]), np.array(opt_brf_images[i][:,:,k]), os.path.join(per_optimize_result_dir,
-                                                                                                                                       "Image_Pixel_Comparison",
-                                                                                                                                       f"init_per_pixel_diffabs_epoch-{init_epoch}_band{k+1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"))
+                # if len(diff_render_config.image_diff_abs_bands) > 0:
+                #     for k in diff_render_config.image_diff_abs_bands:
+                #         Utils.image_diff_abs_plot(np.array(ref_brf_images[i][:,:,k]), np.array(opt_brf_images[i][:,:,k]), os.path.join(per_optimize_result_dir,
+                #                                                                                                                        "Image_Pixel_Comparison",
+                #                                                                                                                        f"init_per_pixel_diffabs_epoch-{init_epoch}_band{k+1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"))
 
 
         opt = mi.ad.Adam(lr=diff_render_config.initial_learning_rate, mask_updates=True)
+        # opt = mi.ad.Adam(lr=diff_render_config.initial_learning_rate, mask_updates=False)
 
         for i in range(len(optimize_params)):
             opt[optimize_params[i]] = params[optimize_params[i]]
@@ -970,7 +972,7 @@ class LESS3Scene(object):
 
             current_epoch_all_params_every_bands_rmse = [0] * len(spectral_bands)
             current_epoch_all_params_every_bands_rrmse = [0] * len(spectral_bands)
-            if it % 1 == 0:  # 这里的1一般不改，因为除了生成xlsx，还有曲线图，如果不要曲线图等等，就可以考虑更改
+            if it % 1 == 0:
                 # diff_render_log.info('将新参数写入excel中')
                 params_diff_value = 0.000000
                 for i in range(len(optimize_params)):
@@ -979,21 +981,19 @@ class LESS3Scene(object):
                     # optimize_params_result[optimize_spectral_params_output_names[i]] = dr.copy(params[optimize_params[i]])
                     # print(type(params[optimize_param[i]]), type(true_params_result[optimize_param[i]]))
                     # optimize_params_result[optimize_param[i]] = params[optimize_param[i]]
-                    if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+                    if diff_render_config.is_open_comparison_between_opt_and_origin:
                         temp_value = optimize_params_result[optimize_spectral_params_output_names[i]] - origin_params_result[
                             optimize_spectral_params_output_names[i]]
-                        print(optimize_params[i], optimize_spectral_params_output_names[i], 'Maximum_difference：'
-                              , max(abs(temp_value))
-                              , 'optimize - origin :', temp_value)
+
                         params_diff_value = max(max(abs(temp_value)), params_diff_value)
                         current_epoch_all_params_every_bands_rmse = [current_epoch_all_params_every_bands_rmse[i_band] + (temp_value[i_band]**2) for i_band in range(len(spectral_bands))]
                         current_epoch_all_params_every_bands_rrmse = [current_epoch_all_params_every_bands_rrmse[i_band] + (optimize_params_result[optimize_spectral_params_output_names[i]][i_band]**2) for i_band in range(len(spectral_bands))]
-                if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+                if diff_render_config.is_open_comparison_between_opt_and_origin:
                     current_epoch_all_params_every_bands_rrmse = [np.sqrt((current_epoch_all_params_every_bands_rmse[i_band]/len(optimize_params)/current_epoch_all_params_every_bands_rrmse[i_band])) for i_band in range(len(spectral_bands))]
                     current_epoch_all_params_every_bands_rmse = [
                         np.sqrt(current_epoch_all_params_every_bands_rmse[i_band] / len(optimize_params)) for i_band in
                         range(len(spectral_bands))]
-                    print('params_diff_value:', params_diff_value)
+
                     diff_render_log.info(f"params_diff_value: {params_diff_value}")
                 optimize_params_result1 = pd.DataFrame(optimize_params_result)
                 optimize_params_result1.to_excel(per_optimize_result_dir + '/optimize_params_' + str(it) + '.xlsx',
@@ -1009,7 +1009,7 @@ class LESS3Scene(object):
             #             optimize_params[transmittance_to_reflectance_index[trans_index]]]
 
             # Track the difference between the current color and the true value
-            if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+            if diff_render_config.is_open_comparison_between_opt_and_origin:
                 all_epoch_all_params_every_bands_rmse.append(current_epoch_all_params_every_bands_rmse)
                 diff_render_log.info(f"当前各波段rmse:\n{current_epoch_all_params_every_bands_rmse}")
                 diff_render_log.info(f"当前各波段rrmse:\n{current_epoch_all_params_every_bands_rrmse}")
@@ -1020,8 +1020,8 @@ class LESS3Scene(object):
         diff_render_log.info(f"\nbest_epoch = {best_epoch}  lowest_loss = {lowest_loss}")
         diff_render_log.info(f"\nOptimization complete.")
 
-        # plot rmse for different bands if is_oepn_comparison_between_opt_and_origin=True
-        if diff_render_config.is_oepn_comparison_between_opt_and_origin:
+        # plot rmse for different bands if is_open_comparison_between_opt_and_origin=True
+        if False:
             print("Start generating RMSE iteration graph")
             if not os.path.exists(os.path.join(per_optimize_result_dir, "Parameters_RMSE_linegraph")):
                 os.makedirs(os.path.join(per_optimize_result_dir, "Parameters_RMSE_linegraph"))
@@ -1126,15 +1126,15 @@ class LESS3Scene(object):
         else:
             for i in range(len(diff_render_config.ref_brf_image_path)):
 
-                Utils.brf_image_pixel_scatter_plot(np.array(ref_brf_images[i]), np.array(opt_brf_images[i]),
-                                                   save_path=os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison",
-                                                                          f'final_Image_Camparison_result_epoch-{diff_render_config.stop_epoch - 1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png'))
+                # Utils.brf_image_pixel_scatter_plot(np.array(ref_brf_images[i]), np.array(opt_brf_images[i]),
+                #                                    save_path=os.path.join(per_optimize_result_dir, "Image_Pixel_Comparison",
+                #                                                           f'final_Image_Camparison_result_epoch-{diff_render_config.stop_epoch - 1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png'))
 
-                if len(diff_render_config.image_diff_abs_bands) > 0:
-                    for k in diff_render_config.image_diff_abs_bands:
-                        Utils.image_diff_abs_plot(np.array(ref_brf_images[i][:,:,k]), np.array(opt_brf_images[i][:,:,k]), os.path.join(per_optimize_result_dir,
-                                                                                                                                       "Image_Pixel_Comparison",
-                                                                                                                                       f"final_per_pixel_diffabs_epoch-{diff_render_config.stop_epoch-1}_band{k+1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"))
+                # if len(diff_render_config.image_diff_abs_bands) > 0:
+                #     for k in diff_render_config.image_diff_abs_bands:
+                #         Utils.image_diff_abs_plot(np.array(ref_brf_images[i][:,:,k]), np.array(opt_brf_images[i][:,:,k]), os.path.join(per_optimize_result_dir,
+                #                                                                                                                        "Image_Pixel_Comparison",
+                #                                                                                                                        f"final_per_pixel_diffabs_epoch-{diff_render_config.stop_epoch-1}_band{k+1}_VZ{diff_render_config.sensor_observation_Zenith_Azimuth[i][0]}_VA{diff_render_config.sensor_observation_Zenith_Azimuth[i][1]}.png"))
 
                 if len(spectral_bands) < 3:
                     mi.util.write_bitmap(os.path.join(per_optimize_result_dir,
@@ -1241,7 +1241,7 @@ class LESS3Scene(object):
         #             target=[5, 2, 5],
         #             up=[1, 0, 0])
 
-        print(scene["dark_soil_mollisol"]["reflectance"])
+        # print(scene["dark_soil_mollisol"]["reflectance"])
         # scene["emitter2"] = {
         #     'type': 'constant',
         #     'radiance': {

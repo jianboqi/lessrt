@@ -9,21 +9,24 @@ from LESS3Scene import LESS3Scene
 class LESS3Simulation(object):
     def __init__(self, less_sim: Simulation):
         self.less_sim = less_sim
-        # self.less3scene = LESS3Scene(self.less_sim.get_scene())
+        self.__less3scene = LESS3Scene(self.less_sim.get_scene())
 
     def start(self):
-        less3scene = LESS3Scene(self.less_sim.get_scene())
-        less3scene.render()
+        # less3scene = LESS3Scene(self.less_sim.get_scene())
+        self.__less3scene.render()
         pass
 
     def start_diff_spectrum(self, diff_render_config):
-        less3scene = LESS3Scene(self.less_sim.get_scene())
-        less3scene.render_diff_spectrum(diff_render_config)
+        # less3scene = LESS3Scene(self.less_sim.get_scene())
+        self.__less3scene.render_diff_spectrum(diff_render_config)
 
-    # 多角度反演
-    def start_diff_spectrum_multi_angle(self, diff_render_config):
-        less3scene = LESS3Scene(self.less_sim.get_scene())
-        less3scene.render_diff_spectrum_multi_angle(diff_render_config)
+    def get_scene(self):
+        return self.__less3scene
+
+
+    # def start_diff_spectrum_multi_angle(self, diff_render_config):
+    #     less3scene = LESS3Scene(self.less_sim.get_scene())
+    #     less3scene.render_diff_spectrum_multi_angle(diff_render_config)
 
     # def get_scene_xml(self):
     #     # 用于测试
